@@ -176,8 +176,8 @@
     } else {
       $activeCard = thisCard;
       resetBaseOrientation();
-      // @ts-ignore
-      gtag("event", "select_item", {
+      // Optional: only fires if GA is configured.
+      window.gtag?.("event", "select_item", {
         item_list_id: "cards_list",
         item_list_name: "Pokemon Cards",
         items: [
@@ -294,17 +294,30 @@
     --translate-y: ${$springTranslate.y}px;
 	`;
 
+  const normalize = (v) => (v ?? "").toString().toLowerCase();
+  const normalizeList = (v) =>
+    Array.isArray(v) ? v.join(" ").toLowerCase() : normalize(v);
+
+  // Never mutate exported props (Svelte 5 treats props more strictly).
+  let rarityAttr = "common";
+  let supertypeAttr = "pokémon";
+  let numberAttr = "";
+  let setAttr = "";
+  let typesAttr = "";
+  let subtypesAttr = "basic";
+
   $: {
-    rarity = rarity.toLowerCase();
-    supertype = supertype.toLowerCase();
-    number = number.toLowerCase();
-    isTrainerGallery = !!number.match(/^[tg]g/i) || !!( id === "swshp-SWSH076" || id === "swshp-SWSH077" );
-    if (Array.isArray(types)) {
-      types = types.join(" ").toLowerCase();
-    }
-    if (Array.isArray(subtypes)) {
-      subtypes = subtypes.join(" ").toLowerCase();
-    }
+    rarityAttr = normalize(rarity) || "common";
+    supertypeAttr = normalize(supertype) || "pokémon";
+    numberAttr = normalize(number);
+    setAttr = normalize(set);
+    typesAttr = normalizeList(types);
+    subtypesAttr = normalizeList(subtypes) || "basic";
+
+    isTrainerGallery =
+      !!numberAttr.match(/^[tg]g/i) ||
+      id === "swshp-SWSH076" ||
+      id === "swshp-SWSH077";
   }
 
   const orientate = (e) => {
@@ -423,20 +436,20 @@
 <svelte:window on:scroll={reposition} />
 
 <div
-  class="card {types} / interactive / "
-  class:active
-  class:interacting
-  class:loading
-  class:masked={!!mask}
-  data-number={number}
-  data-set={set}
-  data-subtypes={subtypes}
-  data-supertype={supertype}
-  data-rarity={rarity}
-  data-trainer-gallery={isTrainerGallery}
-  style={dynamicStyles}
-  bind:this={thisCard}
->
+	  class="card {typesAttr} / interactive / "
+	  class:active
+	  class:interacting
+	  class:loading
+	  class:masked={!!mask}
+	  data-number={numberAttr}
+	  data-set={setAttr}
+	  data-subtypes={subtypesAttr}
+	  data-supertype={supertypeAttr}
+	  data-rarity={rarityAttr}
+	  data-trainer-gallery={isTrainerGallery}
+	  style={dynamicStyles}
+	  bind:this={thisCard}
+	>
   <div 
     class="card__translater">
     <button

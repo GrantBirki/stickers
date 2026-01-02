@@ -59,8 +59,8 @@
           isError = true;
         });
 
-        // @ts-ignore
-        gtag("event", "search", {
+        // Optional: only fires if GA is configured.
+        window.gtag?.("event", "search", {
           search_term: query
         });
 

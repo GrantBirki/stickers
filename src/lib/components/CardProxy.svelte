@@ -40,37 +40,64 @@
    Promo Card
    */
   const isPromo = isDefined(set) && set === "swshp";
-  
-  if ( isReverse ) {
-    rarity = rarity + " Reverse Holo";
-  }
 
-  if ( isGallery ) {
-    if ( isDefined(rarity) && rarity.startsWith( "Trainer Gallery" ) ) {
-      rarity = rarity.replace( /Trainer Gallery\s*/, "" );
-    }
-    if ( isDefined(rarity) && rarity.includes( "Rare Holo V" ) && isDefined(subtypes) && subtypes.includes("VMAX") ) {
-      rarity = "Rare Holo VMAX";
-    }
-    if ( isDefined(rarity) && rarity.includes( "Rare Holo V" ) && isDefined(subtypes) && subtypes.includes("VSTAR") ) {
-      rarity = "Rare Holo VSTAR";
-    }
-  }
+  // Never mutate exported props (Svelte 5 treats props more strictly).
+  // Compute a derived rarity value for CSS selectors and foil/mask lookups.
+  let rarityComputed = rarity;
+  $: {
+    rarityComputed = rarity;
 
-  if ( isPromo ) {
-    if ( id === "swshp-SWSH076" || id === "swshp-SWSH077" ) {
-      rarity = "Rare Secret";
+    if (isReverse && isDefined(rarityComputed)) {
+      rarityComputed = rarityComputed + " Reverse Holo";
+    }
 
-    } else if ( isDefined(subtypes) && subtypes.includes("V") ) {
-      rarity = "Rare Holo V";
-    } else if ( isDefined(subtypes) && subtypes.includes("V-UNION") ) {
-      rarity = "Rare Holo VUNION";
-    } else if ( isDefined(subtypes) && subtypes.includes("VMAX") ) {
-      rarity = "Rare Holo VMAX";
-    } else if ( isDefined(subtypes) && subtypes.includes("VSTAR") ) {
-      rarity = "Rare Holo VSTAR";
-    } else if ( isDefined(subtypes) && subtypes.includes("Radiant") ) {
-      rarity = "Radiant Rare";
+    if (isGallery) {
+      if (isDefined(rarityComputed) && rarityComputed.startsWith("Trainer Gallery")) {
+        rarityComputed = rarityComputed.replace(/Trainer Gallery\\s*/, "");
+      }
+      if (
+        isDefined(rarityComputed) &&
+        rarityComputed.includes("Rare Holo V") &&
+        isDefined(subtypes) &&
+        subtypes.includes("VMAX")
+      ) {
+        rarityComputed = "Rare Holo VMAX";
+      }
+      if (
+        isDefined(rarityComputed) &&
+        rarityComputed.includes("Rare Holo V") &&
+        isDefined(subtypes) &&
+        subtypes.includes("VSTAR")
+      ) {
+        rarityComputed = "Rare Holo VSTAR";
+      }
+    }
+
+    if (isPromo) {
+      if (id === "swshp-SWSH076" || id === "swshp-SWSH077") {
+        rarityComputed = "Rare Secret";
+      } else if (isDefined(subtypes) && subtypes.includes("V")) {
+        rarityComputed = "Rare Holo V";
+      } else if (isDefined(subtypes) && subtypes.includes("V-UNION")) {
+        rarityComputed = "Rare Holo VUNION";
+      } else if (isDefined(subtypes) && subtypes.includes("VMAX")) {
+        rarityComputed = "Rare Holo VMAX";
+      } else if (isDefined(subtypes) && subtypes.includes("VSTAR")) {
+        rarityComputed = "Rare Holo VSTAR";
+      } else if (isDefined(subtypes) && subtypes.includes("Radiant")) {
+        rarityComputed = "Radiant Rare";
+      }
+    }
+
+    // Additional rarity normalization based on special sets.
+    const rarityLower = isDefined(rarityComputed) ? rarityComputed.toLowerCase() : "";
+    if (isShiny) {
+      // Map shiny-vault cards into the proper CSS buckets.
+      if (rarityLower === "rare holo v") rarityComputed = "Rare Shiny V";
+      if (rarityLower === "rare holo vmax") rarityComputed = "Rare Shiny VMAX";
+    }
+    if (isAlternate && isDefined(subtypes) && subtypes.includes("VMAX")) {
+      rarityComputed = "Rare Rainbow Alt";
     }
   }
 
@@ -111,7 +138,7 @@
       return "";
     }
 
-    const fRarity = rarity.toLowerCase();
+    const fRarity = rarityComputed.toLowerCase();
     const fNumber = number.toString().toLowerCase().replace( "swsh", "" ).padStart( 3, "0" );
     const fSet = set.toString().toLowerCase().replace( /(tg|gg|sv)/, "" );
 
@@ -144,19 +171,12 @@
     }
 
     if ( isShiny ) {
-
       etch = "etched";
       style = "sunpillar";
 
-      if ( fRarity === "rare shiny v" || (fRarity === "rare holo v" && fNumber.startsWith( "sv" )) ) {
-        rarity = "Rare Shiny V";
-      }
-
       if ( fRarity === "rare shiny vmax" || (fRarity === "rare holo vmax" && fNumber.startsWith( "sv" )) ) {
         style = "swsecret";
-        rarity = "Rare Shiny VMAX";
       }
-
     }
 
     if ( isGallery ) {
@@ -181,20 +201,12 @@
     }
 
     if ( isAlternate ) {
-
       etch = "etched";
-
       if ( subtypes.includes( "VMAX" ) ) {
-
         style = "swsecret";
-        rarity = "Rare Rainbow Alt";
-
       } else {
-
         style = "sunpillar";
-
       }
-
     }
 
     if ( isPromo ) {
@@ -204,13 +216,16 @@
         style = promoStyle.style.toLowerCase();
         etch = promoStyle.etch.toLowerCase();
         if ( style === "swholo" ) {
-          rarity = "Rare Holo";
+          // rarityComputed handles the CSS rarity buckets; do not mutate props here.
         } else if ( style === "cosmos" ) {
-          rarity = "Rare Holo Cosmos";
+          // rarityComputed handles the CSS rarity buckets; do not mutate props here.
         }
       }
 
     }
+
+    // If no CDN is configured, fall back to "no mask/foil" so the CSS-only effects still render.
+    if (!server) return "";
 
     return `${ server }/foils/${ fSet }/${ type }/upscaled/${ fNumber }_foil_${ etch }_${ style }_2x.${ ext }`;
 
@@ -238,7 +253,7 @@
     types,
     subtypes,
     supertype,
-    rarity,
+    rarity: rarityComputed,
     showcase
 
   }

@@ -4,14 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.1.0",
+    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "pokemontcgsdk": "^2.0.0",
-    "svelte": "^3.52.0",
-    "vite": "^3.2.0"
+    "svelte": "^5.46.1",
+    "vite": "^7.3.0"
   }
 }
