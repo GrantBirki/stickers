@@ -91,6 +91,7 @@ This project uses short rarity tokens everywhere (no long rarity names with spac
 Set these on the `rarity` field in `public/data/stickers.json`.
 
 - `holofoil` -> `Rare Holo`
+- `spiral-holographic` -> Custom combo of `holographic` and `holofoil-alt-1`
 - `common` -> `Common`
 - `uncommon` -> `Uncommon`
 - `galaxy` -> `Rare Holo Cosmos`
