@@ -89,11 +89,6 @@
   <div class="topbar">
     <a class="topbar__brand" href="/">birki stickers</a>
 
-    <nav class="topbar__nav" aria-label="Site">
-      <a class:active={!isExamples} href="/">stickers</a>
-      <a class:active={isExamples} href="/examples/">examples</a>
-    </nav>
-
     <div class="topbar__actions">
       <button class="topbar__btn" type="button" on:click={toggleTheme}>
         theme: {appliedTheme}
@@ -141,30 +136,6 @@
     color: var(--text);
   }
 
-  .topbar__nav {
-    display: flex;
-    gap: 10px;
-  }
-
-  .topbar__nav a {
-    color: var(--text);
-    text-decoration: none;
-    opacity: 0.78;
-    padding: 6px 10px;
-    border-radius: 999px;
-    transition: background 150ms ease, opacity 150ms ease;
-  }
-
-  .topbar__nav a:hover {
-    opacity: 1;
-    background: var(--surface-2);
-  }
-
-  .topbar__nav a.active {
-    opacity: 1;
-    background: var(--surface);
-  }
-
   .topbar__actions {
     display: flex;
     gap: 8px;
@@ -192,4 +163,3 @@
     padding: 0 20px 60px;
   }
 </style>
-

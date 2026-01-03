@@ -64,8 +64,8 @@ If `back` is not provided, the card uses the default back image set in `src/lib/
 ## Examples
 
 Pokemon example cards live in `public/data/cards.json` and render on `/examples/`.
+This page is intentionally not linked from the UI; visit it directly by typing `/examples/`.
 
 ## Acknowledgements
 
 https://github.com/simeydotme/pokemon-cards-css
-
