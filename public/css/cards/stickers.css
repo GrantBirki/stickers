@@ -17,9 +17,18 @@
   */
   --front-texture-opacity: 0.38;
   --front-texture-blend: multiply;
-  /* Treat the texture like a tiling "paper grain" (smaller scale, not zoomed). */
-  --front-texture-size: 320px auto;
-  --front-texture-repeat: repeat;
+  /* We do NOT want a texture overlay on top of the card face for stickers. */
+  --front-texture-opacity: 0;
+
+  /*
+    Sticker card face:
+    - the face is an explicit background image (defaulting to the repo texture)
+    - sizing is controlled here (no "overlay" layer above the UI)
+  */
+  --card-front-img: url("/img/card_front_texture.png");
+  --card-front-position: center;
+  --card-front-size: 100% 100%;
+  --card-front-repeat: no-repeat;
 
   /* Art window geometry (percentages of the full card). */
   --sticker-header-top: var(--sticker-safe);
@@ -61,12 +70,10 @@
   position: relative;
   overflow: hidden;
   /* A "trading card" face behind the sticker. */
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92)),
-    var(--card-front-img);
-  background-position: center, center;
-  background-size: cover, cover;
-  background-repeat: no-repeat, no-repeat;
+  background-image: var(--card-front-img);
+  background-position: var(--card-front-position);
+  background-size: var(--card-front-size);
+  background-repeat: var(--card-front-repeat);
   box-shadow:
     inset 0 0 0 2px rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);

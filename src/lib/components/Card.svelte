@@ -392,11 +392,12 @@
     front_img = isStickerCard && !isMysteryCard ? stickerFace : cardFace;
     back_img = resolveImgSrc(card_back_img || back);
 
-    // Optional front background override for sticker cards (lets you swap the "paper" face).
-    frontOverrideStyles =
+  // Optional front background override for sticker cards (lets you swap the face image).
+  // We intentionally do NOT set a "none" fallback here; CSS provides a default face.
+  frontOverrideStyles =
       isStickerCard && !isMysteryCard && card_front_img
-        ? `--card-front-img: ${cssUrl(card_front_img)};`
-        : `--card-front-img: none;`;
+        ? `--card-front-img: ${cssUrl(card_front_img)}; --front-texture-opacity: 0;`
+        : ``;
   }
 
   const updateSprings = ( background, rotate, glare ) => {
