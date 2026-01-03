@@ -144,6 +144,12 @@
   z-index: 2;
   border-radius: var(--sticker-art-radius);
   overflow: hidden;
+  /* Make the art window feel "pressed" into the card surface. */
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.20),
+    inset 0 2px 0 rgba(255, 255, 255, 0.60),
+    inset 0 -16px 28px rgba(0, 0, 0, 0.26),
+    inset 0 14px 22px rgba(255, 255, 255, 0.16);
 }
 
 .card[data-set="stickers"] .sticker__art-bg {
@@ -154,6 +160,22 @@
   box-shadow:
     inset 0 0 0 1px rgba(0, 0, 0, 0.10),
     0 10px 26px rgba(0, 0, 0, 0.20);
+}
+
+.card[data-set="stickers"] .sticker__art-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* A subtle bevel gradient to sell the "stamped" depth. */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.70) 0%,
+    rgba(255, 255, 255, 0.0) 30%,
+    rgba(0, 0, 0, 0.34) 100%
+  );
+  mix-blend-mode: multiply;
+  opacity: 0.40;
 }
 
 .card[data-set="stickers"] .sticker__art-bg::before {
@@ -175,6 +197,21 @@
   justify-content: center;
   padding: 0;
   box-sizing: border-box;
+  isolation: isolate;
+}
+
+.card[data-set="stickers"] .sticker__art-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Inner shadow across the sticker image itself to match the card edge treatment. */
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.12),
+    inset 0 18px 26px rgba(255, 255, 255, 0.12),
+    inset 0 -22px 36px rgba(0, 0, 0, 0.30);
+  z-index: 2;
 }
 
 .card[data-set="stickers"] .sticker__face {
@@ -183,7 +220,9 @@
   display: block;
   object-fit: contain;
   object-position: center center;
-  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.24));
+  /* Less "floating", more "pressed in". */
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18));
+  z-index: 1;
 }
 
 .card[data-set="stickers"] .sticker__frame {
@@ -191,7 +230,10 @@
   inset: 0;
   z-index: 6;
   border-radius: var(--sticker-art-radius);
-  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.12);
   pointer-events: none;
 }
 
