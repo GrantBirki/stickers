@@ -183,7 +183,7 @@
     }
   };
 
-  const interactEnd = (e, delay = 500) => {
+  const interactEnd = (_e, delay = 500) => {
     // Cancel any pending animation frame
     if (rafId !== null) {
       cancelAnimationFrame(rafId);
@@ -210,7 +210,7 @@
     }, delay);
   };
 
-  const activate = (e) => {
+  const activate = (_e) => {
     if (flip_on_click) {
       flipped = !flipped;
       springFlip.set(flipped ? 180 : 0);
@@ -229,13 +229,13 @@
     }
   };
 
-  const deactivate = (e) => {
+  const deactivate = (_e) => {
     if (expanded) return;
     interactEnd();
     $activeCard = undefined;
   };
 
-  const reposition = (e) => {
+  const reposition = (_e) => {
     clearTimeout(repositionTimer);
     repositionTimer = setTimeout(() => {
       if ($activeCard && $activeCard === thisCard) {
@@ -437,7 +437,7 @@
     }
   }
 
-  document.addEventListener("visibilitychange", (e) => {
+  document.addEventListener("visibilitychange", () => {
     isVisible = document.visibilityState === "visible";
     endShowcase();
     reset();
@@ -478,7 +478,6 @@
     // run a cute little animation on load
     // for showcase card
     if (showcase && isVisible) {
-      let showTimer;
       const s = 0.02;
       const d = 0.5;
       let r = 0;

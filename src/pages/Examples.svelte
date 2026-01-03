@@ -335,7 +335,7 @@
     </div>
   </header>
 
-  {#each groups as group}
+  {#each groups as group (group.anchor)}
     <h2 id={"⚓-" + group.anchor}>
       <a href={"#⚓-" + group.anchor}>{group.title}</a>
     </h2>

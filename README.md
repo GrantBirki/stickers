@@ -10,6 +10,7 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 - `npm install`
 - `npm run dev`
 - `npm run build`
+- `npm run validate` (runs ESLint + svelte-check)
 
 ## Generated Sticker Inspect Pages
 
