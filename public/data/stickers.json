@@ -7,7 +7,7 @@
     "rarity": "holographic",
     "sticker_img": "/img/stickers/mike-mike-dms-sticker.png",
     "card_front_img": "/img/card_front_texture.png",
-    "card_back_img": null,
+    "card_back_img": "/img/oai_back.png",
     "drop_date": "2026-01-02",
     "description": "Cryptic ramblings from Mike",
     "total_prints": 10
