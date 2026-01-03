@@ -72,6 +72,7 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
     <link rel="stylesheet" href="/css/cards/shiny-rare.css" />
     <link rel="stylesheet" href="/css/cards/shiny-v.css" />
     <link rel="stylesheet" href="/css/cards/shiny-vmax.css" />
+    <link rel="stylesheet" href="/css/cards/spiral-holographic.css" />
     <link rel="stylesheet" href="/css/cards/swsh-pikachu.css" />
     <link rel="stylesheet" href="/css/cards/stickers.css" />
   </head>

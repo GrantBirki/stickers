@@ -195,6 +195,13 @@
           subtypes: ["V"]
         }),
         withBase({
+          id: "demo-spiral-holo",
+          set: "demo",
+          number: "0018a",
+          types: ["Psychic"],
+          rarity: "spiral-holographic"
+        }),
+        withBase({
           id: "demo-v-ultra",
           set: "demo",
           number: "0019",
