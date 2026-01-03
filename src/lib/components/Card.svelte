@@ -19,7 +19,7 @@
 
   // image props
   export let img = "";
-  export let back = "/img/card_back.png";
+  export let back = "/img/card_front_texture.png";
   export let foil = "";
   export let mask = "";
 
