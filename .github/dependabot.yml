@@ -11,3 +11,11 @@ updates:
           - "*"
     schedule:
       interval: monthly
+  - package-ecosystem: npm
+    directory: "/"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    schedule:
+      interval: monthly
