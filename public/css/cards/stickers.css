@@ -56,8 +56,26 @@
 }
 
 .card[data-set="stickers"][data-sticker-foil="full"] {
-  /* Trainer Gallery cards are meant to be full-card foils. */
-  --clip-borders: inset(0 0 0 0 round var(--card-radius));
+  /*
+    Full-card foils:
+    Many effect styles clip using the `--clip*` variables. For sticker cards the defaults
+    are art-window-sized, so we override them to the full card border radius.
+  */
+  --clip: inset(0 0 0 0 round var(--card-radius));
+  --clip-invert: var(--clip);
+  --clip-stage: var(--clip);
+  --clip-stage-invert: var(--clip);
+  --clip-trainer: var(--clip);
+  --clip-borders: var(--clip);
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] .card__shine {
+  /* Ensure the foil layers sit above sticker UI/text (the "whole card surface" look). */
+  z-index: 30;
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] .card__glare {
+  z-index: 31;
 }
 
 .card[data-set="stickers"][data-front-shape="square"] {
