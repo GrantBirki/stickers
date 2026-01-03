@@ -61,7 +61,12 @@
   position: relative;
   overflow: hidden;
   /* A "trading card" face behind the sticker. */
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92)),
+    var(--card-front-img);
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
   box-shadow:
     inset 0 0 0 2px rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);

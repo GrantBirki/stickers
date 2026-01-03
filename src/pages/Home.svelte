@@ -42,7 +42,7 @@
           name: "Mystery",
           set: "stickers",
           rarity: "holographic",
-          img: "/img/mystery.png",
+          card_front_img: "/img/mystery.png",
           hidden: true,
           variant: "mystery"
         }
@@ -72,8 +72,9 @@
         <Card
           id={sticker.id}
           name={sticker.name}
-          img={sticker.img}
-          back={sticker.back}
+          sticker_img={sticker.sticker_img}
+          card_front_img={sticker.card_front_img}
+          card_back_img={sticker.card_back_img}
           number={sticker.number}
           set={sticker.set}
           types={sticker.types}

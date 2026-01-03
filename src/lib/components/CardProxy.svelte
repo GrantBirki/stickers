@@ -21,6 +21,15 @@
   export let total_prints = undefined;
 
   // image props
+  // New schema:
+  // - sticker_img: for sticker cards, the image shown in the art window
+  // - card_front_img: full-card front image override (non-sticker cards use this as the face)
+  // - card_back_img: back-face image override
+  export let sticker_img = undefined;
+  export let card_front_img = undefined;
+  export let card_back_img = undefined;
+
+  // Legacy props (still supported)
   export let img = undefined;
   export let back = undefined;
   export let foil = undefined;
@@ -116,13 +125,18 @@
   }
 
   function cardImage () {
-    if ( isDefined( img ) ) {
-      return img;
-    }
+    if ( isDefined( card_front_img ) ) return card_front_img;
+    if ( isDefined( img ) ) return img;
+    if ( isDefined( sticker_img ) ) return sticker_img;
     if ( isDefined( set ) && isDefined( number ) ) {
       return `https://images.pokemontcg.io/${ set.toLowerCase() }/${ number }_hires.png`;
     }
     return "";
+  }
+
+  function cardBackImage () {
+    if ( isDefined( card_back_img ) ) return card_back_img;
+    return back;
   }
   
   function foilMaskImage ( prop, type = "masks" ) {
@@ -243,12 +257,15 @@
     return foilMaskImage( mask, "masks" );
   }
 
+  const backComputed = cardBackImage();
   const proxy = {
-    
     img: cardImage(),
-    back,
+    ...(isDefined(backComputed) ? { back: backComputed } : {}),
     foil: foilImage(),
     mask: maskImage(),
+    sticker_img,
+    card_front_img,
+    card_back_img,
 
     id,
     name,

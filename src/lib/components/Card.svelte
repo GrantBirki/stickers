@@ -23,6 +23,14 @@
   export let foil = "";
   export let mask = "";
 
+  // New schema (optional; `img`/`back` still work for legacy callers):
+  // - sticker_img: image shown in the sticker art window (set === "stickers")
+  // - card_front_img: full-card front image override (used for non-sticker cards and mystery cards)
+  // - card_back_img: back-face image override
+  export let sticker_img = "";
+  export let card_front_img = "";
+  export let card_back_img = "";
+
   // context/environment props
   export let showcase = false;
 
@@ -64,6 +72,13 @@
     if (src.startsWith("http") || src.startsWith("/") || src.startsWith("data:")) return src;
     // Legacy support: allow passing `set/number_hires.png`-style paths.
     return `https://images.pokemontcg.io/${src}`;
+  };
+
+  const cssUrl = (src) => {
+    const resolved = resolveImgSrc(src);
+    if (!resolved) return "none";
+    // Quote to survive URLs with parens/spaces.
+    return `url("${resolved}")`;
   };
 
 
@@ -284,6 +299,7 @@
     --seedy: ${randomSeed.y};
     --cosmosbg: ${cosmosPosition.x}px ${cosmosPosition.y}px;
   `;
+  let frontOverrideStyles = "";
   $: dynamicStyles = `
     --pointer-x: ${$springGlare.x}%;
     --pointer-y: ${$springGlare.y}%;
@@ -366,6 +382,23 @@
 
   };
 
+  // Derive which images to use based on card type.
+  $: {
+    // For sticker cards, `sticker_img` (or legacy `img`) is the art-window image.
+    // For non-sticker cards, `card_front_img` (or legacy `img`) is the full face image.
+    const stickerFace = resolveImgSrc(sticker_img || img);
+    const cardFace = resolveImgSrc(card_front_img || img);
+
+    front_img = isStickerCard && !isMysteryCard ? stickerFace : cardFace;
+    back_img = resolveImgSrc(card_back_img || back);
+
+    // Optional front background override for sticker cards (lets you swap the "paper" face).
+    frontOverrideStyles =
+      isStickerCard && !isMysteryCard && card_front_img
+        ? `--card-front-img: ${cssUrl(card_front_img)};`
+        : `--card-front-img: none;`;
+  }
+
   const updateSprings = ( background, rotate, glare ) => {
 
     springBackground.stiffness = springInteractSettings.stiffness;
@@ -415,9 +448,7 @@
 
   onMount(() => {
 
-    // set the front image on mount so that
-    // the lazyloading can work correctly
-    front_img = resolveImgSrc(img);
+    // Images are derived reactively; no work needed here.
 
     // run a cute little animation on load
     // for showcase card
@@ -504,7 +535,7 @@
         height="921"
       />
 	      <div class="card__front" 
-	        style={ staticStyles + foilStyles }>
+	        style={ staticStyles + frontOverrideStyles + foilStyles }>
 	        {#if isStickerCard}
 	          <div class="sticker__bg" aria-hidden="true"></div>
 
