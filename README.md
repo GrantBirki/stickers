@@ -8,6 +8,38 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 - `npm run dev`
 - `npm run build`
 
+## Generated Sticker Inspect Pages
+
+This repo generates a **dark-mode-only** "inspect" page for every sticker in `public/data/stickers.json`.
+
+- Route shape: `/stickers/<slug>/`
+- Example: `id: "stickers-mike-mike-dms-001"` -> `/stickers/mike-mike-dms/`
+- The inspect page intentionally has **no header, no footer, and no theme toggle**. It renders just the
+  card in the expanded ("large") state so you can inspect/iterate on styling.
+
+### How The Pages Are Generated
+
+We generate a small static HTML entrypoint per sticker so the site can be hosted as a fully static build
+and still support direct links (no server-side routing required).
+
+- Script: `scripts/generate-sticker-pages.mjs`
+- Output: `stickers/<slug>/index.html` (one folder per sticker)
+- When it runs:
+  - `npm run dev` runs it automatically via `predev`
+  - `npm run build` runs it automatically via `prebuild`
+
+You can also run it manually:
+
+```bash
+node scripts/generate-sticker-pages.mjs
+```
+
+Notes:
+
+- `<slug>` is derived from the sticker `id` by stripping the `stickers-` prefix and the trailing numeric
+  suffix (e.g. `-001`). If multiple stickers would collide on the same base slug, the full id suffix is
+  used to keep slugs unique.
+
 ## Site Config
 
 Global site toggles live in `public/data/site.json`.
@@ -30,8 +62,9 @@ Example:
   "set": "stickers",
   "number": "0001",
   "rarity": "holographic",
-  "img": "/img/stickers/my-sticker.png",
-  "back": "/img/backs/my-back.png",
+  "sticker_img": "/img/stickers/my-sticker.png",
+  "card_front_img": "/img/card_front_texture.png",
+  "card_back_img": "/img/backs/my-back.png",
   "drop_date": "2026-01-02",
   "description": "Short description",
   "total_prints": 10
@@ -40,8 +73,10 @@ Example:
 
 Notes:
 
-- `img` and `back` are public paths (they should start with `/img/...`).
-- `back` is optional; if omitted we fall back to the default card back image.
+- `sticker_img`, `card_front_img`, and `card_back_img` are public paths (they should start with `/img/...`).
+- `card_front_img` is optional; if omitted the default sticker face texture is used.
+- `card_back_img` is optional; if omitted the default back image is used.
+- After adding a sticker, the inspect page will be generated automatically (see "Generated Sticker Inspect Pages").
 
 ## Rarity Tokens
 
@@ -65,14 +100,24 @@ Set these on the `rarity` field in `public/data/stickers.json` or `public/data/c
 
 ## Card Backs
 
-Each card can optionally set its own back image with the `back` field (example above).
+Each card can optionally set its own back image with the `card_back_img` field (example above).
 
-If `back` is not provided, the card uses the default back image set in `src/lib/components/Card.svelte`.
+If `card_back_img` is not provided (or is `null`), the card uses the default back image set in
+`src/lib/components/Card.svelte`.
 
 ## Examples
 
 Pokemon example cards live in `public/data/cards.json` and render on `/examples/`.
 This page is intentionally not linked from the UI; visit it directly by typing `/examples/`.
+
+## Deployment
+
+This site is designed to deploy as a static build.
+
+- Output folder: `dist/`
+- Custom domain: `https://stickers.birki.io` (root path)
+  - No special base-path config is needed for this setup (it builds with `/` as the base by default).
+  - If you ever deploy to a GitHub project subpath instead, set `VITE_BASE=/your-repo-name/` at build time.
 
 ## Acknowledgements
 
