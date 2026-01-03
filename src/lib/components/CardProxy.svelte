@@ -37,6 +37,7 @@
 
   // context/environment props
   export let showcase = false;
+  export let expanded = false;
 
   const server = import.meta.env.VITE_CDN;
   /**
@@ -280,7 +281,8 @@
     drop_date,
     description,
     total_prints,
-    showcase
+    showcase,
+    expanded
 
   }
 

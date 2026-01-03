@@ -10,7 +10,7 @@
 
   const getStickers = async () => {
     try {
-      const res = await fetch("/data/stickers.json");
+      const res = await fetch(`${import.meta.env.BASE_URL}data/stickers.json`);
       if (!res.ok) return [];
       return await res.json();
     } catch {
@@ -20,7 +20,7 @@
 
   const getSiteConfig = async () => {
     try {
-      const res = await fetch("/data/site.json");
+      const res = await fetch(`${import.meta.env.BASE_URL}data/site.json`);
       if (!res.ok) return { display_next_card_as_hidden: false };
       return await res.json();
     } catch {

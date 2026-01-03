@@ -33,6 +33,8 @@
 
   // context/environment props
   export let showcase = false;
+  // If true, force the card into the expanded "popover" state and prevent collapsing.
+  export let expanded = false;
 
   // Sticker/trading-card metadata (optional)
   export let drop_date = "";
@@ -212,6 +214,11 @@
   };
 
   const activate = (e) => {
+    if (expanded) {
+      $activeCard = thisCard;
+      resetBaseOrientation();
+      return;
+    }
     if ($activeCard && $activeCard === thisCard) {
       $activeCard = undefined;
     } else {
@@ -221,6 +228,7 @@
   };
 
   const deactivate = (e) => {
+    if (expanded) return;
     interactEnd();
     $activeCard = undefined;
   };
@@ -256,11 +264,13 @@
     let scaleF = 1.75;
     setCenter();
     if (firstPop) {
-      delay = 1000;
-      springRotateDelta.set({
-        x: 360,
-        y: 0,
-      });
+      if (!expanded) {
+        delay = 1000;
+        springRotateDelta.set({
+          x: 360,
+          y: 0,
+        });
+      }
     }
     firstPop = false;
     springScale.set(Math.min(scaleW, scaleH, scaleF));
@@ -448,6 +458,15 @@
   };
 
   onMount(() => {
+
+    if (expanded) {
+      $activeCard = thisCard;
+      resetBaseOrientation();
+      // Ensure centering happens once layout has settled.
+      setTimeout(() => {
+        if ($activeCard && $activeCard === thisCard) setCenter();
+      }, 0);
+    }
 
     // Images are derived reactively; no work needed here.
 
