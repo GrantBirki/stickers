@@ -59,6 +59,10 @@
   <p class="home__sub">
     A collection of sticker drops from Birki.
   </p>
+  <p class="home__sub home__sub--slack">
+    Do you work with Birki? Follow the <code class="inline-code">#birki-sticker-drops</code>
+    channel in Slack to catch a limited edition sticker drop!
+  </p>
 
   <CardList>
     {#if isLoading}
@@ -95,5 +99,27 @@
   .home__sub {
     margin: 0 0 20px;
     opacity: 0.85;
+  }
+
+  .home__sub--slack {
+    margin-top: -10px;
+  }
+
+  /* GitHub-esque inline code pill that stays readable in both themes. */
+  .inline-code {
+    font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    font-size: 0.92em;
+    padding: 0.12em 0.4em;
+    border-radius: 6px;
+    background: hsla(220, 14%, 96%, 1);
+    border: 1px solid hsla(220, 14%, 78%, 0.9);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  :global(:root[data-theme="dark"]) .inline-code {
+    background: hsla(215, 28%, 17%, 1);
+    border-color: hsla(215, 20%, 55%, 0.35);
   }
 </style>
