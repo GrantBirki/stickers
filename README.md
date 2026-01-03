@@ -19,11 +19,14 @@ This repo generates a **dark-mode-only** "inspect" page for every sticker in `pu
 
 ### How The Pages Are Generated
 
-We generate a small static HTML entrypoint per sticker so the site can be hosted as a fully static build
-and still support direct links (no server-side routing required).
+We generate a few small static HTML entrypoints so the site can be hosted as a fully static build and
+still support direct links (no server-side routing required).
 
 - Script: `scripts/generate-sticker-pages.mjs`
-- Output: `stickers/<slug>/index.html` (one folder per sticker)
+- Outputs:
+  - `stickers/<slug>/index.html` (one folder per sticker)
+  - `examples/index.html` (hidden CSS effect playground route)
+  - `example/index.html` (alias for `/examples/`)
 - When it runs:
   - `npm run dev` runs it automatically via `predev`
   - `npm run build` runs it automatically via `prebuild`
