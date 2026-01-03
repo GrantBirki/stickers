@@ -57,14 +57,6 @@
   let stickerFoilScope = "art"; // "art" | "full"
   let isMysteryCard = false;
 
-  // Sticker-only: which rarities should have a full-card foil (instead of art-window-only).
-  const FULL_STICKER_FOILS = new Set([
-    "holographic",
-    "rare-rainbow",
-    "rare-rainbow-alt-1",
-    "ancient"
-  ]);
-
   let back_img = back;
   let front_img = "";
 
@@ -364,8 +356,10 @@
 
     isStickerCard = setAttr === "stickers";
     isMysteryCard = isStickerCard && variant === "mystery";
+    // Sticker cards: any "special" rarity should foil the full card face (not just the art window).
+    // Only plain common/uncommon should remain un-foiled (or art-only).
     stickerFoilScope =
-      isStickerCard && FULL_STICKER_FOILS.has(rarityAttr) ? "full" : "art";
+      isStickerCard && rarityAttr && !["common", "uncommon"].includes(rarityAttr) ? "full" : "art";
   }
 
   const orientate = (e) => {
