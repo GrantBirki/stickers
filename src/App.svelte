@@ -40,7 +40,7 @@
     };
   });
 
-  $: isExamples = path.startsWith("/examples");
+  $: isExamples = path.startsWith("/examples") || path.startsWith("/example");
   $: isStickerInspect = path.startsWith("/stickers/");
   $: stickerSlug = isStickerInspect
     ? path.replace(/^\/stickers\/+/, "").replace(/\/+$/, "")

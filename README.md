@@ -13,7 +13,7 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 This repo generates a **dark-mode-only** "inspect" page for every sticker in `public/data/stickers.json`.
 
 - Route shape: `/stickers/<slug>/`
-- Example: `id: "stickers-mike-mike-dms-001"` -> `/stickers/mike-mike-dms/`
+- Example: `id: "mike-mike-dms"` -> `/stickers/mike-mike-dms/`
 - The inspect page intentionally has **no header, no footer, and no theme toggle**. It renders just the
   card in the expanded ("large") state so you can inspect/iterate on styling.
 
@@ -57,7 +57,7 @@ Example:
 
 ```json
 {
-  "id": "stickers-my-sticker-001",
+  "id": "my-sticker",
   "name": "My Sticker",
   "set": "stickers",
   "number": "0001",
@@ -81,7 +81,7 @@ Notes:
 ## Rarity Tokens
 
 This project uses short rarity tokens everywhere (no long rarity names with spaces).
-Set these on the `rarity` field in `public/data/stickers.json` or `public/data/cards.json`.
+Set these on the `rarity` field in `public/data/stickers.json`.
 
 - `holofoil` -> `Rare Holo`
 - `common` -> `Common`
@@ -107,7 +107,8 @@ If `card_back_img` is not provided (or is `null`), the card uses the default bac
 
 ## Examples
 
-Pokemon example cards live in `public/data/cards.json` and render on `/examples/`.
+The CSS effect playground renders on `/examples/` (and an alias at `/example/`).
+It intentionally repeats a single local image so the site doesn't ship licensed card art.
 This page is intentionally not linked from the UI; visit it directly by typing `/examples/`.
 
 ## Deployment

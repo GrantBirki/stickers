@@ -5,7 +5,7 @@
   import { orientation, resetBaseOrientation } from "../stores/orientation.js";
   import { clamp, round, adjust } from "../helpers/Math.js";
 
-  // data / pokemon props
+  // card metadata props
   export let id = "";
   export let name = "";
   export let number = "";
@@ -19,7 +19,7 @@
 
   // image props
   export let img = "";
-  export let back = "/img/card_front_texture.png";
+  export let back = "/img/oai_back.png";
   export let foil = "";
   export let mask = "";
 
@@ -72,8 +72,9 @@
     if (!src) return "";
     // Absolute/served assets (http(s), /public/*, data URLs) should be used as-is.
     if (src.startsWith("http") || src.startsWith("/") || src.startsWith("data:")) return src;
-    // Legacy support: allow passing `set/number_hires.png`-style paths.
-    return `https://images.pokemontcg.io/${src}`;
+    // Treat bare relative paths as public-root paths (avoid any remote URL fallbacks).
+    const cleaned = src.toString().replace(/^\.\//, "");
+    return `/${cleaned}`;
   };
 
   const cssUrl = (src) => {

@@ -50,6 +50,7 @@ export default defineConfig(({mode}) => {
         input: {
           main: resolve(process.cwd(), "index.html"),
           examples: resolve(process.cwd(), "examples/index.html"),
+          example: resolve(process.cwd(), "example/index.html"),
           ...stickerInputs()
         }
       }

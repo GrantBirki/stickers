@@ -1,552 +1,347 @@
 <script>
-  import { onMount } from "svelte";
-
   import CardList from "../Cards.svelte";
-  import Card from "../lib/components/CardProxy.svelte";
+  import Card from "../lib/components/Card.svelte";
 
-  let showcase;
-  let basics,
-    reverse,
-    holos,
-    cosmos,
-    amazings,
-    radiant,
-    basicGallery,
-    vee,
-    veeUltra,
-    veeAlt,
-    veeMax,
-    veeMaxAlt,
-    veeStar,
-    trainerHolo,
-    rainbow,
-    gold,
-    veeGallery,
-    shinyVault;
+  const FACE = "/img/stickers/mike-mike-dms-sticker.png";
+  const BACK = "/img/oai_back.png";
+  const NAME = "#mike-mike-dms";
 
-  let isLoading = true;
-
-  const getCards = async () => {
-    const cardFetch = await fetch(`${import.meta.env.BASE_URL}data/cards.json`);
-    return await cardFetch.json();
+  const base = {
+    name: NAME,
+    card_front_img: FACE,
+    card_back_img: BACK,
+    supertype: "pokémon",
+    subtypes: ["Basic"]
   };
 
-  const loadCards = async () => {
-    isLoading = true;
-    const cards = await getCards();
-    window.cards = cards;
+  const withBase = (c) => ({
+    ...base,
+    ...c
+  });
 
-    showcase = cards[0];
-    basics = cards.slice(1, 4);
-    reverse = [...cards.slice(4, 7), ...cards.slice(70, 76)];
-    holos = cards.slice(7, 13);
-    cosmos = cards.slice(13, 16);
-    amazings = cards.slice(76, 85);
-    radiant = cards.slice(16, 19);
-    basicGallery = cards.slice(19, 22);
-    vee = cards.slice(22, 25);
-    veeUltra = cards.slice(25, 28);
-    veeAlt = cards.slice(28, 34);
-    veeMax = cards.slice(37, 40);
-    veeMaxAlt = cards.slice(40, 43);
-    veeStar = cards.slice(43, 46);
-    trainerHolo = cards.slice(46, 52);
-    rainbow = cards.slice(52, 58);
-    gold = cards.slice(58, 64);
-    veeGallery = cards.slice(64, 70);
-    shinyVault = cards.slice(85, 91);
+  const showcase = withBase({
+    id: "demo-showcase",
+    set: "demo",
+    number: "0001",
+    types: ["Darkness"],
+    rarity: "holofoil"
+  });
 
-    isLoading = false;
-  };
-
-  onMount(loadCards);
+  const groups = [
+    {
+      anchor: "basic",
+      title: "Basic / Non-Holo",
+      description:
+        "Same local art, different type glows. (No licensed card imagery anywhere on this page.)",
+      cards: [
+        withBase({
+          id: "demo-basic-water",
+          set: "demo",
+          number: "0002",
+          types: ["Water"],
+          rarity: "common"
+        }),
+        withBase({
+          id: "demo-basic-fire",
+          set: "demo",
+          number: "0003",
+          types: ["Fire"],
+          rarity: "uncommon"
+        }),
+        withBase({
+          id: "demo-basic-psychic",
+          set: "demo",
+          number: "0004",
+          types: ["Psychic"],
+          rarity: "common"
+        })
+      ]
+    },
+    {
+      anchor: "reverse",
+      title: "Reverse Holo",
+      description: "Reverse holo uses a different shine/glare treatment.",
+      cards: [
+        withBase({
+          id: "demo-reverse-grass",
+          set: "demo",
+          number: "0005",
+          types: ["Grass"],
+          rarity: "common reverse holo"
+        }),
+        withBase({
+          id: "demo-reverse-lightning",
+          set: "demo",
+          number: "0006",
+          types: ["Lightning"],
+          rarity: "uncommon reverse holo"
+        }),
+        withBase({
+          id: "demo-reverse-darkness",
+          set: "demo",
+          number: "0007",
+          types: ["Darkness"],
+          rarity: "common reverse holo"
+        })
+      ]
+    },
+    {
+      anchor: "holo",
+      title: "Holofoil",
+      cards: [
+        withBase({
+          id: "demo-holofoil-basic",
+          set: "demo",
+          number: "0008",
+          types: ["Metal"],
+          rarity: "holofoil"
+        }),
+        withBase({
+          id: "demo-holofoil-stage1",
+          set: "demo",
+          number: "0009",
+          types: ["Water"],
+          rarity: "holofoil",
+          subtypes: ["Stage 1"]
+        }),
+        withBase({
+          id: "demo-holofoil-trainer",
+          set: "demo",
+          number: "0010",
+          types: ["Colorless"],
+          rarity: "holofoil",
+          supertype: "trainer",
+          subtypes: ["Supporter"]
+        })
+      ]
+    },
+    {
+      anchor: "cosmos",
+      title: "Galaxy / Cosmos",
+      cards: [
+        withBase({
+          id: "demo-cosmos-1",
+          set: "demo",
+          number: "0011",
+          types: ["Water"],
+          rarity: "galaxy"
+        }),
+        withBase({
+          id: "demo-cosmos-2",
+          set: "demo",
+          number: "0012",
+          types: ["Fire"],
+          rarity: "galaxy"
+        }),
+        withBase({
+          id: "demo-cosmos-3",
+          set: "demo",
+          number: "0013",
+          types: ["Psychic"],
+          rarity: "galaxy"
+        })
+      ]
+    },
+    {
+      anchor: "amazing",
+      title: "Amazing Rare",
+      cards: [
+        withBase({
+          id: "demo-amazing-1",
+          set: "demo",
+          number: "0014",
+          types: ["Dragon"],
+          rarity: "rare"
+        }),
+        withBase({
+          id: "demo-amazing-2",
+          set: "demo",
+          number: "0015",
+          types: ["Fairy"],
+          rarity: "rare"
+        })
+      ]
+    },
+    {
+      anchor: "radiant",
+      title: "Radiant",
+      cards: [
+        withBase({
+          id: "demo-radiant-1",
+          set: "demo",
+          number: "0016",
+          types: ["Lightning"],
+          rarity: "radiant"
+        }),
+        withBase({
+          id: "demo-radiant-2",
+          set: "demo",
+          number: "0017",
+          types: ["Grass"],
+          rarity: "radiant"
+        })
+      ]
+    },
+    {
+      anchor: "v",
+      title: "V / VMAX / VSTAR",
+      cards: [
+        withBase({
+          id: "demo-v",
+          set: "demo",
+          number: "0018",
+          types: ["Darkness"],
+          rarity: "steel",
+          subtypes: ["V"]
+        }),
+        withBase({
+          id: "demo-v-ultra",
+          set: "demo",
+          number: "0019",
+          types: ["Water"],
+          rarity: "ultra-rare",
+          subtypes: ["V"]
+        }),
+        withBase({
+          id: "demo-vmax",
+          set: "demo",
+          number: "0020",
+          types: ["Fire"],
+          rarity: "holofoil-alt-1",
+          subtypes: ["VMAX"]
+        }),
+        withBase({
+          id: "demo-vstar",
+          set: "demo",
+          number: "0021",
+          types: ["Psychic"],
+          rarity: "holofoil-alt-2",
+          subtypes: ["VSTAR"]
+        })
+      ]
+    },
+    {
+      anchor: "trainer-gallery",
+      title: "Trainer / Galar Gallery",
+      cards: [
+        withBase({
+          id: "demo-tg-holo",
+          set: "demo",
+          number: "TG01",
+          types: ["Water"],
+          rarity: "holofoil"
+        }),
+        withBase({
+          id: "demo-tg-v",
+          set: "demo",
+          number: "TG02",
+          types: ["Grass"],
+          rarity: "steel",
+          subtypes: ["V"]
+        }),
+        withBase({
+          id: "demo-tg-vmax",
+          set: "demo",
+          number: "TG03",
+          types: ["Lightning"],
+          rarity: "holofoil-alt-1",
+          subtypes: ["VMAX"]
+        }),
+        withBase({
+          id: "demo-tg-secret",
+          set: "demo",
+          number: "TG04",
+          types: ["Darkness"],
+          rarity: "ancient"
+        })
+      ]
+    },
+    {
+      anchor: "rainbow",
+      title: "Rainbow / Secret",
+      cards: [
+        withBase({
+          id: "demo-rainbow",
+          set: "demo",
+          number: "0022",
+          types: ["Dragon"],
+          rarity: "rare-rainbow"
+        }),
+        withBase({
+          id: "demo-rainbow-alt",
+          set: "demo",
+          number: "0023",
+          types: ["Dragon"],
+          rarity: "rare-rainbow-alt-1"
+        }),
+        withBase({
+          id: "demo-secret",
+          set: "demo",
+          number: "0024",
+          types: ["Metal"],
+          rarity: "ancient"
+        })
+      ]
+    },
+    {
+      anchor: "shiny",
+      title: "Shiny Vault",
+      cards: [
+        withBase({
+          id: "demo-shiny",
+          set: "demo",
+          number: "SV01",
+          types: ["Grass"],
+          rarity: "shiny"
+        }),
+        withBase({
+          id: "demo-shiny-v",
+          set: "demo",
+          number: "SV02",
+          types: ["Lightning"],
+          rarity: "shiny-v",
+          subtypes: ["V"]
+        }),
+        withBase({
+          id: "demo-shiny-vmax",
+          set: "demo",
+          number: "SV03",
+          types: ["Fire"],
+          rarity: "shiny-vmax",
+          subtypes: ["VMAX"]
+        })
+      ]
+    }
+  ];
 </script>
 
 <section class="examples">
   <header class="examples__header">
     <h1>Examples</h1>
     <p class="examples__sub">
-      Legacy Pokemon card effect demos (moved off the homepage).
+      CSS effect playground using a single local image (<code>{NAME}</code>) so we don't ship licensed
+      card art.
     </p>
 
     <div class="showcase">
-      {#if !showcase}
-        loading...
-      {:else}
-        <Card
-          id={showcase.id}
-          card_front_img={showcase.card_front_img}
-          card_back_img={showcase.card_back_img}
-          name={showcase.name}
-          set={showcase.set}
-          number={showcase.number}
-          types={showcase.types}
-          supertype={showcase.supertype}
-          subtypes={showcase.subtypes}
-          rarity={showcase.rarity}
-          isReverse={showcase.isReverse}
-          showcase={true}
-        />
-      {/if}
+      <Card {...showcase} showcase={true} />
     </div>
   </header>
 
-  <h2 id="⚓-common">
-    <a href="#⚓-common">Common &amp; Uncommon</a>
-  </h2>
-  <p>
-    All cards get a 3d rotation with CSS based on cursor position. The basic non-holo cards apply a
-    flare/glare effect that follows the mouse.
-  </p>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each basics as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-        />
-      {/each}
+  {#each groups as group}
+    <h2 id={"⚓-" + group.anchor}>
+      <a href={"#⚓-" + group.anchor}>{group.title}</a>
+    </h2>
+    {#if group.description}
+      <p>{group.description}</p>
     {/if}
-  </CardList>
 
-  <h2 id="⚓-reverse">
-    <a href="#⚓-reverse">Reverse Holo non-rares</a>
-  </h2>
-  <p>
-    Reverse holo cards come in many shapes and sizes (trainer, stage1, and different energy types). These
-    examples show a few variations.
-  </p>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each reverse as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-          isReverse
-        />
+    <CardList>
+      {#each group.cards as card (card.id)}
+        <Card {...card} />
       {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-holo">
-    <a href="#⚓-holo">Holofoil Rare</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each holos as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-galaxy">
-    <a href="#⚓-galaxy">Galaxy/Cosmos Holofoil</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each cosmos as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-amazing">
-    <a href="#⚓-amazing">Holofoil Amazing Rare</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each amazings as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-radiant">
-    <a href="#⚓-radiant">Radiant Holofoil</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each radiant as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-trainer-gallery-holo">
-    <a href="#⚓-trainer-gallery-holo">Trainer Gallery Holofoil</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each basicGallery as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v">
-    <a href="#⚓-v">Pokemon V</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each vee as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-full-art">
-    <a href="#⚓-v-full-art">Pokemon V (Full Art)</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeUltra as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-alternate-art">
-    <a href="#⚓-v-alternate-art">Pokemon V (Alternate Art)</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeAlt as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-max">
-    <a href="#⚓-v-max">VMax</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeMax as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-max-alternate">
-    <a href="#⚓-v-max-alternate">VMax (Alternate/Rainbow)</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeMaxAlt as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-star">
-    <a href="#⚓-v-star">VStar</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeStar as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-trainers">
-    <a href="#⚓-trainers">Trainer Full Art</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each trainerHolo as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-rainbow">
-    <a href="#⚓-rainbow">Rainbow</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each rainbow as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-gold">
-    <a href="#⚓-gold">Gold</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each gold as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-v-gallery">
-    <a href="#⚓-v-gallery">Trainer / Galar Gallery V</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each veeGallery as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
-
-  <h2 id="⚓-shiny">
-    <a href="#⚓-shiny">Shiny Vault</a>
-  </h2>
-
-  <CardList>
-    {#if isLoading}
-      loading...
-    {:else}
-      {#each shinyVault as card (card.id)}
-        <Card
-          id={card.id}
-          card_front_img={card.card_front_img}
-          card_back_img={card.card_back_img}
-          name={card.name}
-          number={card.number}
-          set={card.set}
-          types={card.types}
-          supertype={card.supertype}
-          subtypes={card.subtypes}
-          rarity={card.rarity}
-        />
-      {/each}
-    {/if}
-  </CardList>
+    </CardList>
+  {/each}
 </section>
 
 <style>

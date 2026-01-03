@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
 
-  import Card from "../lib/components/CardProxy.svelte";
+  import Card from "../lib/components/Card.svelte";
 
   export let slug = "";
 
