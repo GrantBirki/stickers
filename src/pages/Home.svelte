@@ -55,9 +55,9 @@
 </script>
 
 <section class="home">
-  <h1>Stickers</h1>
+  <h1>Sticker Drops</h1>
   <p class="home__sub">
-    Holographic “trading cards” for my sticker drops.
+    A collection of sticker drops from Birki.
   </p>
 
   <CardList>
