@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite'
+import { resolve } from "path";
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
 // https://vitejs.dev/config/
@@ -20,6 +21,14 @@ export default defineConfig(({mode}) => {
 
   return {
     plugins: [svelte(), htmlPlugin()],
+    build: {
+      rollupOptions: {
+        input: {
+          main: resolve(process.cwd(), "index.html"),
+          examples: resolve(process.cwd(), "examples/index.html")
+        }
+      }
+    },
     server: {
       watch: {
         usePolling: false

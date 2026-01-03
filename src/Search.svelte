@@ -59,11 +59,6 @@
           isError = true;
         });
 
-        // Optional: only fires if GA is configured.
-        window.gtag?.("event", "search", {
-          search_term: query
-        });
-
 
 		},666);
 	};

@@ -1,0 +1,316 @@
+/*
+  Sticker cards
+
+  Layout:
+  - art window near the top (sticker image lives here)
+  - holo/glare effects are usually constrained to the art window,
+    but `trainer gallery rare holo` should cover the entire card
+  - metadata renders in the bottom section
+*/
+
+.card[data-set="stickers"] {
+  /* Keep a consistent "safety margin" so elements don't hug the edges. */
+  --sticker-safe: 5%;
+  /*
+    Sticker cards have large light areas; make the paper texture clearly visible.
+    Use multiply so the darker speckles show up on near-white backgrounds.
+  */
+  --front-texture-opacity: 0.38;
+  --front-texture-blend: multiply;
+
+  /* Art window geometry (percentages of the full card). */
+  --sticker-header-top: var(--sticker-safe);
+  --sticker-header-height: 6%;
+
+  /* Bigger art window: the sticker should dominate the card. */
+  --sticker-art-gap: 1.5%;
+  --sticker-art-top: calc(var(--sticker-header-top) + var(--sticker-header-height) + var(--sticker-art-gap));
+  --sticker-art-left: var(--sticker-safe);
+  --sticker-art-right: var(--sticker-safe);
+  /* Balance: larger sticker image, but still enough room for the info panel + footer. */
+  --sticker-art-bottom: 26%;
+  --sticker-art-radius: 2.75%;
+
+  --sticker-footer-height: 5%;
+  --sticker-footer-gap: 1%;
+  --sticker-meta-gap: 2%;
+
+  /* For sticker cards, effects should cover the entire art window element. */
+  --clip: inset(0 0 0 0 round var(--sticker-art-radius));
+  --clip-invert: var(--clip);
+  --clip-stage: var(--clip);
+  --clip-stage-invert: var(--clip);
+  --clip-trainer: var(--clip);
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] {
+  /* Trainer Gallery cards are meant to be full-card foils. */
+  --clip-borders: inset(0 0 0 0 round var(--card-radius));
+}
+
+.card[data-set="stickers"][data-front-shape="square"] {
+  /* Reduce letterboxing for square sticker art (tighten the inner frame). */
+  --sticker-art-bottom: 23%;
+  --sticker-meta-gap: 1.75%;
+}
+
+.card[data-set="stickers"] .card__front {
+  position: relative;
+  overflow: hidden;
+  /* A "trading card" face behind the sticker. */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92)),
+    url("/img/card_front_texture.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+/* The base styles apply very broad rules to *all* descendants of the rotator;
+   for sticker layout we "reset" only our sticker subtrees. */
+.card[data-set="stickers"] .sticker__bg,
+.card[data-set="stickers"] .sticker__header,
+.card[data-set="stickers"] .sticker__header *,
+.card[data-set="stickers"] .sticker__art,
+.card[data-set="stickers"] .sticker__art-bg,
+.card[data-set="stickers"] .sticker__art-inner,
+.card[data-set="stickers"] .sticker__face,
+.card[data-set="stickers"] .sticker__frame,
+.card[data-set="stickers"] .sticker__meta,
+.card[data-set="stickers"] .sticker__meta *,
+.card[data-set="stickers"] .sticker__footer,
+.card[data-set="stickers"] .sticker__footer * {
+  aspect-ratio: auto;
+  grid-area: auto;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.card[data-set="stickers"] .sticker__bg,
+.card[data-set="stickers"] .sticker__header,
+.card[data-set="stickers"] .sticker__art,
+.card[data-set="stickers"] .sticker__art-bg,
+.card[data-set="stickers"] .sticker__art-inner,
+.card[data-set="stickers"] .sticker__frame,
+.card[data-set="stickers"] .sticker__meta,
+.card[data-set="stickers"] .sticker__footer {
+  width: auto;
+  height: auto;
+}
+
+.card[data-set="stickers"] .sticker__header {
+  position: absolute;
+  left: var(--sticker-safe);
+  right: var(--sticker-safe);
+  top: var(--sticker-header-top);
+  height: var(--sticker-header-height);
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 0.25rem;
+  color: rgba(5, 10, 12, 0.9);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.card[data-set="stickers"] .sticker__title {
+  font-family: "Roboto Condensed";
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-size: 1.15rem;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card[data-set="stickers"] .sticker__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 70% 80%, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0) 60%);
+}
+
+.card[data-set="stickers"] .sticker__art {
+  position: absolute;
+  inset: var(--sticker-art-top) var(--sticker-art-right) var(--sticker-art-bottom)
+    var(--sticker-art-left);
+  z-index: 2;
+  border-radius: var(--sticker-art-radius);
+  overflow: hidden;
+}
+
+.card[data-set="stickers"] .sticker__art-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.10),
+    0 10px 26px rgba(0, 0, 0, 0.20);
+}
+
+.card[data-set="stickers"] .sticker__art-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--front-texture) center / cover no-repeat;
+  opacity: 0.24;
+  mix-blend-mode: var(--front-texture-blend);
+}
+
+.card[data-set="stickers"] .sticker__art-inner {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.card[data-set="stickers"] .sticker__face {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center center;
+  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.24));
+}
+
+.card[data-set="stickers"] .sticker__frame {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  border-radius: var(--sticker-art-radius);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
+
+/* FULL CARD FOIL (Trainer Gallery Rare Holo) */
+.card[data-set="stickers"][data-sticker-foil="full"] .card__front > .card__shine,
+.card[data-set="stickers"][data-sticker-foil="full"] .card__front > .card__glare {
+  position: absolute;
+  inset: 0;
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] .card__front > .card__shine {
+  z-index: 7;
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] .card__front > .card__glare {
+  z-index: 8;
+}
+
+/* Ensure the effect layers fill the art window and stay on top of the sticker image. */
+.card[data-set="stickers"] .sticker__art > .card__shine,
+.card[data-set="stickers"] .sticker__art > .card__glare {
+  position: absolute;
+  inset: 0;
+}
+
+.card[data-set="stickers"] .sticker__art > .card__shine {
+  z-index: 4;
+}
+
+.card[data-set="stickers"] .sticker__art > .card__glare {
+  z-index: 5;
+}
+
+/* Bottom metadata area */
+.card[data-set="stickers"] .sticker__meta {
+  position: absolute;
+  left: var(--sticker-safe);
+  right: var(--sticker-safe);
+  top: calc(100% - var(--sticker-art-bottom) + var(--sticker-meta-gap));
+  bottom: calc(var(--sticker-safe) + var(--sticker-footer-height) + var(--sticker-footer-gap));
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+  box-shadow: none;
+  color: rgba(5, 10, 12, 0.88);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.card[data-set="stickers"][data-sticker-foil="full"] .sticker__meta {
+  /* Keep readable on top of full-card foil without adding a box. */
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 2px 12px rgba(0, 0, 0, 0.10);
+}
+
+.card[data-set="stickers"] .sticker__date,
+.card[data-set="stickers"] .sticker__desc,
+.card[data-set="stickers"] .sticker__prints,
+.card[data-set="stickers"] .sticker__card-number {
+  display: block;
+}
+
+.card[data-set="stickers"] .sticker__date {
+  font-family: "Roboto";
+  font-size: 0.83rem;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  align-self: center;
+}
+
+.card[data-set="stickers"] .sticker__desc {
+  font-family: "Roboto";
+  font-size: 0.9rem;
+  line-height: 1.22;
+  opacity: 0.92;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card[data-set="stickers"] .sticker__footer {
+  position: absolute;
+  left: var(--sticker-safe);
+  right: var(--sticker-safe);
+  bottom: var(--sticker-safe);
+  height: var(--sticker-footer-height);
+  z-index: 12;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  color: rgba(5, 10, 12, 0.85);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.card[data-set="stickers"] .sticker__prints {
+  font-family: "Roboto";
+  font-size: 0.82rem;
+  opacity: 0.78;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card[data-set="stickers"] .sticker__card-number {
+  font-family: "Roboto Condensed";
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  opacity: 0.9;
+  white-space: nowrap;
+}

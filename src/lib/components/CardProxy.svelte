@@ -13,6 +13,11 @@
   export let supertype = undefined;
   export let rarity = undefined;
   export let isReverse = false;
+  // Sticker/trading-card metadata (optional)
+  export let drop_number = undefined;
+  export let drop_date = undefined;
+  export let description = undefined;
+  export let total_prints = undefined;
 
   // image props
   export let img = undefined;
@@ -254,6 +259,10 @@
     subtypes,
     supertype,
     rarity: rarityComputed,
+    drop_number,
+    drop_date,
+    description,
+    total_prints,
     showcase
 
   }

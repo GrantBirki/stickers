@@ -58,6 +58,11 @@
   clipping as the card animates to/from active state. worth it. */
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
+
+  /* Subtle "paper" texture on the front face (over the artwork). */
+  --front-texture: url("/img/card_front_texture.png");
+  --front-texture-opacity: 0.22;
+  --front-texture-blend: soft-light;
 }
 
 .card,
@@ -199,8 +204,18 @@ button.card__rotator {
   overflow: hidden;
 }
 
-.card__rotator img {
+/* Most card face images should keep their intrinsic proportions. */
+.card__rotator img:not(.card__back) {
   height: auto;
+}
+
+/* The card back image is a "background" plate; ensure it always fills the card. */
+.card__back {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
 }
 .card__rotator img:not(.card__back) {
   -webkit-transform: translate3d(0px, 0px, 0.01px);
@@ -220,10 +235,28 @@ button.card__rotator {
 }
 
 .card__front {
+  position: relative;
   opacity: 1;
   transition: opacity 0.33s ease-out;
   -webkit-transform: translate3d(0px, 0px, 0.01px);
   transform: translate3d(0px, 0px, 0.01px);
+}
+
+.card__front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: var(--front-texture) center / cover no-repeat;
+  opacity: var(--front-texture-opacity);
+  mix-blend-mode: var(--front-texture-blend);
+  backface-visibility: hidden;
+}
+
+/* Keep the texture above the artwork but below shine/glare layers. */
+.card__front > img.card__face {
+  z-index: 0;
 }
 
 .loading .card__front {
@@ -290,6 +323,7 @@ Shine & Glare Effects
 }
 
 .card__glare {
+  z-index: 4;
 
   /* make sure the glare doesn't clip */
   transform: translateZ(1.41px);
