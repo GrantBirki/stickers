@@ -60,8 +60,8 @@
     A collection of sticker drops from Birki.
   </p>
   <p class="home__sub home__sub--slack">
-    Do you work with Birki? Follow the <code class="inline-code">#birki-sticker-drops</code>
-    channel in Slack to catch a limited edition sticker drop!
+    Do you work with Birki? Follow the <code class="inline-code">#birki-sticker-drops</code> channel
+    in Slack to catch a limited edition sticker drop!
   </p>
 
   <CardList>

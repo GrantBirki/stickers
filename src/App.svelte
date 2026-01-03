@@ -59,7 +59,17 @@
 
   <footer class="footer">
     <div class="footer__inner">
-      <p class="footer__text">Made in San Francisco with ❤️ by Grant Birkinbine</p>
+      <p class="footer__text">
+        Made in San Francisco with ❤️ by
+        <a
+          class="footer__by"
+          href="https://github.com/GrantBirki"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Grant Birkinbine
+        </a>
+      </p>
       <a
         class="footer__link"
         href="https://github.com/GrantBirki/stickers"
@@ -138,17 +148,29 @@
   .footer__text {
     margin: 0;
     text-align: center;
-    color: var(--text);
-    opacity: 0.8;
+    color: var(--muted);
     font-size: 0.95rem;
+  }
+
+  .footer__by {
+    color: var(--text);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  .footer__by:hover,
+  .footer__by:focus {
+    color: var(--text);
   }
 
   .footer__link {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: var(--muted);
+    color: var(--text);
     text-decoration: none;
+    opacity: 1;
   }
 
   .footer__link span {
@@ -157,6 +179,7 @@
 
   .footer__link:hover {
     color: var(--text);
+    opacity: 1;
     text-decoration: underline;
     text-underline-offset: 3px;
   }
