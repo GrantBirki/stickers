@@ -67,6 +67,9 @@
   --front-texture-position: center;
   --front-texture-size: cover;
   --front-texture-repeat: no-repeat;
+
+  /* Card flip (used by sticker inspect pages). */
+  --flip: 0deg;
 }
 
 .card,
@@ -151,10 +154,10 @@
 }
 
 .card__rotator {
-  -webkit-transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
+  -webkit-transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
-  transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
+  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
   
   /* performance */
   pointer-events: auto;

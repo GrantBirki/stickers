@@ -35,6 +35,8 @@
   export let showcase = false;
   // If true, force the card into the expanded "popover" state and prevent collapsing.
   export let expanded = false;
+  // If true, clicking the card flips it to show the back (instead of expanding).
+  export let flip_on_click = false;
 
   // Sticker/trading-card metadata (optional)
   export let drop_date = "";
@@ -87,6 +89,7 @@
   let firstPop = true;
   let loading = true;
   let isVisible = document.visibilityState === "visible";
+  let flipped = false;
 
   const springInteractSettings = { stiffness: 0.066, damping: 0.25 };
   const springPopoverSettings = { stiffness: 0.033, damping: 0.45 };
@@ -96,6 +99,7 @@
   let springRotateDelta = spring({ x: 0, y: 0 }, springPopoverSettings);
   let springTranslate = spring({ x: 0, y: 0 }, springPopoverSettings);
   let springScale = spring(1, springPopoverSettings);
+  let springFlip = spring(0, springPopoverSettings);
 
   let showcaseInterval;
   let showcaseTimerStart;
@@ -207,6 +211,11 @@
   };
 
   const activate = (e) => {
+    if (flip_on_click) {
+      flipped = !flipped;
+      springFlip.set(flipped ? 180 : 0);
+      return;
+    }
     if (expanded) {
       $activeCard = thisCard;
       resetBaseOrientation();
@@ -316,6 +325,7 @@
     --card-opacity: ${$springGlare.o};
     --rotate-x: ${$springRotate.x + $springRotateDelta.x}deg;
     --rotate-y: ${$springRotate.y + $springRotateDelta.y}deg;
+    --flip: ${$springFlip}deg;
     --background-x: ${$springBackground.x}%;
     --background-y: ${$springBackground.y}%;
     --card-scale: ${$springScale};
@@ -538,7 +548,7 @@
       on:pointermove={interact}
       on:mouseout={interactEnd}
       on:blur={deactivate}
-      aria-label="Expand card: {name}."
+      aria-label={flip_on_click ? `Flip card: ${name}.` : `Expand card: ${name}.`}
       tabindex="0"
       >
       <img

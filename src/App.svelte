@@ -50,6 +50,7 @@
 <div class="app">
   {#if !isStickerInspect}
     <div class="topbar">
+      <a class="topbar__brand" href="/">birki stickers</a>
       <div class="topbar__actions">
         <ThemeToggle />
       </div>
