@@ -338,6 +338,8 @@
   overflow: visible;
   background: transparent;
   box-shadow: none;
+  font-family: "Roboto Condensed";
+  font-weight: 600;
   color: rgba(5, 10, 12, 0.88);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
@@ -357,7 +359,8 @@
 }
 
 .card[data-set="stickers"] .sticker__date {
-  font-family: "Roboto";
+  font-family: "Roboto Condensed";
+  font-weight: 600;
   font-size: 0.83rem;
   letter-spacing: 0.04em;
   opacity: 0.85;
@@ -369,7 +372,8 @@
 }
 
 .card[data-set="stickers"] .sticker__desc {
-  font-family: "Roboto";
+  font-family: "Roboto Condensed";
+  font-weight: 600;
   font-size: 0.9rem;
   line-height: 1.22;
   opacity: 0.92;
@@ -390,14 +394,17 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 10px;
+  font-family: "Roboto Condensed";
+  font-weight: 600;
   color: rgba(5, 10, 12, 0.85);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .card[data-set="stickers"] .sticker__prints {
-  font-family: "Roboto";
+  font-family: "Roboto Condensed";
+  font-weight: 600;
   font-size: 0.82rem;
-  opacity: 0.78;
+  opacity: 0.88;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
