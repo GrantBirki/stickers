@@ -50,7 +50,6 @@
 <div class="app">
   {#if !isStickerInspect}
     <div class="topbar">
-      <a class="topbar__brand" href="/">birki stickers</a>
       <div class="topbar__actions">
         <ThemeToggle />
       </div>
@@ -120,17 +119,6 @@
     justify-content: flex-end;
     gap: 16px;
     padding: 16px 20px;
-  }
-
-  .topbar__brand {
-    font-family: var(--font-sans);
-    font-weight: 700;
-    font-stretch: 100%;
-    font-optical-sizing: none;
-    font-variation-settings: "opsz" var(--opsz-heading);
-    letter-spacing: 0.02em;
-    text-decoration: none;
-    color: var(--text);
   }
 
   .topbar__actions {
