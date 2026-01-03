@@ -63,6 +63,10 @@
   --front-texture: url("/img/card_front_texture.png");
   --front-texture-opacity: 0.22;
   --front-texture-blend: soft-light;
+  /* Default behavior: treat the texture like a photo (single, full bleed). */
+  --front-texture-position: center;
+  --front-texture-size: cover;
+  --front-texture-repeat: no-repeat;
 }
 
 .card,
@@ -248,7 +252,10 @@ button.card__rotator {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: var(--front-texture) center / cover no-repeat;
+  background-image: var(--front-texture);
+  background-position: var(--front-texture-position);
+  background-size: var(--front-texture-size);
+  background-repeat: var(--front-texture-repeat);
   opacity: var(--front-texture-opacity);
   mix-blend-mode: var(--front-texture-blend);
   backface-visibility: hidden;

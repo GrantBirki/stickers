@@ -17,6 +17,9 @@
   */
   --front-texture-opacity: 0.38;
   --front-texture-blend: multiply;
+  /* Treat the texture like a tiling "paper grain" (smaller scale, not zoomed). */
+  --front-texture-size: 320px auto;
+  --front-texture-repeat: repeat;
 
   /* Art window geometry (percentages of the full card). */
   --sticker-header-top: var(--sticker-safe);
@@ -58,12 +61,7 @@
   position: relative;
   overflow: hidden;
   /* A "trading card" face behind the sticker. */
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92)),
-    url("/img/card_front_texture.png");
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(245, 241, 232, 0.92));
   box-shadow:
     inset 0 0 0 2px rgba(0, 0, 0, 0.22),
     inset 0 0 0 1px rgba(255, 255, 255, 0.4);
@@ -225,7 +223,10 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: var(--front-texture) center / cover no-repeat;
+  background-image: var(--front-texture);
+  background-position: var(--front-texture-position);
+  background-size: var(--front-texture-size);
+  background-repeat: var(--front-texture-repeat);
   opacity: 0.24;
   mix-blend-mode: var(--front-texture-blend);
 }
