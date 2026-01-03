@@ -16,7 +16,7 @@
 
 */
 
-.card[data-rarity="rare shiny vmax"] .card__shine {
+.card[data-rarity="shiny-vmax"] .card__shine {
 
   --imgsize: cover;
   --angle: -30deg;
@@ -52,7 +52,7 @@
 
 }
 
-.card[data-rarity="rare shiny vmax"] .card__shine:before {
+.card[data-rarity="shiny-vmax"] .card__shine:before {
   
   content: "";
   -webkit-mask-image: none !important;
@@ -77,7 +77,7 @@
 
 }
 
-.card[data-rarity="rare shiny vmax"] .card__shine:after {
+.card[data-rarity="shiny-vmax"] .card__shine:after {
 
   content: "";
   -webkit-mask-image: none !important;
@@ -113,7 +113,7 @@
 
 */
 
-.card[data-rarity="rare shiny vmax"] .card__glare {
+.card[data-rarity="shiny-vmax"] .card__glare {
 	
 	background-image: 
 		radial-gradient( 
@@ -128,7 +128,7 @@
 
 }
 
-.card[data-rarity="rare shiny vmax"] .card__glare:after {
+.card[data-rarity="shiny-vmax"] .card__glare:after {
 	
   content: "";
   -webkit-mask-image: var(--mask);

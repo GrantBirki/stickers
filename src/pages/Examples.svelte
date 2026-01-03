@@ -75,6 +75,7 @@
       {:else}
         <Card
           id={showcase.id}
+          back={showcase.back}
           name={showcase.name}
           set={showcase.set}
           number={showcase.number}
@@ -104,6 +105,7 @@
       {#each basics as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           img={card.images.large}
           number={card.number}
@@ -130,6 +132,7 @@
       {#each reverse as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -154,6 +157,7 @@
       {#each holos as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -177,6 +181,7 @@
       {#each cosmos as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -200,6 +205,7 @@
       {#each amazings as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -223,6 +229,7 @@
       {#each radiant as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -246,6 +253,7 @@
       {#each basicGallery as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -269,6 +277,7 @@
       {#each vee as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -292,6 +301,7 @@
       {#each veeUltra as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -315,6 +325,7 @@
       {#each veeAlt as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -338,6 +349,7 @@
       {#each veeMax as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -361,6 +373,7 @@
       {#each veeMaxAlt as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -384,6 +397,7 @@
       {#each veeStar as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -407,6 +421,7 @@
       {#each trainerHolo as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -430,6 +445,7 @@
       {#each rainbow as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -453,6 +469,7 @@
       {#each gold as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -476,6 +493,7 @@
       {#each veeGallery as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}
@@ -499,6 +517,7 @@
       {#each shinyVault as card (card.id)}
         <Card
           id={card.id}
+          back={card.back}
           name={card.name}
           number={card.number}
           set={card.set}

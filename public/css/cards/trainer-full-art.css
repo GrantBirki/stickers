@@ -15,19 +15,19 @@
 
 */
 
-.card[data-subtypes*="supporter"][data-rarity="rare ultra"] .card__shine {
+.card[data-subtypes*="supporter"][data-rarity="ultra-rare"] .card__shine {
   
   filter: brightness(calc((var(--pointer-from-center)*0.05) + .8)) contrast(1.75) saturate(1.2);
 
 }
 
-.card[data-subtypes*="supporter"][data-rarity="rare ultra"] .card__shine:after {
+.card[data-subtypes*="supporter"][data-rarity="ultra-rare"] .card__shine:after {
 
   filter: brightness(calc((var(--pointer-from-center)*.4) + .85)) contrast(2) saturate(.5);
 
 }
 
-.card[data-subtypes*="supporter"][data-rarity="rare ultra"] .card__shine:before {
+.card[data-subtypes*="supporter"][data-rarity="ultra-rare"] .card__shine:before {
 
   background-image: 
     radial-gradient( 
@@ -56,7 +56,7 @@
 
 */
 
-.card[data-rarity="rare ultra"][data-subtypes*="supporter"] .card__glare {
+.card[data-rarity="ultra-rare"][data-subtypes*="supporter"] .card__glare {
 
   opacity: calc( var(--card-opacity) * .75 );
   mix-blend-mode: multiply;
@@ -80,8 +80,8 @@
 
 */
 
-.card:not(.masked)[data-subtypes*="supporter"][data-rarity="rare ultra"] .card__shine,
-.card:not(.masked)[data-subtypes*="supporter"][data-rarity="rare ultra"] .card__shine:after {
+.card:not(.masked)[data-subtypes*="supporter"][data-rarity="ultra-rare"] .card__shine,
+.card:not(.masked)[data-subtypes*="supporter"][data-rarity="ultra-rare"] .card__shine:after {
 
   --mask: none;
   --foil: url("/img/trainerbg.png"); 

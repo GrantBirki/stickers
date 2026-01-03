@@ -15,7 +15,7 @@
 
 */
 
-.card[data-rarity="amazing rare"] .card__shine {
+.card[data-rarity="rare"] .card__shine {
 
   background-image:
     var(--glitter),
@@ -34,7 +34,7 @@
 
 }
 
-.card[data-rarity="amazing rare"] .card__shine:before {
+.card[data-rarity="rare"] .card__shine:before {
   
   content: "";
   -webkit-mask-image: none !important;
@@ -59,7 +59,7 @@
 
 }
 
-.card[data-rarity="amazing rare"] .card__shine:after {
+.card[data-rarity="rare"] .card__shine:after {
 
   content: "";
   -webkit-mask-image: none !important;
@@ -95,7 +95,7 @@
 
 */
 
-.card.masked[data-rarity="amazing rare"] .card__glare {
+.card.masked[data-rarity="rare"] .card__glare {
 	
 	background-image: 
 		radial-gradient( 
@@ -110,7 +110,7 @@
 
 }
 
-.card.masked[data-rarity="amazing rare"] .card__glare:after {
+.card.masked[data-rarity="rare"] .card__glare:after {
 	
   content: "";
   -webkit-mask-image: var(--mask);
@@ -148,11 +148,11 @@
 
 */
 
-.card:not(.masked)[data-rarity="amazing rare"] .card__shine {
+.card:not(.masked)[data-rarity="rare"] .card__shine {
   clip-path: var(--clip);
 }
 
-.card:not(.masked)[data-rarity="amazing rare"] .card__glare {
+.card:not(.masked)[data-rarity="rare"] .card__glare {
   background-image: 
     radial-gradient( 
       farthest-corner circle at var(--pointer-x) var(--pointer-y), 

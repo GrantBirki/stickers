@@ -44,6 +44,14 @@
   let isStickerCard = false;
   let stickerFoilScope = "art"; // "art" | "full"
 
+  // Sticker-only: which rarities should have a full-card foil (instead of art-window-only).
+  const FULL_STICKER_FOILS = new Set([
+    "holographic",
+    "rare-rainbow",
+    "rare-rainbow-alt-1",
+    "ancient"
+  ]);
+
   let back_img = back;
   let front_img = "";
 
@@ -326,7 +334,7 @@
 
     isStickerCard = setAttr === "stickers";
     stickerFoilScope =
-      isStickerCard && rarityAttr === "trainer gallery rare holo" ? "full" : "art";
+      isStickerCard && FULL_STICKER_FOILS.has(rarityAttr) ? "full" : "art";
   }
 
   const orientate = (e) => {

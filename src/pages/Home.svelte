@@ -41,6 +41,7 @@
           id={sticker.id}
           name={sticker.name}
           img={sticker.img}
+          back={sticker.back}
           number={sticker.number}
           set={sticker.set}
           types={sticker.types}

@@ -15,8 +15,8 @@
 
 */
 
-.card[data-rarity="rare rainbow alt"] .card__shine,
-.card[data-rarity="rare holo vmax"][data-trainer-gallery="true"] .card__shine {
+.card[data-rarity="rare-rainbow-alt-1"] .card__shine,
+.card[data-rarity="holofoil-alt-1"][data-trainer-gallery="true"] .card__shine {
 
   --imgsize: cover;
 
@@ -54,8 +54,8 @@
 
 }
 
-.card[data-rarity="rare rainbow alt"] .card__shine:after,
-.card[data-rarity="rare holo vmax"][data-trainer-gallery="true"] .card__shine:after {
+.card[data-rarity="rare-rainbow-alt-1"] .card__shine:after,
+.card[data-rarity="holofoil-alt-1"][data-trainer-gallery="true"] .card__shine:after {
 
   content: "";
   -webkit-mask-image: none !important;
@@ -79,8 +79,8 @@
 
 }
 
-.card[data-rarity="rare rainbow alt"] .card__shine:before,
-.card[data-rarity="rare holo vmax"][data-trainer-gallery="true"] .card__shine:before {
+.card[data-rarity="rare-rainbow-alt-1"] .card__shine:before,
+.card[data-rarity="holofoil-alt-1"][data-trainer-gallery="true"] .card__shine:before {
   
   content: "";
 
@@ -105,7 +105,7 @@
 
 */
 
-.card[data-rarity="rare rainbow alt"] .card__glare {
+.card[data-rarity="rare-rainbow-alt-1"] .card__glare {
 	
 	background-image: 
 		radial-gradient( 
@@ -137,8 +137,8 @@
 */
 
 
-.card:not(.masked)[data-rarity="rare rainbow alt"] .card__shine,
-.card:not(.masked)[data-rarity="rare holo vmax"][data-trainer-gallery="true"] .card__shine {
+.card:not(.masked)[data-rarity="rare-rainbow-alt-1"] .card__shine,
+.card:not(.masked)[data-rarity="holofoil-alt-1"][data-trainer-gallery="true"] .card__shine {
 
   --mask: none;
   --foil: none;

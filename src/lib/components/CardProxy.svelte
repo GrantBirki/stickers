@@ -49,59 +49,57 @@
   // Compute a derived rarity value for CSS selectors and foil/mask lookups.
   let rarityComputed = rarity;
   $: {
-    rarityComputed = rarity;
+    // We standardize on short, lowercase rarity tokens (e.g. "holographic", "steel").
+    rarityComputed = isDefined(rarity) ? rarity.toString().trim().toLowerCase() : rarity;
 
     if (isReverse && isDefined(rarityComputed)) {
       rarityComputed = rarityComputed + " Reverse Holo";
     }
 
     if (isGallery) {
-      if (isDefined(rarityComputed) && rarityComputed.startsWith("Trainer Gallery")) {
-        rarityComputed = rarityComputed.replace(/Trainer Gallery\\s*/, "");
-      }
       if (
         isDefined(rarityComputed) &&
-        rarityComputed.includes("Rare Holo V") &&
+        rarityComputed === "steel" &&
         isDefined(subtypes) &&
         subtypes.includes("VMAX")
       ) {
-        rarityComputed = "Rare Holo VMAX";
+        rarityComputed = "holofoil-alt-1";
       }
       if (
         isDefined(rarityComputed) &&
-        rarityComputed.includes("Rare Holo V") &&
+        rarityComputed === "steel" &&
         isDefined(subtypes) &&
         subtypes.includes("VSTAR")
       ) {
-        rarityComputed = "Rare Holo VSTAR";
+        rarityComputed = "holofoil-alt-2";
       }
     }
 
     if (isPromo) {
       if (id === "swshp-SWSH076" || id === "swshp-SWSH077") {
-        rarityComputed = "Rare Secret";
+        rarityComputed = "ancient";
       } else if (isDefined(subtypes) && subtypes.includes("V")) {
-        rarityComputed = "Rare Holo V";
+        rarityComputed = "steel";
       } else if (isDefined(subtypes) && subtypes.includes("V-UNION")) {
-        rarityComputed = "Rare Holo VUNION";
+        rarityComputed = "steel";
       } else if (isDefined(subtypes) && subtypes.includes("VMAX")) {
-        rarityComputed = "Rare Holo VMAX";
+        rarityComputed = "holofoil-alt-1";
       } else if (isDefined(subtypes) && subtypes.includes("VSTAR")) {
-        rarityComputed = "Rare Holo VSTAR";
+        rarityComputed = "holofoil-alt-2";
       } else if (isDefined(subtypes) && subtypes.includes("Radiant")) {
-        rarityComputed = "Radiant Rare";
+        rarityComputed = "radiant";
       }
     }
 
     // Additional rarity normalization based on special sets.
     const rarityLower = isDefined(rarityComputed) ? rarityComputed.toLowerCase() : "";
     if (isShiny) {
-      // Map shiny-vault cards into the proper CSS buckets.
-      if (rarityLower === "rare holo v") rarityComputed = "Rare Shiny V";
-      if (rarityLower === "rare holo vmax") rarityComputed = "Rare Shiny VMAX";
+      // Map shiny-vault cards into the proper CSS buckets (short tokens).
+      if (rarityLower === "steel") rarityComputed = "shiny-v";
+      if (rarityLower === "holofoil-alt-1") rarityComputed = "shiny-vmax";
     }
     if (isAlternate && isDefined(subtypes) && subtypes.includes("VMAX")) {
-      rarityComputed = "Rare Rainbow Alt";
+      rarityComputed = "rare-rainbow-alt-1";
     }
   }
 
@@ -146,30 +144,30 @@
     const fNumber = number.toString().toLowerCase().replace( "swsh", "" ).padStart( 3, "0" );
     const fSet = set.toString().toLowerCase().replace( /(tg|gg|sv)/, "" );
 
-    if ( fRarity === "rare holo" ) {
+    if ( fRarity === "holofoil" ) {
       style = "swholo";
     }
 
-    if ( fRarity === "rare holo cosmos" ) {
+    if ( fRarity === "galaxy" ) {
       style = "cosmos";
     }
 
-    if ( fRarity === "radiant rare" ) {
+    if ( fRarity === "radiant" ) {
       etch = "etched";
       style = "radiantholo";
     }
 
-    if ( fRarity === "rare holo v" || fRarity === "rare holo vunion" || fRarity === "basic v" ) {
+    if ( fRarity === "steel" || fRarity === "basic v" ) {
       etch = "holo";
       style = "sunpillar";
     }
     
-    if ( fRarity === "rare holo vmax" || fRarity === "rare ultra" || fRarity === "rare holo vstar" ) {
+    if ( fRarity === "holofoil-alt-1" || fRarity === "ultra-rare" || fRarity === "holofoil-alt-2" ) {
       etch = "etched";
       style = "sunpillar";
     }
     
-    if ( fRarity === "amazing rare" || fRarity === "rare rainbow" || fRarity === "rare secret" ) {
+    if ( fRarity === "rare" || fRarity === "rare-rainbow" || fRarity === "rare-rainbow-alt-1" || fRarity === "ancient" ) {
       etch = "etched";
       style = "swsecret";
     }
@@ -178,7 +176,7 @@
       etch = "etched";
       style = "sunpillar";
 
-      if ( fRarity === "rare shiny vmax" || (fRarity === "rare holo vmax" && fNumber.startsWith( "sv" )) ) {
+      if ( fRarity === "shiny-vmax" || (fRarity === "holofoil-alt-1" && fNumber.startsWith( "sv" )) ) {
         style = "swsecret";
       }
     }
@@ -188,14 +186,14 @@
       etch = "holo";
       style = "rainbow";
 
-      if ( fRarity.includes( "rare holo v" ) || fRarity.includes( "rare ultra" ) ) {
+      if ( fRarity.includes( "steel" ) || fRarity.includes( "ultra-rare" ) ) {
 
         etch = "etched";
         style = "sunpillar";
 
       }
 
-      if ( fRarity.includes( "rare secret" ) ) {
+      if ( fRarity.includes( "ancient" ) ) {
 
         etch = "etched";
         style = "swsecret";
