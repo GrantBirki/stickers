@@ -30,6 +30,19 @@
   --card-front-size: 100% 100%;
   --card-front-repeat: no-repeat;
 
+  /*
+    Sticker typography defaults (home page / normal cards).
+    The inspect page overrides these via CSS variables so it can be larger without
+    making all cards chunky.
+  */
+  font-size: 16px;
+  --sticker-title-size: 1.2em;
+  --sticker-date-size: 0.82em;
+  --sticker-desc-size: 0.90em;
+  --sticker-prints-size: 0.80em;
+  --sticker-card-number-size: 0.90em;
+  --sticker-meta-weight: 500;
+
   /* Art window geometry (percentages of the full card). */
   --sticker-header-top: var(--sticker-safe);
   --sticker-header-height: 6%;
@@ -194,7 +207,7 @@
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-heading);
   letter-spacing: 0.02em;
-  font-size: 1.15rem;
+  font-size: var(--sticker-title-size);
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -360,7 +373,7 @@
   background: transparent;
   box-shadow: none;
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: var(--sticker-meta-weight);
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
@@ -384,11 +397,11 @@
 
 .card[data-set="stickers"] .sticker__date {
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: var(--sticker-meta-weight);
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
-  font-size: 0.83rem;
+  font-size: var(--sticker-date-size);
   letter-spacing: 0.04em;
   opacity: 0.85;
   font-variant-numeric: tabular-nums;
@@ -400,11 +413,11 @@
 
 .card[data-set="stickers"] .sticker__desc {
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: var(--sticker-meta-weight);
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
-  font-size: 0.9rem;
+  font-size: var(--sticker-desc-size);
   line-height: 1.22;
   opacity: 0.92;
   display: -webkit-box;
@@ -425,7 +438,7 @@
   justify-content: space-between;
   gap: 10px;
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: var(--sticker-meta-weight);
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
@@ -435,11 +448,11 @@
 
 .card[data-set="stickers"] .sticker__prints {
   font-family: var(--font-sans);
-  font-weight: 600;
+  font-weight: var(--sticker-meta-weight);
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
-  font-size: 0.82rem;
+  font-size: var(--sticker-prints-size);
   opacity: 0.88;
   white-space: nowrap;
   overflow: hidden;
@@ -452,7 +465,7 @@
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-mid);
-  font-size: 0.92rem;
+  font-size: var(--sticker-card-number-size);
   letter-spacing: 0.04em;
   opacity: 0.9;
   white-space: nowrap;

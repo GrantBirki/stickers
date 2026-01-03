@@ -65,11 +65,6 @@
 {/if}
 
 <style>
-  :global(html) {
-    /* Make rem-based typography feel right when the card is shown large. */
-    font-size: clamp(16px, 1.1vw + 12px, 20px);
-  }
-
   :global(html),
   :global(body) {
     height: 100%;
@@ -91,5 +86,16 @@
   /* Fit the card to the viewport immediately (no popover scaling needed). */
   .inspect :global(.card) {
     width: min(92vw, calc(86vh * var(--card-aspect)), 620px);
+  }
+
+  /* Large inspect view: scale sticker typography without affecting the rest of the site. */
+  .inspect :global(.card[data-set="stickers"]) {
+    font-size: clamp(26px, 4vmin, 38px);
+    --sticker-title-size: 2.5em;
+    --sticker-desc-size: 1.9em;
+    --sticker-date-size: 1.5em;
+    --sticker-prints-size: 1.5em;
+    --sticker-card-number-size: 1.5em;
+    --sticker-meta-weight: 600;
   }
 </style>
