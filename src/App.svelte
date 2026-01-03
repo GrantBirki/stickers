@@ -124,8 +124,11 @@
   }
 
   .topbar__brand {
-    font-family: "Roboto Condensed";
+    font-family: var(--font-sans);
     font-weight: 700;
+    font-stretch: 100%;
+    font-optical-sizing: none;
+    font-variation-settings: "opsz" var(--opsz-heading);
     letter-spacing: 0.02em;
     text-decoration: none;
     color: var(--text);

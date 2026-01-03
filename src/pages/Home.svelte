@@ -108,8 +108,7 @@
 
   /* GitHub-esque inline code pill that stays readable in both themes. */
   .inline-code {
-    font-family: ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas, "Liberation Mono",
-      "Courier New", monospace;
+    font-family: var(--font-mono);
     font-size: 0.92em;
     padding: 0.12em 0.4em;
     border-radius: 6px;

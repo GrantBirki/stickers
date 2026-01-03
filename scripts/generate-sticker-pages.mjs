@@ -30,12 +30,20 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
       document.documentElement.dataset.theme = "dark";
     </script>
 
-    <!-- fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- fonts (local) -->
     <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,300;0,700;1,300;1,700&family=Roboto:ital,wght@0,300;0,700;1,300;1,700&display=swap"
+      rel="preload"
+      href="/fonts/mona-sans/MonaSansVF.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/mona-sans/MonaSansMonoVF.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
 
     <!-- styles -->
@@ -93,4 +101,3 @@ const main = () => {
 };
 
 main();
-

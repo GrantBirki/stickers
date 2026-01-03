@@ -1,3 +1,30 @@
+/* Local Mona Sans variable fonts (no Google Fonts). */
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/fonts/mona-sans/MonaSansVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/fonts/mona-sans/MonaSansVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans Mono";
+  src: url("/fonts/mona-sans/MonaSansMonoVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Brand / accent */
   --primary: hsl(187, 85%, 46%);
@@ -14,6 +41,14 @@
   /* Highlights */
   --mark-bg: hsl(187, 80%, 26%);
   --mark-text: hsl(0, 0%, 100%);
+
+  /* Typography */
+  --font-sans: "Mona Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-mono: "Mona Sans Mono", ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --opsz-body: 12;
+  --opsz-mid: 20;
+  --opsz-heading: 20;
 }
 
 :root[data-theme="dark"] {
@@ -45,7 +80,11 @@ body {
 }
 
 body {
-  font-family: Roboto, system-ui, -apple-system, Segoe UI, sans-serif;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   background: radial-gradient(
       circle at 20% 0%,
       hsla(187, 85%, 60%, 0.14),
@@ -73,19 +112,30 @@ a:focus {
 h1,
 h2,
 h3 {
-  font-family: "Roboto Condensed", Roboto, system-ui, -apple-system, Segoe UI, sans-serif;
+  font-family: var(--font-sans);
+  font-stretch: 100%;
+  font-optical-sizing: none;
   margin: 0;
 }
 
 h1 {
   font-size: 2rem;
   letter-spacing: 0.01em;
+  font-weight: 700;
+  font-variation-settings: "opsz" var(--opsz-heading);
 }
 
 h2 {
   margin-top: 2.5rem;
   margin-bottom: 0.5rem;
   font-size: 1.35rem;
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-mid);
+}
+
+h3 {
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-mid);
 }
 
 p {
@@ -109,4 +159,3 @@ hr {
   background: var(--border);
   margin: 1rem 0;
 }
-

@@ -170,8 +170,11 @@
 }
 
 .card[data-set="stickers"] .sticker__title {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 700;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-heading);
   letter-spacing: 0.02em;
   font-size: 1.15rem;
   line-height: 1;
@@ -338,8 +341,11 @@
   overflow: visible;
   background: transparent;
   box-shadow: none;
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 600;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   color: rgba(5, 10, 12, 0.88);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
@@ -359,8 +365,11 @@
 }
 
 .card[data-set="stickers"] .sticker__date {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 600;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   font-size: 0.83rem;
   letter-spacing: 0.04em;
   opacity: 0.85;
@@ -372,8 +381,11 @@
 }
 
 .card[data-set="stickers"] .sticker__desc {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 600;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   font-size: 0.9rem;
   line-height: 1.22;
   opacity: 0.92;
@@ -394,15 +406,21 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 10px;
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 600;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   color: rgba(5, 10, 12, 0.85);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .card[data-set="stickers"] .sticker__prints {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 600;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
   font-size: 0.82rem;
   opacity: 0.88;
   white-space: nowrap;
@@ -411,8 +429,11 @@
 }
 
 .card[data-set="stickers"] .sticker__card-number {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
   font-weight: 700;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-mid);
   font-size: 0.92rem;
   letter-spacing: 0.04em;
   opacity: 0.9;

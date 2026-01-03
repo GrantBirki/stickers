@@ -47,6 +47,13 @@ Global site toggles live in `public/data/site.json`.
 - `display_next_card_as_hidden` (boolean): when `true`, the next card slot on the homepage shows a
   dark/muted "mystery" placeholder using `public/img/mystery.png`.
 
+## Fonts
+
+This site uses **local** Mona Sans variable fonts (no Google Fonts / CDNs).
+
+- Font files: `public/fonts/mona-sans/` (includes `OFL.txt`)
+- `@font-face` + typography defaults: `public/css/global.css`
+
 ## Adding A Sticker Card
 
 1) Put the sticker image in `public/img/stickers/` (PNG works great).
@@ -122,4 +129,5 @@ This site is designed to deploy as a static build.
 
 ## Acknowledgements
 
-[github.com/simeydotme/pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css)
+- [Card examples](https://poke-holo.simey.me)
+- [github.com/simeydotme/pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css)
