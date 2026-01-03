@@ -16,8 +16,8 @@
 
 */
 
-.card[data-rarity="rare shiny v"] .card__shine,
-.card[data-rarity="rare shiny v"] .card__shine:after {
+.card[data-rarity="shiny-v"] .card__shine,
+.card[data-rarity="shiny-v"] .card__shine:after {
 
   --space: 5%;
   --angle: 133deg;
@@ -64,7 +64,7 @@
 
 }
 
-.card[data-rarity="rare shiny v"] .card__shine:after {
+.card[data-rarity="shiny-v"] .card__shine:after {
 
   content: "";
 
@@ -82,7 +82,7 @@
 }
 
 
-.card[data-rarity="rare shiny v"] .card__shine:before {
+.card[data-rarity="shiny-v"] .card__shine:before {
 
   content: "";
   -webkit-mask-image: none;
@@ -114,7 +114,7 @@
 
 */
 
-.card[data-rarity="rare shiny v"] .card__glare {
+.card[data-rarity="shiny-v"] .card__glare {
 
   background-image: 
     radial-gradient( farthest-corner circle at var(--pointer-x) var(--pointer-y), 
@@ -149,8 +149,8 @@
 */
 
 
-.card:not(.masked)[data-rarity="rare shiny v"] .card__shine,
-.card:not(.masked)[data-rarity="rare shiny v"] .card__shine:after {
+.card:not(.masked)[data-rarity="shiny-v"] .card__shine,
+.card:not(.masked)[data-rarity="shiny-v"] .card__shine:after {
 
   --mask: none;
   --foil: url("/img/illusion.png"); 
@@ -166,12 +166,12 @@
 
 }
 
-.card:not(.masked)[data-rarity="rare shiny v"] .card__shine:before {
+.card:not(.masked)[data-rarity="shiny-v"] .card__shine:before {
   content: none;
   display: none;
 }
 
-.card:not(.masked)[data-rarity="rare shiny v"] .card__shine:after {
+.card:not(.masked)[data-rarity="shiny-v"] .card__shine:after {
   filter: brightness(calc((var(--pointer-from-center)*.5) + .8)) contrast(1.6) saturate(1.4);
 }
 

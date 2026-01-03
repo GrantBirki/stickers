@@ -4,11 +4,11 @@
 
 */
 
-.card[data-rarity="radiant rare"] .card__shine {
+.card[data-rarity="radiant"] .card__shine {
   clip-path: var(--clip-borders);
 }
 
-.card[data-rarity="radiant rare"] .card__shine:after {
+.card[data-rarity="radiant"] .card__shine:after {
   clip-path: var(--clip);
 }
 
@@ -22,7 +22,7 @@
 
 */
 
-.card[data-rarity="radiant rare"] .card__shine {
+.card[data-rarity="radiant"] .card__shine {
 
   --barwidth: 1.2%;
   --space: 200px;
@@ -98,7 +98,7 @@
 
 }
 
-.card[data-rarity="radiant rare"] .card__shine:after {
+.card[data-rarity="radiant"] .card__shine:after {
 
   content: "";
 
@@ -124,7 +124,7 @@
   
 }
 
-.card[data-rarity="radiant rare"] .card__shine:before {
+.card[data-rarity="radiant"] .card__shine:before {
   
   content: "";
   z-index: 2;
@@ -160,7 +160,7 @@
 
 */
 		
-.card[data-rarity="radiant rare"] .card__glare {
+.card[data-rarity="radiant"] .card__glare {
   
   background-image: 
     radial-gradient( 
@@ -189,8 +189,8 @@
 
 */
 
-.card:not(.masked)[data-rarity="radiant rare"] .card__shine,
-.card:not(.masked)[data-rarity="radiant rare"] .card__shine:after {
+.card:not(.masked)[data-rarity="radiant"] .card__shine,
+.card:not(.masked)[data-rarity="radiant"] .card__shine:after {
 
   --mask: none;
   --foil: url("/img/trainerbg.png"); 
@@ -198,7 +198,7 @@
 
 }
   
-.card:not(.masked)[data-rarity="radiant rare"] .card__shine:after {
+.card:not(.masked)[data-rarity="radiant"] .card__shine:after {
 
   background-blend-mode: difference;
   

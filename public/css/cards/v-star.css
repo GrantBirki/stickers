@@ -5,9 +5,9 @@
 */
 
 
-.card.masked[data-rarity="rare holo vstar"] .card__shine, 
-.card.masked[data-rarity="rare holo vstar"] .card__shine::before, 
-.card.masked[data-rarity="rare holo vstar"] .card__shine::after {
+.card.masked[data-rarity="holofoil-alt-2"] .card__shine, 
+.card.masked[data-rarity="holofoil-alt-2"] .card__shine::before, 
+.card.masked[data-rarity="holofoil-alt-2"] .card__shine::after {
 
   -webkit-mask-image:  
     var(--mask), 
@@ -35,8 +35,8 @@
 
 */
 
-.card[data-rarity="rare holo vstar"] .card__shine,
-.card[data-rarity="rare holo vstar"] .card__shine:after {
+.card[data-rarity="holofoil-alt-2"] .card__shine,
+.card[data-rarity="holofoil-alt-2"] .card__shine:after {
 
   --space: 5%;
   --angle: 133deg;
@@ -78,7 +78,7 @@
 
 }
 
-.card[data-rarity="rare holo vstar"] .card__shine:after {
+.card[data-rarity="holofoil-alt-2"] .card__shine:after {
 
   content: "";
 
@@ -90,7 +90,7 @@
 
 }
 
-.card[data-rarity="rare holo vstar"] .card__shine::before {
+.card[data-rarity="holofoil-alt-2"] .card__shine::before {
 
   content: "";
   background-image: radial-gradient( farthest-corner circle at var(--pointer-x) var(--pointer-y), hsla(190, 7%, 80%, 0.75) 0%, hsla(260, 7%, 50%, 0.25) 45%, hsl(310, 7%, 50%) 120% );
@@ -112,7 +112,7 @@
 */
 
 
-.card[data-rarity="rare holo vstar"] .card__glare {
+.card[data-rarity="holofoil-alt-2"] .card__glare {
   
   filter: brightness(.7) contrast(2);
 
@@ -145,8 +145,8 @@
 */
 
 
-.card:not(.masked)[data-rarity="rare holo vstar"] .card__shine,
-.card:not(.masked)[data-rarity="rare holo vstar"] .card__shine:after {
+.card:not(.masked)[data-rarity="holofoil-alt-2"] .card__shine,
+.card:not(.masked)[data-rarity="holofoil-alt-2"] .card__shine:after {
 
   --mask: none;
   --foil: url("/img/ancient.png"); 
@@ -157,14 +157,14 @@
 
 }
 
-.card:not(.masked)[data-rarity="rare holo vstar"] .card__shine:after {
+.card:not(.masked)[data-rarity="holofoil-alt-2"] .card__shine:after {
 
   filter: brightness(calc((var(--pointer-from-center) * .75) + .5)) contrast(1.5) saturate(1.5);
 
 }
 
 
-.card:not(.masked)[data-rarity="rare holo vstar"] .card__glare {
+.card:not(.masked)[data-rarity="holofoil-alt-2"] .card__glare {
   
   filter: brightness(.55) contrast(2);
 

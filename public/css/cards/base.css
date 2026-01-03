@@ -58,6 +58,18 @@
   clipping as the card animates to/from active state. worth it. */
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
+
+  /* Subtle "paper" texture on the front face (over the artwork). */
+  --front-texture: url("/img/card_front_texture.png");
+  --front-texture-opacity: 0.22;
+  --front-texture-blend: soft-light;
+  /* Default behavior: treat the texture like a photo (single, full bleed). */
+  --front-texture-position: center;
+  --front-texture-size: cover;
+  --front-texture-repeat: no-repeat;
+
+  /* Card flip (used by sticker inspect pages). */
+  --flip: 0deg;
 }
 
 .card,
@@ -142,10 +154,10 @@
 }
 
 .card__rotator {
-  -webkit-transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
+  -webkit-transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
-  transform: rotateY(var(--rotate-x)) rotateX(var(--rotate-y));
+  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
   
   /* performance */
   pointer-events: auto;
@@ -199,8 +211,18 @@ button.card__rotator {
   overflow: hidden;
 }
 
-.card__rotator img {
+/* Most card face images should keep their intrinsic proportions. */
+.card__rotator img:not(.card__back) {
   height: auto;
+}
+
+/* The card back image is a "background" plate; ensure it always fills the card. */
+.card__back {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
 }
 .card__rotator img:not(.card__back) {
   -webkit-transform: translate3d(0px, 0px, 0.01px);
@@ -220,19 +242,42 @@ button.card__rotator {
 }
 
 .card__front {
+  position: relative;
   opacity: 1;
   transition: opacity 0.33s ease-out;
   -webkit-transform: translate3d(0px, 0px, 0.01px);
   transform: translate3d(0px, 0px, 0.01px);
 }
 
+.card__front::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: var(--front-texture);
+  background-position: var(--front-texture-position);
+  background-size: var(--front-texture-size);
+  background-repeat: var(--front-texture-repeat);
+  opacity: var(--front-texture-opacity);
+  mix-blend-mode: var(--front-texture-blend);
+  backface-visibility: hidden;
+}
+
+/* Keep the texture above the artwork but below shine/glare layers. */
+.card__front > img.card__face {
+  z-index: 0;
+}
+
+/* Avoid showing the backface during initial page load/hard refresh. */
 .loading .card__front {
-  opacity: 0;
+  opacity: 1;
 }
 
 .loading .card__back {
-  -webkit-transform: rotateY(0deg);
-  transform: rotateY(0deg);
+  -webkit-transform: rotateY(180deg) translateZ(1px);
+  transform: rotateY(180deg) translateZ(1px);
+  opacity: 0;
 }
 
 
@@ -290,6 +335,7 @@ Shine & Glare Effects
 }
 
 .card__glare {
+  z-index: 4;
 
   /* make sure the glare doesn't clip */
   transform: translateZ(1.41px);
@@ -332,20 +378,20 @@ Shine & Glare Effects
 
 }
 
-.card[data-rarity="rare holo"] .card__glare:after,
-.card[data-rarity="rare holo cosmos"] .card__glare:after,
+.card[data-rarity="holofoil"] .card__glare:after,
+.card[data-rarity="galaxy"] .card__glare:after,
 .card[data-rarity$="reverse holo"] .card__glare:after {
   clip-path: var(--clip);
 }
 
-.card[data-rarity="rare holo"][data-subtypes^="stage"] .card__glare:after,
-.card[data-rarity="rare holo cosmos"][data-subtypes^="stage"] .card__glare:after,
+.card[data-rarity="holofoil"][data-subtypes^="stage"] .card__glare:after,
+.card[data-rarity="galaxy"][data-subtypes^="stage"] .card__glare:after,
 .card[data-rarity$="reverse holo"][data-subtypes^="stage"] .card__glare:after {
   clip-path: var(--clip-stage);
 }
 
-.card[data-rarity="rare holo"][data-supertype="trainer"] .card__glare:after,
-.card[data-rarity="rare holo cosmos"][data-supertype="trainer"] .card__glare:after,
+.card[data-rarity="holofoil"][data-supertype="trainer"] .card__glare:after,
+.card[data-rarity="galaxy"][data-supertype="trainer"] .card__glare:after,
 .card[data-rarity$="reverse holo"][data-supertype="trainer"] .card__glare:after {
   clip-path: var(--clip-trainer);
 }

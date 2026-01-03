@@ -1,11 +1,12 @@
 <script>
   import { spring } from "svelte/motion";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { activeCard } from "../stores/activeCard.js";
+  import { activeStickerId } from "../stores/activeStickerId.js";
   import { orientation, resetBaseOrientation } from "../stores/orientation.js";
   import { clamp, round, adjust } from "../helpers/Math.js";
 
-  // data / pokemon props
+  // card metadata props
   export let id = "";
   export let name = "";
   export let number = "";
@@ -14,15 +15,34 @@
   export let subtypes = "basic";
   export let supertype = "pokémon";
   export let rarity = "common";
+  export let hidden = false;
+  export let variant = "";
 
   // image props
   export let img = "";
-  export let back = "https://tcg.pokemon.com/assets/img/global/tcg-card-back-2x.jpg";
+  export let back = "/img/oai_back.png";
   export let foil = "";
   export let mask = "";
 
+  // New schema (optional; `img`/`back` still work for legacy callers):
+  // - sticker_img: image shown in the sticker art window (set === "stickers")
+  // - card_front_img: full-card front image override (used for non-sticker cards and mystery cards)
+  // - card_back_img: back-face image override
+  export let sticker_img = "";
+  export let card_front_img = "";
+  export let card_back_img = "";
+
   // context/environment props
   export let showcase = false;
+  // If true, force the card into the expanded "popover" state and prevent collapsing.
+  export let expanded = false;
+  // If true, clicking the card flips it to show the back (instead of expanding).
+  export let flip_on_click = false;
+
+  // Sticker/trading-card metadata (optional)
+  export let drop_date = "";
+  export let description = "";
+  export let total_prints = "";
 
   const randomSeed = {
     x: Math.random(),
@@ -35,10 +55,29 @@
   };
 
   let isTrainerGallery = false;
+  let isSquareFront = false;
+  let isStickerCard = false;
+  let stickerFoilScope = "art"; // "art" | "full"
+  let isMysteryCard = false;
 
   let back_img = back;
   let front_img = "";
-  let img_base = img.startsWith("http") ? "" : "https://images.pokemontcg.io/";
+
+  const resolveImgSrc = (src) => {
+    if (!src) return "";
+    // Absolute/served assets (http(s), /public/*, data URLs) should be used as-is.
+    if (src.startsWith("http") || src.startsWith("/") || src.startsWith("data:")) return src;
+    // Treat bare relative paths as public-root paths (avoid any remote URL fallbacks).
+    const cleaned = src.toString().replace(/^\.\//, "");
+    return `/${cleaned}`;
+  };
+
+  const cssUrl = (src) => {
+    const resolved = resolveImgSrc(src);
+    if (!resolved) return "none";
+    // Quote to survive URLs with parens/spaces.
+    return `url("${resolved}")`;
+  };
 
 
   let thisCard;
@@ -51,6 +90,7 @@
   let firstPop = true;
   let loading = true;
   let isVisible = document.visibilityState === "visible";
+  let flipped = false;
 
   const springInteractSettings = { stiffness: 0.066, damping: 0.25 };
   const springPopoverSettings = { stiffness: 0.033, damping: 0.45 };
@@ -60,6 +100,7 @@
   let springRotateDelta = spring({ x: 0, y: 0 }, springPopoverSettings);
   let springTranslate = spring({ x: 0, y: 0 }, springPopoverSettings);
   let springScale = spring(1, springPopoverSettings);
+  let springFlip = spring(0, springPopoverSettings);
 
   let showcaseInterval;
   let showcaseTimerStart;
@@ -143,7 +184,7 @@
     }
   };
 
-  const interactEnd = (e, delay = 500) => {
+  const interactEnd = (_e, delay = 500) => {
     // Cancel any pending animation frame
     if (rafId !== null) {
       cancelAnimationFrame(rafId);
@@ -170,37 +211,36 @@
     }, delay);
   };
 
-  const activate = (e) => {
+  const activate = (_e) => {
+    if (flip_on_click) {
+      flipped = !flipped;
+      springFlip.set(flipped ? 180 : 0);
+      return;
+    }
+    if (expanded) {
+      $activeCard = thisCard;
+      resetBaseOrientation();
+      return;
+    }
     if ($activeCard && $activeCard === thisCard) {
       $activeCard = undefined;
     } else {
       $activeCard = thisCard;
       resetBaseOrientation();
-      // Optional: only fires if GA is configured.
-      window.gtag?.("event", "select_item", {
-        item_list_id: "cards_list",
-        item_list_name: "Pokemon Cards",
-        items: [
-          {
-            item_id: id,
-            item_name: name,
-            item_category: set,
-            item_category2: supertype,
-            item_category3: subtypes,
-            item_category4: rarity
-          }
-        ]
-      });
-
     }
   };
 
   const deactivate = (e) => {
+    if (expanded) return;
+    // Clicking the homepage "inspect" button should not collapse the active card
+    // before the navigation click can fire.
+    const nextFocus = e?.relatedTarget;
+    if (nextFocus?.closest?.('[data-inspect-button="true"]')) return;
     interactEnd();
     $activeCard = undefined;
   };
 
-  const reposition = (e) => {
+  const reposition = (_e) => {
     clearTimeout(repositionTimer);
     repositionTimer = setTimeout(() => {
       if ($activeCard && $activeCard === thisCard) {
@@ -231,11 +271,13 @@
     let scaleF = 1.75;
     setCenter();
     if (firstPop) {
-      delay = 1000;
-      springRotateDelta.set({
-        x: 360,
-        y: 0,
-      });
+      if (!expanded) {
+        delay = 1000;
+        springRotateDelta.set({
+          x: 360,
+          y: 0,
+        });
+      }
     }
     firstPop = false;
     springScale.set(Math.min(scaleW, scaleH, scaleF));
@@ -261,11 +303,23 @@
     if ($activeCard && $activeCard === thisCard) {
       popover();
       active = true;
+      activeStickerId.set(id);
     } else {
       retreat();
       active = false;
+      // Only clear when no card is active at all.
+      if (!$activeCard) activeStickerId.set(undefined);
     }
   }
+
+  onDestroy(() => {
+    // If we navigate away while a card is active, clear stores so we don't
+    // keep a stale DOM ref / stale "active sticker" selection around.
+    if ($activeCard === thisCard) {
+      $activeCard = undefined;
+      activeStickerId.set(undefined);
+    }
+  });
 
 
   let foilStyles = ``;
@@ -274,6 +328,7 @@
     --seedy: ${randomSeed.y};
     --cosmosbg: ${cosmosPosition.x}px ${cosmosPosition.y}px;
   `;
+  let frontOverrideStyles = "";
   $: dynamicStyles = `
     --pointer-x: ${$springGlare.x}%;
     --pointer-y: ${$springGlare.y}%;
@@ -287,6 +342,7 @@
     --card-opacity: ${$springGlare.o};
     --rotate-x: ${$springRotate.x + $springRotateDelta.x}deg;
     --rotate-y: ${$springRotate.y + $springRotateDelta.y}deg;
+    --flip: ${$springFlip}deg;
     --background-x: ${$springBackground.x}%;
     --background-y: ${$springBackground.y}%;
     --card-scale: ${$springScale};
@@ -297,6 +353,12 @@
   const normalize = (v) => (v ?? "").toString().toLowerCase();
   const normalizeList = (v) =>
     Array.isArray(v) ? v.join(" ").toLowerCase() : normalize(v);
+
+  const formatDropDate = (v) => {
+    if (!v) return "";
+    // Support `YYYY-MM-DD` -> `YYYY/MM/DD` for a more card-like look.
+    return v.toString().trim().replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$1/$2/$3");
+  };
 
   // Never mutate exported props (Svelte 5 treats props more strictly).
   let rarityAttr = "common";
@@ -318,6 +380,13 @@
       !!numberAttr.match(/^[tg]g/i) ||
       id === "swshp-SWSH076" ||
       id === "swshp-SWSH077";
+
+    isStickerCard = setAttr === "stickers";
+    isMysteryCard = isStickerCard && variant === "mystery";
+    // Sticker cards: any "special" rarity should foil the full card face (not just the art window).
+    // Only plain common/uncommon should remain un-foiled (or art-only).
+    stickerFoilScope =
+      isStickerCard && rarityAttr && !["common", "uncommon"].includes(rarityAttr) ? "full" : "art";
   }
 
   const orientate = (e) => {
@@ -345,6 +414,24 @@
 
   };
 
+  // Derive which images to use based on card type.
+  $: {
+    // For sticker cards, `sticker_img` (or legacy `img`) is the art-window image.
+    // For non-sticker cards, `card_front_img` (or legacy `img`) is the full face image.
+    const stickerFace = resolveImgSrc(sticker_img || img);
+    const cardFace = resolveImgSrc(card_front_img || img);
+
+    front_img = isStickerCard && !isMysteryCard ? stickerFace : cardFace;
+    back_img = resolveImgSrc(card_back_img || back);
+
+  // Optional front background override for sticker cards (lets you swap the face image).
+  // We intentionally do NOT set a "none" fallback here; CSS provides a default face.
+  frontOverrideStyles =
+      isStickerCard && !isMysteryCard && card_front_img
+        ? `--card-front-img: ${cssUrl(card_front_img)}; --front-texture-opacity: 0;`
+        : ``;
+  }
+
   const updateSprings = ( background, rotate, glare ) => {
 
     springBackground.stiffness = springInteractSettings.stiffness;
@@ -367,7 +454,7 @@
     }
   }
 
-  document.addEventListener("visibilitychange", (e) => {
+  document.addEventListener("visibilitychange", () => {
     isVisible = document.visibilityState === "visible";
     endShowcase();
     reset();
@@ -375,6 +462,15 @@
 
   const imageLoader = (e) => {
     loading = false;
+
+    // Detect if the provided face image is roughly square (e.g. a sticker),
+    // so we can apply nicer "centered with padding" layout rules.
+    const imgEl = e?.currentTarget;
+    if (imgEl?.naturalWidth && imgEl?.naturalHeight) {
+      const ratio = imgEl.naturalWidth / imgEl.naturalHeight;
+      isSquareFront = Math.abs(ratio - 1) < 0.05;
+    }
+
     if ( mask || foil ) {
       foilStyles = `
     --mask: url(${mask});
@@ -385,14 +481,20 @@
 
   onMount(() => {
 
-    // set the front image on mount so that
-    // the lazyloading can work correctly
-    front_img = img_base + img;
+    if (expanded) {
+      $activeCard = thisCard;
+      resetBaseOrientation();
+      // Ensure centering happens once layout has settled.
+      setTimeout(() => {
+        if ($activeCard && $activeCard === thisCard) setCenter();
+      }, 0);
+    }
+
+    // Images are derived reactively; no work needed here.
 
     // run a cute little animation on load
     // for showcase card
     if (showcase && isVisible) {
-      let showTimer;
       const s = 0.02;
       const d = 0.5;
       let r = 0;
@@ -440,12 +542,16 @@
 	  class:active
 	  class:interacting
 	  class:loading
-	  class:masked={!!mask}
-	  data-number={numberAttr}
-	  data-set={setAttr}
-	  data-subtypes={subtypesAttr}
-	  data-supertype={supertypeAttr}
-	  data-rarity={rarityAttr}
+		  class:masked={!!mask}
+		  data-front-shape={isSquareFront ? "square" : "rect"}
+		  data-sticker-foil={isStickerCard ? stickerFoilScope : undefined}
+		  data-number={numberAttr}
+		  data-set={setAttr}
+		  data-subtypes={subtypesAttr}
+		  data-supertype={supertypeAttr}
+		  data-rarity={rarityAttr}
+		  data-hidden={hidden ? "true" : undefined}
+		  data-variant={variant ? variant : undefined}
 	  data-trainer-gallery={isTrainerGallery}
 	  style={dynamicStyles}
 	  bind:this={thisCard}
@@ -458,29 +564,93 @@
       on:pointermove={interact}
       on:mouseout={interactEnd}
       on:blur={deactivate}
-      aria-label="Expand the Pokemon Card; {name}."
+      aria-label={flip_on_click ? `Flip card: ${name}.` : `Expand card: ${name}.`}
       tabindex="0"
       >
       <img
         class="card__back"
         src={back_img}
-        alt="The back of a Pokemon Card, a Pokeball in the center with Pokemon logo above and below"
+        alt="The back of a trading card"
         loading="lazy"
         width="660"
         height="921"
       />
-      <div class="card__front" 
-        style={ staticStyles + foilStyles }>
-        <img
-          src={front_img}
-          alt="Front design of the {name} Pokemon Card, with the stats and info around the edge"
-          on:load={imageLoader}
-          loading="lazy"
-          width="660"
-          height="921"
-        />
-        <div class="card__shine"></div>
-        <div class="card__glare"></div>
+	      <div class="card__front" 
+	        style={ staticStyles + frontOverrideStyles + foilStyles }>
+	        {#if isStickerCard}
+	          <div class="sticker__bg" aria-hidden="true"></div>
+
+	          {#if isMysteryCard}
+	            <img
+	              class="card__face mystery__face"
+	              src={front_img}
+	              alt="A mystery card"
+	              on:load={imageLoader}
+	              loading="lazy"
+	              width="660"
+	              height="921"
+	            />
+	          {:else}
+	            {#if stickerFoilScope === "full"}
+	              <div class="card__shine"></div>
+	              <div class="card__glare"></div>
+	            {/if}
+
+	            <div class="sticker__header">
+	              <div class="sticker__title">{name}</div>
+	            </div>
+
+	            <div class="sticker__art">
+	              <div class="sticker__art-bg" aria-hidden="true"></div>
+	              <div class="sticker__art-inner">
+	                <img
+	                  class="card__face sticker__face"
+	                  src={front_img}
+	                  alt="Front image for the {name} card"
+	                  on:load={imageLoader}
+	                  loading="lazy"
+	                  width="660"
+	                  height="921"
+	                />
+	              </div>
+	              <div class="sticker__frame" aria-hidden="true"></div>
+	              {#if stickerFoilScope === "art"}
+	                <div class="card__shine"></div>
+	                <div class="card__glare"></div>
+	              {/if}
+	            </div>
+
+	            <div class="sticker__meta">
+	              {#if drop_date}
+	                <div class="sticker__date">{formatDropDate(drop_date)}</div>
+	              {/if}
+	              {#if description}
+	                <div class="sticker__desc">{description}</div>
+	              {/if}
+	            </div>
+
+	            <div class="sticker__footer">
+	              {#if total_prints}
+	                <div class="sticker__prints">Total prints: {total_prints}</div>
+	              {/if}
+	              {#if number}
+	                <div class="sticker__card-number">{number}</div>
+	              {/if}
+	            </div>
+	          {/if}
+	        {:else}
+          <img
+            class="card__face"
+            src={front_img}
+            alt="Front image for the {name} card"
+            on:load={imageLoader}
+            loading="lazy"
+            width="660"
+            height="921"
+          />
+          <div class="card__shine"></div>
+          <div class="card__glare"></div>
+        {/if}
       </div>
     </button>
   </div>

@@ -27,7 +27,7 @@
 */    
 
 
-.card[data-rarity="rare holo v"][data-trainer-gallery="true"] .card__glare {
+.card[data-rarity="steel"][data-trainer-gallery="true"] .card__glare {
 
   opacity: calc(var(--card-opacity)*.4);
 

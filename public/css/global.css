@@ -1,29 +1,107 @@
+/* Local Mona Sans variable fonts (no Google Fonts). */
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/fonts/mona-sans/MonaSansVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans";
+  src: url("/fonts/mona-sans/MonaSansVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Mona Sans Mono";
+  src: url("/fonts/mona-sans/MonaSansMonoVF.woff2") format("woff2");
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  /* Brand / accent */
+  --primary: hsl(187, 85%, 46%);
+  --link-hover: hsl(187, 85%, 35%);
+
+  /* Surfaces (light theme defaults) */
+  --bg: hsl(220, 20%, 98%);
+  --text: hsl(220, 18%, 12%);
+  --muted: hsla(220, 18%, 12%, 0.72);
+  --surface: hsla(0, 0%, 100%, 0.72);
+  --surface-2: hsla(0, 0%, 100%, 0.55);
+  --border: hsla(220, 18%, 12%, 0.14);
+
+  /* Highlights */
+  --mark-bg: hsl(187, 80%, 26%);
+  --mark-text: hsl(0, 0%, 100%);
+
+  /* Typography */
+  --font-sans: "Mona Sans", system-ui, -apple-system, Segoe UI, sans-serif;
+  --font-mono: "Mona Sans Mono", ui-monospace, SFMono-Regular, SFMono, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  --opsz-body: 12;
+  --opsz-mid: 20;
+  --opsz-heading: 20;
+}
+
+:root[data-theme="dark"] {
   --primary: hsl(187, 85%, 60%);
-  --link-hover: hsl(207, 100%, 94%)
+  --link-hover: hsl(207, 100%, 94%);
+
+  --bg: hsl(220, 7%, 14%);
+  --text: hsl(0, 0%, 100%);
+  --muted: hsla(0, 0%, 100%, 0.78);
+  --surface: hsla(0, 0%, 100%, 0.08);
+  --surface-2: hsla(0, 0%, 100%, 0.12);
+  --border: hsla(0, 0%, 100%, 0.14);
+
+  --mark-bg: hsl(187, 80%, 22%);
+  --mark-text: hsl(0, 0%, 100%);
 }
 
 * {
   box-sizing: border-box;
 }
 
-body,
-html {
+html,
+body {
   height: 100%;
   padding: 0;
   margin: 0;
   scroll-behavior: smooth;
-  scroll-padding-top: 2em;
+  scroll-padding-top: 6rem;
 }
 
 body {
-  font-family: Roboto;
-  background-color: hsl(220, 7%, 24%);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  font-variation-settings: "opsz" var(--opsz-body);
+  background: radial-gradient(
+      circle at 20% 0%,
+      hsla(187, 85%, 60%, 0.14),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 90%,
+      hsla(48, 90%, 55%, 0.14),
+      transparent 45%
+    ),
+    var(--bg);
+  color: var(--text);
 }
 
 a {
   color: var(--primary);
-  transition: all 0.3s ease;
+  transition: color 150ms ease;
 }
 
 a:hover,
@@ -31,166 +109,53 @@ a:focus {
   color: var(--link-hover);
 }
 
-main {
-  color: white;
-  padding: 50px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-header {
-  margin-bottom: 4rem;
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-gap: 30px;
-  max-width: 900px;
-  margin: auto;
-}
-
-header h2 {
-  margin-top: 0;
-  font-weight: 100;
-}
-
-header svg {
-  width: 1em;
-  fill: currentColor;
-  position: relative;
-  top: 2px;
-  margin: 0 5px;
-  display: inline-block;
-}
-
-@media screen and (min-width: 600px) {
-  header {
-    grid-template-columns: 50% 1fr;
-  }
-  .showcase {
-    grid-column: 2;
-    grid-row: 1/5;
-  }
-  .intro,
-  .info,
-  .author {
-    grid-column: 1;
-  }
-}
-
-@media screen and (min-width: 900px) {
-  header {
-    grid-template-columns: 60% 1fr;
-  }
-}
-
-.showcase {
-  z-index: 99;
-  max-width: min(330px, 80vw);
-  margin: auto;
-}
-
-h1 {
-  margin-top: 0;
-  margin-bottom: 0.25em;
-}
-
-p {
-  margin: 0 0 0.25em;
-  line-height: 1.5;
-}
-
-p.small {
-  font-size: 0.875rem;
-  opacity: 0.75;
-}
-
 h1,
 h2,
 h3 {
-  font-family: "Roboto Condensed";
+  font-family: var(--font-sans);
+  font-stretch: 100%;
+  font-optical-sizing: none;
+  margin: 0;
 }
 
-h1 sup {
-  font-weight: 300;
-  font-size: 0.5em;
+h1 {
+  font-size: 2rem;
+  letter-spacing: 0.01em;
+  font-weight: 700;
+  font-variation-settings: "opsz" var(--opsz-heading);
 }
 
 h2 {
-  margin-top: 4em;
-  margin-bottom: 0.25em;
+  margin-top: 2.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.35rem;
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-mid);
 }
 
-h1 a,
-h2 a,
-h3 a {
-  color: inherit;
-  text-decoration: none;
-  display: inline-flex;
+h3 {
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-mid);
 }
 
-h1 a:before,
-h2 a:before,
-h3 a:before {
-  content: "⚓";
-  position: absolute;
-  transform: translate(-100px, -5px);
-  width: 1em;
-  height: 1em;
-  opacity: 0;
-  transition: all 0.5s cubic-bezier(.55,.06,.68,.19);
-}
-
-h1 a:hover:before,
-h2 a:hover:before,
-h3 a:hover:before,
-h1:target a:before,
-h2:target a:before,
-h3:target a:before {
-  content: "⚓";
-  transform: translate(-200%, -5px);
-  opacity: 1;
-  transition: all 0.5s cubic-bezier(.22,.61,.36,1);
-}
-
-h2 + p,
-h2 + p + p {
-  font-style: italic;
-  margin-bottom: 1em;
-}
-
-h2 sup {
-  font-weight: 300;
-  font-size: 0.75em;
-  margin-left: 0.5em;
-  font-style: italic;
-  opacity: 0.8;
-}
-
-hr {
-  border: none;
-  background: white;
-  height: 1px;
-  opacity: 0.25;
-  margin: 1em -1em;
+p {
+  margin: 0 0 0.6rem;
+  line-height: 1.5;
+  color: var(--muted);
 }
 
 mark {
-  background: #006065;
-  color: white;
+  background: var(--mark-bg);
+  color: var(--mark-text);
   font-style: italic;
-  font-weight: bold;
+  font-weight: 700;
   padding-inline: 0.25em;
   border-radius: 3px;
 }
 
-.back-to-top {
-  font-weight: bold;
-  position: fixed;
-  bottom: 1em;
-  right: 1em;
-  padding: .5em 1em;
-  border-radius: 5em;
-  background: var(--primary);
-  color: hsl(192, 87%, 15%);
-  text-decoration: none;
-  box-shadow: 0 7px 13px -5px currentColor;
+hr {
+  border: 0;
+  height: 1px;
+  background: var(--border);
+  margin: 1rem 0;
 }

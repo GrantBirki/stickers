@@ -1,0 +1,15 @@
+[
+  {
+    "id": "mike-mike-dms",
+    "name": "#mike-mike-dms",
+    "set": "stickers",
+    "number": "0001",
+    "rarity": "spiral-holographic",
+    "sticker_img": "/img/stickers/mike-mike-dms-sticker.png",
+    "card_front_img": "/img/card_front_texture_silver_holo.png",
+    "card_back_img": "/img/card_back_oai_dark.png",
+    "drop_date": "2026-01-02",
+    "description": "Cryptic ramblings from Mike",
+    "total_prints": 10
+  }
+]
