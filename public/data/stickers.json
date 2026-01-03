@@ -1,10 +1,12 @@
 [
   {
+    "display_effect_at_rest": true,
     "id": "stickers-mike-mike-dms-001",
     "name": "#mike-mike-dms",
     "set": "stickers",
-    "number": "001",
+    "number": "0001",
     "rarity": "trainer gallery rare holo",
+    "rarity_text": "Holographic",
     "img": "/img/stickers/mike-mike-dms-sticker.png",
     "drop_number": "0001",
     "drop_date": "2026-01-02",
