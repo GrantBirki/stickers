@@ -50,8 +50,6 @@
 <div class="app">
   {#if !isStickerInspect}
     <div class="topbar">
-      <a class="topbar__brand" href="/">birki stickers</a>
-
       <div class="topbar__actions">
         <ThemeToggle />
       </div>
@@ -110,17 +108,17 @@
 
 <style>
   .app {
-    min-height: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .topbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 16px;
     padding: 16px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
   }
 
   .topbar__brand {
@@ -143,6 +141,7 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px 60px;
+    flex: 1;
   }
 
   .content--inspect {
@@ -153,7 +152,7 @@
   .footer {
     border-top: 1px solid var(--border);
     padding: 14px 20px;
-    margin-top: 10px;
+    margin-top: auto;
   }
 
   .footer__inner {

@@ -266,13 +266,15 @@ button.card__rotator {
   z-index: 0;
 }
 
+/* Avoid showing the backface during initial page load/hard refresh. */
 .loading .card__front {
-  opacity: 0;
+  opacity: 1;
 }
 
 .loading .card__back {
-  -webkit-transform: rotateY(0deg);
-  transform: rotateY(0deg);
+  -webkit-transform: rotateY(180deg) translateZ(1px);
+  transform: rotateY(180deg) translateZ(1px);
+  opacity: 0;
 }
 
 
