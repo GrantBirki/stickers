@@ -25,7 +25,6 @@
   export let showcase = false;
 
   // Sticker/trading-card metadata (optional)
-  export let drop_number = "";
   export let drop_date = "";
   export let description = "";
   export let total_prints = "";
@@ -537,8 +536,8 @@
 	            {#if total_prints}
 	              <div class="sticker__prints">Total prints: {total_prints}</div>
 	            {/if}
-	            {#if drop_number}
-	              <div class="sticker__card-number">{drop_number}</div>
+	            {#if number}
+	              <div class="sticker__card-number">{number}</div>
 	            {/if}
 	          </div>
 	        {:else}

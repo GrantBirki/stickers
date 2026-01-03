@@ -47,7 +47,6 @@
           supertype={sticker.supertype}
           subtypes={sticker.subtypes}
           rarity={sticker.rarity}
-          drop_number={sticker.drop_number}
           drop_date={sticker.drop_date}
           description={sticker.description}
           total_prints={sticker.total_prints}
@@ -67,4 +66,3 @@
     opacity: 0.85;
   }
 </style>
-
