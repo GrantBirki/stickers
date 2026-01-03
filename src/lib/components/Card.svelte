@@ -1,7 +1,8 @@
 <script>
   import { spring } from "svelte/motion";
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { activeCard } from "../stores/activeCard.js";
+  import { activeStickerId } from "../stores/activeStickerId.js";
   import { orientation, resetBaseOrientation } from "../stores/orientation.js";
   import { clamp, round, adjust } from "../helpers/Math.js";
 
@@ -229,8 +230,12 @@
     }
   };
 
-  const deactivate = (_e) => {
+  const deactivate = (e) => {
     if (expanded) return;
+    // Clicking the homepage "inspect" button should not collapse the active card
+    // before the navigation click can fire.
+    const nextFocus = e?.relatedTarget;
+    if (nextFocus?.closest?.('[data-inspect-button="true"]')) return;
     interactEnd();
     $activeCard = undefined;
   };
@@ -298,11 +303,23 @@
     if ($activeCard && $activeCard === thisCard) {
       popover();
       active = true;
+      activeStickerId.set(id);
     } else {
       retreat();
       active = false;
+      // Only clear when no card is active at all.
+      if (!$activeCard) activeStickerId.set(undefined);
     }
   }
+
+  onDestroy(() => {
+    // If we navigate away while a card is active, clear stores so we don't
+    // keep a stale DOM ref / stale "active sticker" selection around.
+    if ($activeCard === thisCard) {
+      $activeCard = undefined;
+      activeStickerId.set(undefined);
+    }
+  });
 
 
   let foilStyles = ``;
