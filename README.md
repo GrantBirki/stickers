@@ -32,6 +32,7 @@ Example:
 ```
 
 Notes:
+
 - `img` and `back` are public paths (they should start with `/img/...`).
 - `back` is optional; if omitted we fall back to the default card back image.
 
@@ -68,4 +69,4 @@ This page is intentionally not linked from the UI; visit it directly by typing `
 
 ## Acknowledgements
 
-https://github.com/simeydotme/pokemon-cards-css
+[github.com/simeydotme/pokemon-cards-css](https://github.com/simeydotme/pokemon-cards-css)
