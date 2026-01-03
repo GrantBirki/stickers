@@ -6,6 +6,7 @@
 
   let isLoading = true;
   let stickers = [];
+  let siteConfig = { display_next_card_as_hidden: false };
 
   const getStickers = async () => {
     try {
@@ -17,9 +18,36 @@
     }
   };
 
+  const getSiteConfig = async () => {
+    try {
+      const res = await fetch("/data/site.json");
+      if (!res.ok) return { display_next_card_as_hidden: false };
+      return await res.json();
+    } catch {
+      return { display_next_card_as_hidden: false };
+    }
+  };
+
   const loadStickers = async () => {
     isLoading = true;
-    stickers = await getStickers();
+    const [nextStickers, nextConfig] = await Promise.all([getStickers(), getSiteConfig()]);
+    siteConfig = nextConfig || { display_next_card_as_hidden: false };
+    stickers = nextStickers || [];
+
+    if (siteConfig.display_next_card_as_hidden) {
+      stickers = [
+        ...stickers,
+        {
+          id: "stickers-mystery",
+          name: "Mystery",
+          set: "stickers",
+          rarity: "holographic",
+          img: "/img/mystery.png",
+          hidden: true,
+          variant: "mystery"
+        }
+      ];
+    }
     isLoading = false;
   };
 
@@ -48,6 +76,8 @@
           supertype={sticker.supertype}
           subtypes={sticker.subtypes}
           rarity={sticker.rarity}
+          hidden={sticker.hidden}
+          variant={sticker.variant}
           drop_date={sticker.drop_date}
           description={sticker.description}
           total_prints={sticker.total_prints}

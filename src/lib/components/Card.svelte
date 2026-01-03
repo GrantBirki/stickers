@@ -14,6 +14,8 @@
   export let subtypes = "basic";
   export let supertype = "pokémon";
   export let rarity = "common";
+  export let hidden = false;
+  export let variant = "";
 
   // image props
   export let img = "";
@@ -43,6 +45,7 @@
   let isSquareFront = false;
   let isStickerCard = false;
   let stickerFoilScope = "art"; // "art" | "full"
+  let isMysteryCard = false;
 
   // Sticker-only: which rarities should have a full-card foil (instead of art-window-only).
   const FULL_STICKER_FOILS = new Set([
@@ -333,6 +336,7 @@
       id === "swshp-SWSH077";
 
     isStickerCard = setAttr === "stickers";
+    isMysteryCard = isStickerCard && variant === "mystery";
     stickerFoilScope =
       isStickerCard && FULL_STICKER_FOILS.has(rarityAttr) ? "full" : "art";
   }
@@ -474,6 +478,8 @@
 		  data-subtypes={subtypesAttr}
 		  data-supertype={supertypeAttr}
 		  data-rarity={rarityAttr}
+		  data-hidden={hidden ? "true" : undefined}
+		  data-variant={variant ? variant : undefined}
 	  data-trainer-gallery={isTrainerGallery}
 	  style={dynamicStyles}
 	  bind:this={thisCard}
@@ -502,52 +508,64 @@
 	        {#if isStickerCard}
 	          <div class="sticker__bg" aria-hidden="true"></div>
 
-	          {#if stickerFoilScope === "full"}
-	            <div class="card__shine"></div>
-	            <div class="card__glare"></div>
-	          {/if}
-
-	          <div class="sticker__header">
-	            <div class="sticker__title">{name}</div>
-	          </div>
-
-	          <div class="sticker__art">
-	            <div class="sticker__art-bg" aria-hidden="true"></div>
-	            <div class="sticker__art-inner">
-	              <img
-	                class="card__face sticker__face"
-                src={front_img}
-                alt="Front image for the {name} card"
-                on:load={imageLoader}
-                loading="lazy"
-                width="660"
-                height="921"
-	              />
-	            </div>
-	            <div class="sticker__frame" aria-hidden="true"></div>
-	            {#if stickerFoilScope === "art"}
+	          {#if isMysteryCard}
+	            <img
+	              class="card__face mystery__face"
+	              src={front_img}
+	              alt="A mystery card"
+	              on:load={imageLoader}
+	              loading="lazy"
+	              width="660"
+	              height="921"
+	            />
+	          {:else}
+	            {#if stickerFoilScope === "full"}
 	              <div class="card__shine"></div>
 	              <div class="card__glare"></div>
 	            {/if}
-	          </div>
 
-	          <div class="sticker__meta">
-	            {#if drop_date}
-	              <div class="sticker__date">{formatDropDate(drop_date)}</div>
-	            {/if}
-	            {#if description}
-	              <div class="sticker__desc">{description}</div>
-	            {/if}
-	          </div>
+	            <div class="sticker__header">
+	              <div class="sticker__title">{name}</div>
+	            </div>
 
-	          <div class="sticker__footer">
-	            {#if total_prints}
-	              <div class="sticker__prints">Total prints: {total_prints}</div>
-	            {/if}
-	            {#if number}
-	              <div class="sticker__card-number">{number}</div>
-	            {/if}
-	          </div>
+	            <div class="sticker__art">
+	              <div class="sticker__art-bg" aria-hidden="true"></div>
+	              <div class="sticker__art-inner">
+	                <img
+	                  class="card__face sticker__face"
+	                  src={front_img}
+	                  alt="Front image for the {name} card"
+	                  on:load={imageLoader}
+	                  loading="lazy"
+	                  width="660"
+	                  height="921"
+	                />
+	              </div>
+	              <div class="sticker__frame" aria-hidden="true"></div>
+	              {#if stickerFoilScope === "art"}
+	                <div class="card__shine"></div>
+	                <div class="card__glare"></div>
+	              {/if}
+	            </div>
+
+	            <div class="sticker__meta">
+	              {#if drop_date}
+	                <div class="sticker__date">{formatDropDate(drop_date)}</div>
+	              {/if}
+	              {#if description}
+	                <div class="sticker__desc">{description}</div>
+	              {/if}
+	            </div>
+
+	            <div class="sticker__footer">
+	              {#if total_prints}
+	                <div class="sticker__prints">Total prints: {total_prints}</div>
+	              {/if}
+	              {#if number}
+	                <div class="sticker__card-number">{number}</div>
+	              {/if}
+	            </div>
+	          {/if}
 	        {:else}
           <img
             class="card__face"

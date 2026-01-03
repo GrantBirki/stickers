@@ -8,6 +8,13 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 - `npm run dev`
 - `npm run build`
 
+## Site Config
+
+Global site toggles live in `public/data/site.json`.
+
+- `display_next_card_as_hidden` (boolean): when `true`, the next card slot on the homepage shows a
+  dark/muted "mystery" placeholder using `public/img/mystery.png`.
+
 ## Adding A Sticker Card
 
 1) Put the sticker image in `public/img/stickers/` (PNG works great).

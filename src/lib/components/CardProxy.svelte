@@ -13,6 +13,8 @@
   export let supertype = undefined;
   export let rarity = undefined;
   export let isReverse = false;
+  export let hidden = false;
+  export let variant = undefined;
   // Sticker/trading-card metadata (optional)
   export let drop_date = undefined;
   export let description = undefined;
@@ -256,6 +258,8 @@
     subtypes,
     supertype,
     rarity: rarityComputed,
+    hidden,
+    variant,
     drop_date,
     description,
     total_prints,
