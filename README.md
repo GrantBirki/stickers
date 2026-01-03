@@ -1,5 +1,8 @@
 # stickers
 
+[![build](https://github.com/GrantBirki/stickers/actions/workflows/build.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/build.yml)
+[![test](https://github.com/GrantBirki/stickers/actions/workflows/test.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/test.yml)
+
 The website for stickers.birki.io - Grant's collection of sticker drops!
 
 ## Dev
