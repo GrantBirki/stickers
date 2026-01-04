@@ -55,6 +55,31 @@ Global site toggles live in `public/data/site.json`.
 - `display_next_card_as_hidden` (boolean): when `true`, the next card slot on the homepage shows a
   dark/muted "mystery" placeholder using `public/img/mystery.png`.
 
+## Open Graph / Social Preview Images
+
+This site ships Open Graph + Twitter meta tags for rich link previews (Twitter/X, Discord, iMessage,
+Slack, etc).
+
+To add preview images, just drop PNGs in `public/og/`:
+
+- Default (used everywhere unless overridden): `public/og/default.png`
+- Optional per-route overrides:
+  - `public/og/about.png` -> `/about/`
+  - `public/og/contact.png` -> `/contact/`
+  - `public/og/services.png` -> `/services/`
+  - `public/og/work.png` -> `/work/`
+  - `public/og/privacy.png` -> `/privacy/`
+  - `public/og/terms.png` -> `/terms/`
+- Optional per-sticker overrides:
+  - `public/og/stickers/<slug>.png` -> `/stickers/<slug>/`
+
+Recommended image size: **1200x630**.
+
+Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time.
+- For deployments: set `VITE_SITE_URL` (and optionally `VITE_BASE`) in your CI/deploy environment
+  so builds output absolute URLs (best compatibility for previews).
+- If `VITE_SITE_URL` is not set, the site will fall back to relative URLs in the built HTML.
+
 ## Fonts
 
 This site uses **local** Mona Sans variable fonts (no Google Fonts / CDNs).

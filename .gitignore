@@ -2,6 +2,8 @@ tmp/
 node_modules/
 dist/
 .DS_Store
+.env
+.env.*
 stickers/
 example/
 examples/
