@@ -182,7 +182,8 @@
     justify-self: center;
     font-size: 0.9rem;
     line-height: 1.25;
-    color: color-mix(in srgb, var(--footer-fg) 58%, var(--footer-bg) 42%);
+    /* Must stay readable while still feeling like a subtle signature line. */
+    color: color-mix(in srgb, var(--footer-fg) 74%, var(--footer-bg) 26%);
   }
 
   @media (prefers-reduced-motion: reduce) {

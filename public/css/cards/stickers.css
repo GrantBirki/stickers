@@ -251,7 +251,6 @@
 .card[data-set="stickers"] .sticker__art,
 .card[data-set="stickers"] .sticker__art-bg,
 .card[data-set="stickers"] .sticker__art-inner,
-.card[data-set="stickers"] .sticker__face,
 .card[data-set="stickers"] .sticker__frame,
 .card[data-set="stickers"] .sticker__meta,
 .card[data-set="stickers"] .sticker__meta *,
@@ -378,6 +377,8 @@
   padding: 0;
   box-sizing: border-box;
   isolation: isolate;
+  /* Apply the "pressed in" shadow on the wrapper so we don't need `overflow: visible` on <img>. */
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18));
 }
 
 .card[data-set="stickers"] .sticker__art-inner::after {
@@ -400,8 +401,6 @@
   display: block;
   object-fit: contain;
   object-position: center center;
-  /* Less "floating", more "pressed in". */
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.18));
   z-index: 1;
 }
 

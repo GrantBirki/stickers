@@ -80,6 +80,8 @@ jobs:
 
       - name: build
         run: npm run build
+        env:
+          VITE_SITE_URL: ${{ env.web_url }}
 
       # this step is custom to my site and adds a 'commit' version to the site
       - name: write build version

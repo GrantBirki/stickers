@@ -58,6 +58,7 @@
       sticker_img={sticker.sticker_img}
       card_front_img={sticker.card_front_img}
       card_back_img={sticker.card_back_img}
+      priority={true}
       flip_on_click={true}
     />
   </div>

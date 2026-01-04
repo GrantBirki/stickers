@@ -118,13 +118,14 @@
     {#if isLoading}
       loading...
     {:else}
-      {#each stickers as sticker (sticker.id)}
+      {#each stickers as sticker, idx (sticker.id)}
         <Card
           id={sticker.id}
           name={sticker.name}
           sticker_img={sticker.sticker_img}
           card_front_img={sticker.card_front_img}
           card_back_img={sticker.card_back_img}
+          priority={idx === 0}
           number={sticker.number}
           set={sticker.set}
           types={sticker.types}
@@ -187,7 +188,8 @@
     font-size: 0.78rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: color-mix(in srgb, var(--muted) 72%, var(--bg) 28%);
+    /* Keep it "eyebrow-muted" but still WCAG-readable in both themes. */
+    color: color-mix(in srgb, var(--text) 76%, var(--bg) 24%);
     margin: 0 0 10px;
   }
 
