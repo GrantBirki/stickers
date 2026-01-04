@@ -96,11 +96,8 @@
     <p class="home__desc">A collection of sticker drops from Grant.</p>
     <p class="home__cta">
       <span class="home__cta-lead">Do you work with Grant?</span>
-      <span>Follow</span>
-      <code class="inline-code">
-        <span>#birki-sticker-drops</span>
-      </code>
-      <span>in Slack to catch the next sticker drop.</span>
+      Follow <code class="inline-code">#birki-sticker-drops</code> in Slack to catch the next
+      sticker drop.
     </p>
     <div class="home__rule" aria-hidden="true"></div>
   </header>
@@ -202,13 +199,11 @@
   /* Slack callout: distinct, but quiet. */
   .home__cta {
     margin: clamp(14px, 1.9vw, 18px) 0 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
+    display: block;
     padding-left: 14px;
     border-left: 1px solid var(--border);
-    line-height: 1.5;
+    font-size: clamp(1rem, 1.25vw, 1.12rem);
+    line-height: 1.55;
     color: color-mix(in srgb, var(--text) 86%, var(--bg) 14%);
   }
 
@@ -218,6 +213,24 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: color-mix(in srgb, var(--text) 70%, var(--bg) 30%);
+    display: inline-block;
+    margin-right: 0.45rem;
+    vertical-align: baseline;
+  }
+
+  /* GitHub-esque inline code pill that stays readable in both themes. */
+  .inline-code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    padding: 0.18em 0.44em;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--bg) 88%, var(--text) 12%);
+    border: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    display: inline-block;
+    line-height: 1.1;
+    vertical-align: baseline;
   }
 
   .home__rule {
