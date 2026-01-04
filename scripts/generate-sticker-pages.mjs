@@ -84,7 +84,7 @@ const htmlForRoute = ({ name, description }) => {
     <title>${escapeHtmlText(title)}</title>
     <meta name="description" content="${escapeHtmlAttr(description)}" />
 
-    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" />
+    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" vite-ignore />
     <meta property="og:site_name" content="${escapeHtmlAttr(SITE_NAME)}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtmlAttr(title)}" />
@@ -195,7 +195,7 @@ const htmlForSlug = ({ slug, title, description }) => {
     <title>${escapeHtmlText(title)}</title>
     <meta name="description" content="${escapeHtmlAttr(description)}" />
 
-    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" />
+    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" vite-ignore />
     <meta property="og:site_name" content="${escapeHtmlAttr(SITE_NAME)}" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${escapeHtmlAttr(title)}" />

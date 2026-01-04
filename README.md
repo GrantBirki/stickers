@@ -75,7 +75,10 @@ To add preview images, just drop PNGs in `public/og/`:
 
 Recommended image size: **1200x630**.
 
-Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time. Defaults live in `.env`.
+Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time.
+- For deployments: set `VITE_SITE_URL` (and optionally `VITE_BASE`) in your CI/deploy environment
+  so builds output absolute URLs (best compatibility for previews).
+- If `VITE_SITE_URL` is not set, the site will fall back to relative URLs in the built HTML.
 
 ## Fonts
 
