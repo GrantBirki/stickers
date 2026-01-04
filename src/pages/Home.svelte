@@ -79,6 +79,19 @@
   $: activeSlug = stickerSlugsById[$activeStickerId];
   $: inspectHref = activeSlug ? `/stickers/${activeSlug}` : "";
 
+  const focusInspectButton = (e) => {
+    const el = e?.currentTarget;
+    if (!el?.focus) return;
+    // Mobile Safari often doesn't move focus on tap. The card component collapses
+    // on `blur`, so force focus here so `relatedTarget`/`activeElement` stays
+    // on the inspect button and navigation can fire.
+    try {
+      el.focus({ preventScroll: true });
+    } catch {
+      el.focus();
+    }
+  };
+
   const onInspectClick = (e) => {
     if (!inspectHref) return;
     // Let users open in a new tab/window with modifier keys.
@@ -135,6 +148,8 @@
     <a
       class="inspect-fab"
       href={inspectHref}
+      on:pointerdown={focusInspectButton}
+      on:touchstart={focusInspectButton}
       on:click={onInspectClick}
       data-inspect-button="true"
       aria-label="Open inspect view"

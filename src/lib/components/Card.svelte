@@ -234,8 +234,12 @@
     if (expanded) return;
     // Clicking the homepage "inspect" button should not collapse the active card
     // before the navigation click can fire.
+    const isInspectButton = (el) => !!el?.closest?.('[data-inspect-button="true"]');
     const nextFocus = e?.relatedTarget;
-    if (nextFocus?.closest?.('[data-inspect-button="true"]')) return;
+    if (isInspectButton(nextFocus)) return;
+    // Some mobile browsers fire `blur` with a null `relatedTarget`. In those cases,
+    // the new focus (if any) is still available on `document.activeElement`.
+    if (typeof document !== "undefined" && isInspectButton(document.activeElement)) return;
     interactEnd();
     $activeCard = undefined;
   };
