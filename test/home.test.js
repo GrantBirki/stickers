@@ -91,6 +91,9 @@ test("Home loads stickers, builds slugs, and drives the inspect FAB navigation",
   // Modifier keys or non-left clicks should be ignored.
   pushStateSpy.mockClear();
   await fireEvent.click(inspect, { metaKey: true, button: 0 });
+  await fireEvent.click(inspect, { ctrlKey: true, button: 0 });
+  await fireEvent.click(inspect, { shiftKey: true, button: 0 });
+  await fireEvent.click(inspect, { altKey: true, button: 0 });
   await fireEvent.click(inspect, { button: 1 });
   expect(pushStateSpy).not.toHaveBeenCalled();
 
@@ -116,6 +119,42 @@ test("Home appends a mystery card when configured via site.json", async () => {
   expect(await screen.findByAltText("A mystery card")).toBeInTheDocument();
 });
 
+test("Home falls back to default site config when site.json is not ok", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url) => {
+      const u = url.toString();
+      if (u.includes("stickers.json")) return okJson([]);
+      if (u.includes("site.json")) return { ok: false, json: async () => ({}) };
+      throw new Error(`unexpected fetch: ${u}`);
+    })
+  );
+
+  render(Home);
+
+  // With default config and no stickers, we should simply stop loading.
+  await waitFor(() => expect(screen.queryByText("loading...")).toBe(null));
+  expect(screen.queryByAltText("A mystery card")).toBe(null);
+});
+
+test("Home tolerates null JSON payloads from data endpoints", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url) => {
+      const u = url.toString();
+      if (u.includes("stickers.json")) return okJson(null);
+      if (u.includes("site.json")) return okJson(null);
+      throw new Error(`unexpected fetch: ${u}`);
+    })
+  );
+
+  render(Home);
+
+  await waitFor(() => expect(screen.queryByText("loading...")).toBe(null));
+  expect(screen.queryByLabelText(/Expand card:/)).toBe(null);
+  expect(screen.queryByAltText("A mystery card")).toBe(null);
+});
+
 test("Home handles fetch failures with safe defaults", async () => {
   vi.stubGlobal(
     "fetch",
@@ -135,4 +174,3 @@ test("Home handles fetch failures with safe defaults", async () => {
   await waitFor(() => expect(screen.queryByText("loading...")).toBe(null));
   expect(screen.queryByLabelText(/Expand card:/)).toBe(null);
 });
-

@@ -156,6 +156,31 @@ test("expanded cards self-activate on mount and clear stores on destroy", async 
   expect(get(activeCard)).toBe(undefined);
 });
 
+test("expanded cards ignore activate() toggling and remain active on click", async () => {
+  const { container } = render(Card, {
+    props: {
+      id: "stickers-expanded-click",
+      name: "Expanded Click",
+      set: "stickers",
+      rarity: "common",
+      sticker_img: "/img/stickers/expanded-click.png",
+      expanded: true,
+    },
+  });
+
+  const button = await screen.findByLabelText("Expand card: Expanded Click.");
+  await waitFor(() => expect(get(activeStickerId)).toBe("stickers-expanded-click"));
+
+  const root = container.querySelector(".card");
+  expect(root.classList.contains("active")).toBe(true);
+
+  const activeBefore = get(activeCard);
+  await fireEvent.click(button);
+
+  expect(get(activeCard)).toBe(activeBefore);
+  expect(get(activeStickerId)).toBe("stickers-expanded-click");
+});
+
 test("deactivate() does not collapse the card when focus moves to an inspect button", async () => {
   render(Card, {
     props: {
@@ -274,7 +299,14 @@ test("pointer/touch interaction schedules animation work and is cancelled on mou
     // Second move should hit the "raf already scheduled" path.
     await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
 
-    await fireEvent.touchMove(button, { touches: [{ clientX: 12, clientY: 34 }] });
+    // Use the real DOM event name ("touchmove") so Card's `e.type === "touchmove"`
+    // branch is exercised (testing-library's `touchMove` helper uses "touchMove").
+    const touchMove = new Event("touchmove", { bubbles: true, cancelable: true });
+    Object.defineProperty(touchMove, "touches", {
+      value: [{ clientX: 12, clientY: 34 }],
+      configurable: true,
+    });
+    await fireEvent(button, touchMove);
 
     // Cancels any pending RAF and schedules spring reset.
     await fireEvent.mouseOut(button);
@@ -282,4 +314,182 @@ test("pointer/touch interaction schedules animation work and is cancelled on mou
   } finally {
     vi.useRealTimers();
   }
+});
+
+test("interact runs a queued RAF update when not cancelled", async () => {
+  vi.useFakeTimers();
+
+  try {
+    vi.stubGlobal("requestAnimationFrame", (cb) => setTimeout(() => cb(Date.now()), 0));
+    vi.stubGlobal("cancelAnimationFrame", (id) => clearTimeout(id));
+
+    render(Card, {
+      props: {
+        id: "stickers-raf-run",
+        name: "RAF Run",
+        set: "stickers",
+        rarity: "common",
+        sticker_img: "/img/stickers/raf-run.png",
+      },
+    });
+
+    const button = await screen.findByLabelText("Expand card: RAF Run.");
+    button.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 200,
+    });
+
+    await fireEvent.pointerMove(button, { clientX: 10, clientY: 20 });
+    // Let the scheduled RAF callback run (it clears rafId internally).
+    vi.runOnlyPendingTimers();
+
+    // Further events should still be handled without errors.
+    await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
+    vi.runOnlyPendingTimers();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("scroll reposition debounces and recenters the active card", async () => {
+  vi.useFakeTimers();
+
+  try {
+    const { container } = render(Card, {
+      props: {
+        id: "stickers-scroll",
+        name: "Scroll",
+        set: "stickers",
+        rarity: "common",
+        sticker_img: "/img/stickers/scroll.png",
+      },
+    });
+
+    const button = await screen.findByLabelText("Expand card: Scroll.");
+    const root = container.querySelector(".card");
+    expect(root).not.toBe(null);
+
+    const getRect = vi.fn(() => ({
+      x: 10,
+      y: 20,
+      left: 10,
+      top: 20,
+      width: 200,
+      height: 300,
+    }));
+    root.getBoundingClientRect = getRect;
+
+    Object.defineProperty(document.documentElement, "clientWidth", { value: 1000, configurable: true });
+    Object.defineProperty(document.documentElement, "clientHeight", { value: 800, configurable: true });
+
+    await fireEvent.click(button);
+    await waitFor(() => expect(root.classList.contains("active")).toBe(true));
+
+    // Focus on the scroll-triggered call (popover has already run).
+    getRect.mockClear();
+
+    window.dispatchEvent(new Event("scroll"));
+    window.dispatchEvent(new Event("scroll"));
+    vi.advanceTimersByTime(300);
+
+    expect(getRect).toHaveBeenCalled();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("showcase cards run their intro animation timers", async () => {
+  vi.useFakeTimers();
+
+  try {
+    const { container, unmount } = render(Card, {
+      props: {
+        id: "demo-showcase",
+        name: "Showcase",
+        set: "demo",
+        number: "0001",
+        types: ["Darkness"],
+        rarity: "holofoil",
+        card_front_img: "./img/front.png",
+        card_back_img: "/img/back.png",
+        showcase: true,
+      },
+    });
+
+    const root = container.querySelector(".card");
+    expect(root).not.toBe(null);
+
+    // Start after 2s, then run some frames, then end after 4s.
+    vi.advanceTimersByTime(2000);
+    vi.advanceTimersByTime(100);
+    vi.advanceTimersByTime(4000);
+    vi.runOnlyPendingTimers();
+
+    unmount();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("trainer gallery cards are detected by number prefix", () => {
+  const { container } = render(Card, {
+    props: {
+      id: "demo-tg",
+      name: "Trainer Gallery",
+      set: "demo",
+      number: "TG01",
+      rarity: "common",
+      card_front_img: "./img/front.png",
+      card_back_img: "/img/back.png",
+    },
+  });
+
+  const root = container.querySelector(".card");
+  expect(root).not.toBe(null);
+  expect(root.getAttribute("data-trainer-gallery")).toBe("true");
+});
+
+test("clicking an active card again deactivates it", async () => {
+  const { container } = render(Card, {
+    props: {
+      id: "stickers-toggle",
+      name: "Toggle",
+      set: "stickers",
+      rarity: "common",
+      sticker_img: "/img/stickers/toggle.png",
+    },
+  });
+
+  const button = await screen.findByLabelText("Expand card: Toggle.");
+  const root = container.querySelector(".card");
+  expect(root).not.toBe(null);
+
+  await fireEvent.click(button);
+  await waitFor(() => expect(root.classList.contains("active")).toBe(true));
+
+  await fireEvent.click(button);
+  await waitFor(() => expect(root.classList.contains("active")).toBe(false));
+});
+
+test("resolveImgSrc treats ./ paths as public-root paths", () => {
+  render(Card, {
+    props: {
+      id: "demo-dot",
+      name: "Dot",
+      set: "demo",
+      rarity: "common",
+      card_front_img: "./img/front.png",
+      card_back_img: "./img/back.png",
+    },
+  });
+
+  const face = screen.getByAltText("Front image for the Dot card");
+  expect(face.getAttribute("src")).toBe("/img/front.png");
+
+  const back = screen.getByAltText("The back of a trading card");
+  expect(back.getAttribute("src")).toBe("/img/back.png");
 });

@@ -58,6 +58,47 @@ test("StickerInspect falls back to matching full slug and normalizes leading/tra
   expect(await screen.findByLabelText("Flip card: Bar Sticker.")).toBeInTheDocument();
 });
 
+test("StickerInspect ignores null ids while matching full slugs", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      okJson([
+        { id: null },
+        {
+          id: "stickers-foo-001",
+          name: "Foo Sticker",
+          set: "stickers",
+          rarity: "common",
+          sticker_img: "/img/stickers/foo.png",
+        },
+      ])
+    )
+  );
+
+  render(StickerInspect, { props: { slug: "foo-001" } });
+  expect(await screen.findByLabelText("Flip card: Foo Sticker.")).toBeInTheDocument();
+});
+
+test("StickerInspect normalizes nullish slugs safely", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      okJson([
+        {
+          id: "stickers-foo-001",
+          name: "Foo Sticker",
+          set: "stickers",
+          rarity: "common",
+          sticker_img: "/img/stickers/foo.png",
+        },
+      ])
+    )
+  );
+
+  render(StickerInspect, { props: { slug: undefined } });
+  expect(screen.queryByLabelText(/Flip card:/)).toBe(null);
+});
+
 test("StickerInspect renders nothing when the fetch response is not ok", async () => {
   vi.stubGlobal(
     "fetch",

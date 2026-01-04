@@ -105,13 +105,14 @@ export default defineConfig(({mode}) => {
         include: ["src/**/*.{js,svelte}"],
         exclude: ["src/vite-env.d.ts"],
         thresholds: {
-          // Current suite covers all JS modules and key UI flows, but getting
-          // 100% branch coverage across all Svelte components is not realistic
-          // without a large number of brittle DOM-edge-case tests.
-          lines: 91,
-          functions: 91,
-          branches: 80,
-          statements: 92
+          // Current suite covers all JS modules and key UI flows (including
+          // jsdom component tests). Some Svelte-compiled branches remain hard
+          // to hit without a lot of brittle DOM-edge-case testing, but this
+          // still enforces a high baseline and prevents regressions.
+          lines: 98,
+          functions: 100,
+          branches: 87,
+          statements: 98
         }
       }
     },
