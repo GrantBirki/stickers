@@ -17,7 +17,6 @@ const setVisibility = (state) => {
       Object.defineProperty(document, "visibilityState", original);
     } else {
       // Best effort restore.
-      // eslint-disable-next-line no-undefined
       delete document.visibilityState;
     }
   };
@@ -219,7 +218,7 @@ test("interact() is blocked when the page is hidden or when another card is acti
   }
 
   // Another active card should block interaction.
-  const { container: c1 } = render(Card, {
+  render(Card, {
     props: {
       id: "stickers-a",
       name: "A",
