@@ -3,19 +3,36 @@ import { resolve } from "path";
 import fs from "node:fs";
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
+// Prevent Vite's built-in HTML env replacement from warning when these are unset.
+// When empty, we fall back to relative OG/canonical URLs in the built HTML.
+process.env.VITE_SITE_URL = process.env.VITE_SITE_URL || "";
+process.env.VITE_BASE = process.env.VITE_BASE || "/";
+
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => {
 
   const venv = loadEnv(mode, process.cwd(), '')
-  const env = Object.keys(venv).filter((item) => item.startsWith("VITE_")).reduce((cur, key) => { return Object.assign(cur, { [key]: venv[key] })}, {}) ;
+  const env = Object.keys(venv)
+    .filter((item) => item.startsWith("VITE_"))
+    .reduce((cur, key) => {
+      return Object.assign(cur, { [key]: venv[key] });
+    }, {});
+
+  // Always provide a base so `%VITE_BASE%` never becomes "undefined" in HTML.
   const base = env.VITE_BASE || "/";
+  env.VITE_BASE = base;
+  // Optional. When missing we fall back to relative OG/canonical URLs.
+  env.VITE_SITE_URL = env.VITE_SITE_URL || "";
 
   const htmlPlugin = () => {
     return {
       name: "html-transform",
       transformIndexHtml(html) {
         return html.replace(/%(.*?)%/g, function (match, p1) {
-          return env[p1];
+          // Avoid emitting the string "undefined" when an env var isn't set.
+          // Returning "" keeps tags valid (relative URLs) for local/dev builds.
+          const value = env[p1];
+          return value === undefined ? "" : value;
         });
       },
     };
