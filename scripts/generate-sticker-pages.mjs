@@ -3,6 +3,13 @@ import path from "node:path";
 
 const ROOT = process.cwd();
 const STICKERS_JSON = path.join(ROOT, "public", "data", "stickers.json");
+const PUBLIC_ROOT = path.join(ROOT, "public");
+const OG_DEFAULT_PUBLIC_PATH = "/og/default.png";
+const SITE_NAME = "birki stickers";
+// These placeholders are replaced by `vite.config.js`'s `html-transform` plugin.
+// Keep them as plain strings in the generated HTML (don't resolve at generation time).
+const SITE_URL_PLACEHOLDER = "%VITE_SITE_URL%";
+const BASE_PLACEHOLDER = "%VITE_BASE%";
 const OUT_ROOT = path.join(ROOT, "stickers");
 const STATIC_ROUTES = [
   { dir: path.join(ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
@@ -23,15 +30,77 @@ const fullSlugFromStickerId = (id) => (id ?? "").toString().replace(/^stickers-/
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
 
-const htmlForRoute = ({ name, description }) => `<!DOCTYPE html>
+const escapeHtmlAttr = (v) =>
+  (v ?? "")
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+const escapeHtmlText = (v) =>
+  (v ?? "")
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+const publicPathToFsPath = (publicPath) =>
+  path.join(PUBLIC_ROOT, (publicPath || "").toString().replace(/^\/+/, ""));
+
+const pickOgImage = (candidates) => {
+  for (const candidate of candidates || []) {
+    if (!candidate) continue;
+    if (fs.existsSync(publicPathToFsPath(candidate))) return candidate;
+  }
+  return OG_DEFAULT_PUBLIC_PATH;
+};
+
+const absoluteUrlForPublicPath = (publicPath) => {
+  const cleaned = (publicPath || "").toString().replace(/^\/+/, "");
+  return `${SITE_URL_PLACEHOLDER}${BASE_PLACEHOLDER}${cleaned}`;
+};
+
+const absoluteUrlForRoute = (routePath) => {
+  const cleaned = (routePath || "").toString().replace(/^\/+/, "");
+  return `${SITE_URL_PLACEHOLDER}${BASE_PLACEHOLDER}${cleaned}`;
+};
+
+const htmlForRoute = ({ name, description }) => {
+  const title = `${SITE_NAME} / ${name}`;
+  const routePath = `${name}/`;
+  const ogImage = pickOgImage([`/og/${name}.png`, OG_DEFAULT_PUBLIC_PATH]);
+  const ogImageUrl = absoluteUrlForPublicPath(ogImage);
+  const canonicalUrl = absoluteUrlForRoute(routePath);
+  const alt = `${SITE_NAME} preview image`;
+
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
 
-    <title>birki stickers / ${name}</title>
-    <meta name="description" content="${description}" />
+    <title>${escapeHtmlText(title)}</title>
+    <meta name="description" content="${escapeHtmlAttr(description)}" />
+
+    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" />
+    <meta property="og:site_name" content="${escapeHtmlAttr(SITE_NAME)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="${escapeHtmlAttr(title)}" />
+    <meta property="og:description" content="${escapeHtmlAttr(description)}" />
+    <meta property="og:url" content="${escapeHtmlAttr(canonicalUrl)}" />
+    <meta property="og:image" content="${escapeHtmlAttr(ogImageUrl)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="${escapeHtmlAttr(alt)}" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtmlAttr(title)}" />
+    <meta name="twitter:description" content="${escapeHtmlAttr(description)}" />
+    <meta name="twitter:image" content="${escapeHtmlAttr(ogImageUrl)}" />
+    <meta name="twitter:image:alt" content="${escapeHtmlAttr(alt)}" />
 
     <link rel="icon" href="/favicon.png" />
 
@@ -107,16 +176,42 @@ const htmlForRoute = ({ name, description }) => `<!DOCTYPE html>
   </body>
 </html>
 `;
+};
 
-const htmlForSlug = (slug) => `<!DOCTYPE html>
+const htmlForSlug = ({ slug, title, description }) => {
+  const routePath = `stickers/${slug}/`;
+  const ogImage = pickOgImage([`/og/stickers/${slug}.png`, OG_DEFAULT_PUBLIC_PATH]);
+  const ogImageUrl = absoluteUrlForPublicPath(ogImage);
+  const canonicalUrl = absoluteUrlForRoute(routePath);
+  const alt = `${SITE_NAME} preview image`;
+
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
 
-    <title>birki stickers / ${slug}</title>
-    <meta name="description" content="Sticker card inspect view." />
+    <title>${escapeHtmlText(title)}</title>
+    <meta name="description" content="${escapeHtmlAttr(description)}" />
+
+    <link rel="canonical" href="${escapeHtmlAttr(canonicalUrl)}" />
+    <meta property="og:site_name" content="${escapeHtmlAttr(SITE_NAME)}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="${escapeHtmlAttr(title)}" />
+    <meta property="og:description" content="${escapeHtmlAttr(description)}" />
+    <meta property="og:url" content="${escapeHtmlAttr(canonicalUrl)}" />
+    <meta property="og:image" content="${escapeHtmlAttr(ogImageUrl)}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="${escapeHtmlAttr(alt)}" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escapeHtmlAttr(title)}" />
+    <meta name="twitter:description" content="${escapeHtmlAttr(description)}" />
+    <meta name="twitter:image" content="${escapeHtmlAttr(ogImageUrl)}" />
+    <meta name="twitter:image:alt" content="${escapeHtmlAttr(alt)}" />
 
     <link rel="icon" href="/favicon.png" />
 
@@ -192,6 +287,7 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
   </body>
 </html>
 `;
+};
 
 const main = () => {
   // These routes are pure static entrypoints for Vite multi-page builds.
@@ -214,7 +310,15 @@ const main = () => {
 
     const dir = path.join(OUT_ROOT, slug);
     ensureDir(dir);
-    fs.writeFileSync(path.join(dir, "index.html"), htmlForSlug(slug), "utf8");
+    const title = `${item?.name ? item.name : slug} | ${SITE_NAME}`;
+    const description = item?.description
+      ? item.description
+      : "Sticker card inspect view.";
+    fs.writeFileSync(
+      path.join(dir, "index.html"),
+      htmlForSlug({ slug, title, description }),
+      "utf8"
+    );
   }
 };
 

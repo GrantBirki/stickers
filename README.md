@@ -55,6 +55,28 @@ Global site toggles live in `public/data/site.json`.
 - `display_next_card_as_hidden` (boolean): when `true`, the next card slot on the homepage shows a
   dark/muted "mystery" placeholder using `public/img/mystery.png`.
 
+## Open Graph / Social Preview Images
+
+This site ships Open Graph + Twitter meta tags for rich link previews (Twitter/X, Discord, iMessage,
+Slack, etc).
+
+To add preview images, just drop PNGs in `public/og/`:
+
+- Default (used everywhere unless overridden): `public/og/default.png`
+- Optional per-route overrides:
+  - `public/og/about.png` -> `/about/`
+  - `public/og/contact.png` -> `/contact/`
+  - `public/og/services.png` -> `/services/`
+  - `public/og/work.png` -> `/work/`
+  - `public/og/privacy.png` -> `/privacy/`
+  - `public/og/terms.png` -> `/terms/`
+- Optional per-sticker overrides:
+  - `public/og/stickers/<slug>.png` -> `/stickers/<slug>/`
+
+Recommended image size: **1200x630**.
+
+Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time. Defaults live in `.env`.
+
 ## Fonts
 
 This site uses **local** Mona Sans variable fonts (no Google Fonts / CDNs).
