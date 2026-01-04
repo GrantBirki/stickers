@@ -65,6 +65,8 @@ jobs:
 
       - name: build
         run: npm run build
+        env:
+          VITE_SITE_URL: https://stickers.birki.io
 
       # this step is custom to my site and adds a 'commit' version to the site
       - name: write build version

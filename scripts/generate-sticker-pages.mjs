@@ -10,6 +10,7 @@ const SITE_NAME = "birki stickers";
 // Keep them as plain strings in the generated HTML (don't resolve at generation time).
 const SITE_URL_PLACEHOLDER = "%VITE_SITE_URL%";
 const BASE_PLACEHOLDER = "%VITE_BASE%";
+const CARD_CSS_BUNDLE_PUBLIC_PATH = "/css/cards/all.css";
 const OUT_ROOT = path.join(ROOT, "stickers");
 const STATIC_ROUTES = [
   { dir: path.join(ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
@@ -47,6 +48,49 @@ const escapeHtmlText = (v) =>
 
 const publicPathToFsPath = (publicPath) =>
   path.join(PUBLIC_ROOT, (publicPath || "").toString().replace(/^\/+/, ""));
+
+const CARD_CSS_SOURCES = [
+  "/css/cards/base.css",
+  "/css/cards.css",
+  "/css/cards/basic.css",
+  "/css/cards/reverse-holo.css",
+  "/css/cards/regular-holo.css",
+  "/css/cards/cosmos-holo.css",
+  "/css/cards/amazing-rare.css",
+  "/css/cards/radiant-holo.css",
+  "/css/cards/v-regular.css",
+  "/css/cards/v-full-art.css",
+  "/css/cards/v-max.css",
+  "/css/cards/v-star.css",
+  "/css/cards/trainer-full-art.css",
+  "/css/cards/rainbow-holo.css",
+  "/css/cards/rainbow-alt.css",
+  "/css/cards/secret-rare.css",
+  "/css/cards/trainer-gallery-holo.css",
+  "/css/cards/trainer-gallery-v-regular.css",
+  "/css/cards/trainer-gallery-v-max.css",
+  "/css/cards/trainer-gallery-secret-rare.css",
+  "/css/cards/shiny-rare.css",
+  "/css/cards/shiny-v.css",
+  "/css/cards/shiny-vmax.css",
+  "/css/cards/spiral-holographic.css",
+  "/css/cards/swsh-pikachu.css",
+  "/css/cards/stickers.css",
+];
+
+const buildCardCssBundle = () => {
+  const outPath = publicPathToFsPath(CARD_CSS_BUNDLE_PUBLIC_PATH);
+  ensureDir(path.dirname(outPath));
+
+  const chunks = [];
+  for (const publicPath of CARD_CSS_SOURCES) {
+    const srcPath = publicPathToFsPath(publicPath);
+    const raw = fs.readFileSync(srcPath, "utf8");
+    chunks.push(`/* ---- ${publicPath} ---- */\n\n${raw.trimEnd()}\n`);
+  }
+
+  fs.writeFileSync(outPath, chunks.join("\n"), "utf8");
+};
 
 const pickOgImage = (candidates) => {
   for (const candidate of candidates || []) {
@@ -143,32 +187,7 @@ const htmlForRoute = ({ name, description }) => {
     <!-- styles -->
     <link rel="stylesheet" href="/css/global.css" />
 
-    <link rel="stylesheet" href="/css/cards/base.css" />
-    <link rel="stylesheet" href="/css/cards.css" />
-    <link rel="stylesheet" href="/css/cards/basic.css" />
-    <link rel="stylesheet" href="/css/cards/reverse-holo.css" />
-    <link rel="stylesheet" href="/css/cards/regular-holo.css" />
-    <link rel="stylesheet" href="/css/cards/cosmos-holo.css" />
-    <link rel="stylesheet" href="/css/cards/amazing-rare.css" />
-    <link rel="stylesheet" href="/css/cards/radiant-holo.css" />
-    <link rel="stylesheet" href="/css/cards/v-regular.css" />
-    <link rel="stylesheet" href="/css/cards/v-full-art.css" />
-    <link rel="stylesheet" href="/css/cards/v-max.css" />
-    <link rel="stylesheet" href="/css/cards/v-star.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-full-art.css" />
-    <link rel="stylesheet" href="/css/cards/rainbow-holo.css" />
-    <link rel="stylesheet" href="/css/cards/rainbow-alt.css" />
-    <link rel="stylesheet" href="/css/cards/secret-rare.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-holo.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-v-regular.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-v-max.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-secret-rare.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-rare.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-v.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-vmax.css" />
-    <link rel="stylesheet" href="/css/cards/spiral-holographic.css" />
-    <link rel="stylesheet" href="/css/cards/swsh-pikachu.css" />
-    <link rel="stylesheet" href="/css/cards/stickers.css" />
+    <link rel="stylesheet" href="${CARD_CSS_BUNDLE_PUBLIC_PATH}" />
   </head>
   <body>
     <div id="app"></div>
@@ -254,32 +273,7 @@ const htmlForSlug = ({ slug, title, description }) => {
     <!-- styles -->
     <link rel="stylesheet" href="/css/global.css" />
 
-    <link rel="stylesheet" href="/css/cards/base.css" />
-    <link rel="stylesheet" href="/css/cards.css" />
-    <link rel="stylesheet" href="/css/cards/basic.css" />
-    <link rel="stylesheet" href="/css/cards/reverse-holo.css" />
-    <link rel="stylesheet" href="/css/cards/regular-holo.css" />
-    <link rel="stylesheet" href="/css/cards/cosmos-holo.css" />
-    <link rel="stylesheet" href="/css/cards/amazing-rare.css" />
-    <link rel="stylesheet" href="/css/cards/radiant-holo.css" />
-    <link rel="stylesheet" href="/css/cards/v-regular.css" />
-    <link rel="stylesheet" href="/css/cards/v-full-art.css" />
-    <link rel="stylesheet" href="/css/cards/v-max.css" />
-    <link rel="stylesheet" href="/css/cards/v-star.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-full-art.css" />
-    <link rel="stylesheet" href="/css/cards/rainbow-holo.css" />
-    <link rel="stylesheet" href="/css/cards/rainbow-alt.css" />
-    <link rel="stylesheet" href="/css/cards/secret-rare.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-holo.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-v-regular.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-v-max.css" />
-    <link rel="stylesheet" href="/css/cards/trainer-gallery-secret-rare.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-rare.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-v.css" />
-    <link rel="stylesheet" href="/css/cards/shiny-vmax.css" />
-    <link rel="stylesheet" href="/css/cards/spiral-holographic.css" />
-    <link rel="stylesheet" href="/css/cards/swsh-pikachu.css" />
-    <link rel="stylesheet" href="/css/cards/stickers.css" />
+    <link rel="stylesheet" href="${CARD_CSS_BUNDLE_PUBLIC_PATH}" />
   </head>
   <body>
     <div id="app"></div>
@@ -290,6 +284,7 @@ const htmlForSlug = ({ slug, title, description }) => {
 };
 
 const main = () => {
+  buildCardCssBundle();
   // These routes are pure static entrypoints for Vite multi-page builds.
   // They are intentionally generated so they don't have to be committed.
   for (const route of STATIC_ROUTES) {

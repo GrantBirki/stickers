@@ -38,6 +38,8 @@
   export let expanded = false;
   // If true, clicking the card flips it to show the back (instead of expanding).
   export let flip_on_click = false;
+  // If true, prioritize the front-face image for LCP (avoid lazy-loading + hint fetch priority).
+  export let priority = false;
 
   // Sticker/trading-card metadata (optional)
   export let drop_date = "";
@@ -598,7 +600,8 @@
 	              src={front_img}
 	              alt="A mystery card"
 	              on:load={imageLoader}
-	              loading="lazy"
+	              loading={priority ? "eager" : "lazy"}
+	              fetchpriority={priority ? "high" : "auto"}
 	              width="660"
 	              height="921"
 	            />
@@ -620,7 +623,8 @@
 	                  src={front_img}
 	                  alt="Front image for the {name} card"
 	                  on:load={imageLoader}
-	                  loading="lazy"
+	                  loading={priority ? "eager" : "lazy"}
+	                  fetchpriority={priority ? "high" : "auto"}
 	                  width="660"
 	                  height="921"
 	                />
@@ -656,7 +660,8 @@
             src={front_img}
             alt="Front image for the {name} card"
             on:load={imageLoader}
-            loading="lazy"
+            loading={priority ? "eager" : "lazy"}
+            fetchpriority={priority ? "high" : "auto"}
             width="660"
             height="921"
           />

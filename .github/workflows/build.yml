@@ -28,3 +28,5 @@ jobs:
 
       - name: build
         run: npm run build
+        env:
+          VITE_SITE_URL: https://stickers.birki.io
