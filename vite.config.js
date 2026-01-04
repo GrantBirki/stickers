@@ -47,7 +47,7 @@ export default defineConfig(({mode}) => {
       const inputs = {};
       for (const item of list) {
         const id = item?.id ?? "";
-        const base = id.toString().replace(/^stickers-/, "").replace(/-\\d+$/, "");
+        const base = id.toString().replace(/^stickers-/, "").replace(/-\d+$/, "");
         const full = id.toString().replace(/^stickers-/, "");
         const slug = base && !used.has(base) ? base : full;
         if (!slug) continue;

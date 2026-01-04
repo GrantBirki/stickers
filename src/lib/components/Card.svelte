@@ -323,6 +323,12 @@
       $activeCard = undefined;
       activeStickerId.set(undefined);
     }
+
+    document.removeEventListener("visibilitychange", onVisibilityChange);
+    clearTimeout(repositionTimer);
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    pendingSpringUpdate = null;
+    endShowcase();
   });
 
 
@@ -458,11 +464,13 @@
     }
   }
 
-  document.addEventListener("visibilitychange", () => {
+  const onVisibilityChange = () => {
     isVisible = document.visibilityState === "visible";
     endShowcase();
     reset();
-  });
+  };
+
+  document.addEventListener("visibilitychange", onVisibilityChange);
 
   const imageLoader = (e) => {
     loading = false;

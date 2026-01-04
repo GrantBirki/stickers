@@ -4,15 +4,12 @@
   import CardList from "../Cards.svelte";
   import Card from "../lib/components/Card.svelte";
   import { activeStickerId } from "../lib/stores/activeStickerId.js";
+  import { baseSlugFromStickerId, fullSlugFromStickerId } from "../lib/helpers/stickerSlugs.js";
 
   let isLoading = true;
   let stickers = [];
   let stickerSlugsById = {};
   let siteConfig = { display_next_card_as_hidden: false };
-
-  const baseSlugFromStickerId = (id) =>
-    (id ?? "").toString().replace(/^stickers-/, "").replace(/-\d+$/, "");
-  const fullSlugFromStickerId = (id) => (id ?? "").toString().replace(/^stickers-/, "");
 
   const buildSlugMap = (list) => {
     const used = Object.create(null);

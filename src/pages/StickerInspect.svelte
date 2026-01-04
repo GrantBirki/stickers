@@ -2,29 +2,22 @@
   import { onMount } from "svelte";
 
   import Card from "../lib/components/Card.svelte";
+  import {
+    baseSlugFromStickerId,
+    fullSlugFromStickerId,
+    normalizePathSlug,
+  } from "../lib/helpers/stickerSlugs.js";
 
   export let slug = "";
 
   let sticker = null;
-
-  const baseSlugFromStickerId = (id) => {
-    if (!id) return "";
-    return id.toString().replace(/^stickers-/, "").replace(/-\d+$/, "");
-  };
-
-  const fullSlugFromStickerId = (id) => {
-    if (!id) return "";
-    return id.toString().replace(/^stickers-/, "");
-  };
-
-  const normalizeSlug = (s) => (s ?? "").toString().replace(/^\/+/, "").replace(/\/+$/, "");
 
   const loadSticker = async () => {
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}data/stickers.json`);
       if (!res.ok) return null;
       const list = await res.json();
-      const target = normalizeSlug(slug);
+      const target = normalizePathSlug(slug);
       return (
         (list || []).find((item) => baseSlugFromStickerId(item?.id) === target) ||
         (list || []).find((item) => fullSlugFromStickerId(item?.id) === target) ||
