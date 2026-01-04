@@ -44,6 +44,21 @@ export default [
     },
   },
 
+  // Node tests.
+  {
+    files: ['test/**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': unusedVarsRule,
+    },
+  },
+
   // Node scripts/config.
   {
     files: ['scripts/**/*.{js,mjs,cjs}', 'vite.config.js', '*.config.{js,mjs,cjs}'],
