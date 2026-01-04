@@ -31,7 +31,7 @@
   --link-hover: hsl(187, 85%, 35%);
 
   /* Surfaces (light theme defaults) */
-  --bg: hsl(220, 20%, 98%);
+  --bg: hsl(0, 0%, 100%);
   --text: hsl(220, 18%, 12%);
   --muted: hsla(220, 18%, 12%, 0.72);
   --surface: hsla(0, 0%, 100%, 0.72);
@@ -49,13 +49,20 @@
   --opsz-body: 12;
   --opsz-mid: 20;
   --opsz-heading: 20;
+
+  /* Optional aliases (handy for component theming). */
+  --fg: var(--text);
+  --rule: var(--border);
+  --link: var(--primary);
+  --linkHover: var(--link-hover);
+
 }
 
 :root[data-theme="dark"] {
   --primary: hsl(187, 85%, 60%);
   --link-hover: hsl(207, 100%, 94%);
 
-  --bg: hsl(220, 7%, 14%);
+  --bg: hsl(220, 8%, 11%);
   --text: hsl(0, 0%, 100%);
   --muted: hsla(0, 0%, 100%, 0.78);
   --surface: hsla(0, 0%, 100%, 0.08);
@@ -85,17 +92,7 @@ body {
   font-stretch: 100%;
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
-  background: radial-gradient(
-      circle at 20% 0%,
-      hsla(187, 85%, 60%, 0.14),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 90%,
-      hsla(48, 90%, 55%, 0.14),
-      transparent 45%
-    ),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
 }
 

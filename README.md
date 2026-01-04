@@ -31,6 +31,7 @@ still support direct links (no server-side routing required).
   - `stickers/<slug>/index.html` (one folder per sticker)
   - `examples/index.html` (hidden CSS effect playground route)
   - `example/index.html` (alias for `/examples/`)
+  - `work/index.html`, `about/index.html`, `services/index.html`, `contact/index.html`, `privacy/index.html`, `terms/index.html`
 - When it runs:
   - `npm run dev` runs it automatically via `predev`
   - `npm run build` runs it automatically via `prebuild`

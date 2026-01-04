@@ -4,7 +4,9 @@
   import Home from "./pages/Home.svelte";
   import Examples from "./pages/Examples.svelte";
   import StickerInspect from "./pages/StickerInspect.svelte";
+  import StaticPage from "./pages/StaticPage.svelte";
   import ThemeToggle from "./lib/components/ThemeToggle.svelte";
+  import Footer from "./lib/components/Footer.svelte";
 
   // Initialize from the current URL so we don't flash the normal layout
   // on "direct link" routes like /examples/* or /stickers/*.
@@ -40,10 +42,40 @@
     };
   });
 
-  $: isExamples = path.startsWith("/examples") || path.startsWith("/example");
-  $: isStickerInspect = path.startsWith("/stickers/");
+  const STATIC_PAGES = {
+    "/work": {
+      title: "Work",
+      subtitle: "Selected projects and experiments."
+    },
+    "/about": {
+      title: "About",
+      subtitle: "A tiny studio making playful internet objects."
+    },
+    "/services": {
+      title: "Services",
+      subtitle: "Design, prototyping, and UI engineering."
+    },
+    "/contact": {
+      title: "Contact",
+      subtitle: "Say hello."
+    },
+    "/privacy": {
+      title: "Privacy",
+      subtitle: "No trackers. No ads. Just stickers."
+    },
+    "/terms": {
+      title: "Terms",
+      subtitle: "Be kind. Don't scrape. Enjoy the drops."
+    }
+  };
+
+  $: cleanPath = (path || "/").toString().replace(/\/+$/, "") || "/";
+
+  $: isExamples = cleanPath.startsWith("/examples") || cleanPath.startsWith("/example");
+  $: isStickerInspect = cleanPath.startsWith("/stickers/");
+  $: staticPage = STATIC_PAGES[cleanPath] || null;
   $: stickerSlug = isStickerInspect
-    ? path.replace(/^\/stickers\/+/, "").replace(/\/+$/, "")
+    ? cleanPath.replace(/^\/stickers\/+/, "").replace(/\/+$/, "")
     : "";
 </script>
 
@@ -61,48 +93,15 @@
       <StickerInspect slug={stickerSlug} />
     {:else if isExamples}
       <Examples />
+    {:else if staticPage}
+      <StaticPage {...staticPage} />
     {:else}
       <Home />
     {/if}
   </main>
 
   {#if !isStickerInspect}
-    <footer class="footer">
-      <div class="footer__inner">
-        <p class="footer__text">
-          Made in San Francisco with ❤️ by
-          <a
-            class="footer__by"
-            href="https://github.com/GrantBirki"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Grant Birkinbine
-          </a>
-        </p>
-        <a
-          class="footer__link"
-          href="https://github.com/GrantBirki/stickers"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-github"
-            viewBox="0 0 16 16"
-            aria-hidden="true"
-          >
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-            />
-          </svg>
-          <span>source code</span>
-        </a>
-      </div>
-    </footer>
+    <Footer />
   {/if}
 </div>
 
@@ -136,60 +135,5 @@
   .content--inspect {
     max-width: none;
     padding: 0;
-  }
-
-  .footer {
-    border-top: 1px solid var(--border);
-    padding: 14px 20px;
-    margin-top: auto;
-  }
-
-  .footer__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .footer__text {
-    margin: 0;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
-
-  .footer__by {
-    color: var(--text);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-    text-decoration-thickness: 1px;
-  }
-
-  .footer__by:hover,
-  .footer__by:focus {
-    color: var(--text);
-  }
-
-  .footer__link {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: var(--text);
-    text-decoration: none;
-    opacity: 1;
-  }
-
-  .footer__link span {
-    font-size: 0.9rem;
-  }
-
-  .footer__link:hover {
-    color: var(--text);
-    opacity: 1;
-    text-decoration: underline;
-    text-underline-offset: 3px;
   }
 </style>

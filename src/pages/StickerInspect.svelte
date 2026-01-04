@@ -35,11 +35,20 @@
     }
   };
 
-  onMount(async () => {
+  onMount(() => {
     // This view is intentionally dark-only.
     document.documentElement.dataset.theme = "dark";
 
-    sticker = await loadSticker();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    (async () => {
+      sticker = await loadSticker();
+    })();
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   });
 </script>
 
@@ -68,11 +77,6 @@
   :global(html),
   :global(body) {
     height: 100%;
-  }
-
-  /* No scrollbars / extra chrome for this "inspection" page. */
-  :global(body) {
-    overflow: hidden;
   }
 
   .inspect {
