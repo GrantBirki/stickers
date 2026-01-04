@@ -253,6 +253,22 @@ button.card__rotator {
   transform: translate3d(0px, 0px, 0.01px);
 }
 
+/* 
+  iOS Safari rendering quirk:
+  When a rounded element lives inside a 3D transformed parent, WebKit can
+  occasionally render a tiny "square notch" in one corner (often top-left).
+  Forcing the face onto a masked compositing layer fixes the artifact without
+  changing layout or visuals elsewhere.
+*/
+@supports (-webkit-touch-callout: none) {
+  .card__front,
+  .card__back,
+  .card__shine,
+  .card__glare {
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
+  }
+}
+
 .card__front::before {
   content: "";
   position: absolute;
