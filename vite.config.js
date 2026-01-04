@@ -23,6 +23,7 @@ export default defineConfig(({mode}) => {
   env.VITE_BASE = base;
   // Optional. When missing we fall back to relative OG/canonical URLs.
   env.VITE_SITE_URL = env.VITE_SITE_URL || "";
+  const isTest = mode === "test";
 
   const htmlPlugin = () => {
     return {
@@ -62,6 +63,58 @@ export default defineConfig(({mode}) => {
   return {
     base,
     plugins: [svelte(), htmlPlugin()],
+    resolve: isTest
+      ? {
+          // Vitest loads modules through Vite's SSR pipeline, which can otherwise resolve
+          // `import "svelte"` to the server entrypoint. Force the client runtime so
+          // @testing-library/svelte can mount components in jsdom.
+          alias: [
+            { find: /^svelte$/, replacement: resolve(process.cwd(), "node_modules/svelte/src/index-client.js") }
+          ]
+        }
+      : undefined,
+    // Vitest runs Vite in SSR mode under the hood, so force the browser Svelte
+    // entrypoints (Svelte's default export condition points to server-only APIs).
+    ssr: {
+      resolve: {
+        conditions: ["browser"],
+        // Ensure Vite's SSR module loader uses browser conditions even for externalized deps.
+        externalConditions: ["browser"]
+      }
+    },
+    test: {
+      environment: "jsdom",
+      setupFiles: ["./test/setup.js"],
+      // Ensure Node resolves Svelte's browser entrypoints (otherwise `import { mount } from "svelte"`
+      // resolves to the server build which throws at runtime).
+      pool: "forks",
+      execArgv: ["--conditions", "browser", "--conditions", "svelte"],
+      server: {
+        deps: {
+          // Ensure Vite transforms these deps so imports use the configured resolver
+          // (otherwise Node resolves Svelte's default export to the server entry).
+          inline: ["svelte", "@testing-library/svelte", "@testing-library/svelte-core"]
+        }
+      },
+      restoreMocks: true,
+      clearMocks: true,
+      mockReset: true,
+      coverage: {
+        provider: "v8",
+        reporter: ["text"],
+        include: ["src/**/*.{js,svelte}"],
+        exclude: ["src/vite-env.d.ts"],
+        thresholds: {
+          // Current suite covers all JS modules and key UI flows, but getting
+          // 100% branch coverage across all Svelte components is not realistic
+          // without a large number of brittle DOM-edge-case tests.
+          lines: 91,
+          functions: 91,
+          branches: 80,
+          statements: 92
+        }
+      }
+    },
     build: {
       rollupOptions: {
         input: {
