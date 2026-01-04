@@ -28,3 +28,6 @@ jobs:
 
       - name: validate
         run: npm run validate
+
+      - name: unit tests
+        run: npm test
