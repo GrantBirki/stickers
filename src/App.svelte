@@ -79,7 +79,7 @@
     : "";
 </script>
 
-<div class="app">
+<div class="app" class:app--has-footer={!isStickerInspect}>
   {#if !isStickerInspect}
     <div class="topbar">
       <div class="topbar__actions">
@@ -110,6 +110,18 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  @media (min-width: 900px) {
+    /*
+      Desktop UX:
+      When the page content is short, the flex "sticky footer" pattern makes the footer
+      peek into the initial viewport. Give the main content a viewport-sized minimum so
+      the footer always starts just below the fold (requires a small scroll to reveal).
+    */
+    .app--has-footer .content:not(.content--inspect) {
+      min-height: 100svh;
+    }
   }
 
   .topbar {
