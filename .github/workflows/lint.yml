@@ -1,4 +1,4 @@
-name: test
+name: lint
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,5 +26,5 @@ jobs:
       - name: install dependencies
         run: npm ci
 
-      - name: test
-        run: npm test
+      - name: validate
+        run: npm run validate

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Vitest runs both JS unit tests and Svelte component tests (jsdom) and enforces
+# coverage thresholds via vite.config.js.
+./node_modules/.bin/vitest run --coverage

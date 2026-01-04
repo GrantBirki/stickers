@@ -2,6 +2,9 @@
 
 [![build](https://github.com/GrantBirki/stickers/actions/workflows/build.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/build.yml)
 [![test](https://github.com/GrantBirki/stickers/actions/workflows/test.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/test.yml)
+[![lint](https://github.com/GrantBirki/stickers/actions/workflows/lint.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/lint.yml)
+[![deploy](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml)
+[![Unlock On Merge](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml)
 
 The website for stickers.birki.io - Grant's collection of sticker drops!
 
@@ -76,6 +79,7 @@ To add preview images, just drop PNGs in `public/og/`:
 Recommended image size: **1200x630**.
 
 Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time.
+
 - For deployments: set `VITE_SITE_URL` (and optionally `VITE_BASE`) in your CI/deploy environment
   so builds output absolute URLs (best compatibility for previews).
 - If `VITE_SITE_URL` is not set, the site will fall back to relative URLs in the built HTML.
