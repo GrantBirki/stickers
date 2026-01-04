@@ -96,8 +96,10 @@
     <p class="home__desc">A collection of sticker drops from Grant.</p>
     <p class="home__cta">
       <span class="home__cta-lead">Do you work with Grant?</span>
-      Follow <code class="inline-code">#birki-sticker-drops</code> in Slack to catch the next
-      sticker drop.
+      <span class="home__cta-body">
+        Follow <code class="inline-code">#birki-sticker-drops</code> in Slack to catch the next
+        sticker drop.
+      </span>
     </p>
     <div class="home__rule" aria-hidden="true"></div>
   </header>
@@ -216,6 +218,11 @@
     display: inline-block;
     margin-right: 0.45rem;
     vertical-align: baseline;
+  }
+
+  .home__cta-body {
+    display: block;
+    margin-top: 6px;
   }
 
   /* GitHub-esque inline code pill that stays readable in both themes. */
