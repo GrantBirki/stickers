@@ -51,6 +51,12 @@ export default defineConfig(({mode}) => {
           main: resolve(process.cwd(), "index.html"),
           examples: resolve(process.cwd(), "examples/index.html"),
           example: resolve(process.cwd(), "example/index.html"),
+          work: resolve(process.cwd(), "work/index.html"),
+          about: resolve(process.cwd(), "about/index.html"),
+          services: resolve(process.cwd(), "services/index.html"),
+          contact: resolve(process.cwd(), "contact/index.html"),
+          privacy: resolve(process.cwd(), "privacy/index.html"),
+          terms: resolve(process.cwd(), "terms/index.html"),
           ...stickerInputs()
         }
       }

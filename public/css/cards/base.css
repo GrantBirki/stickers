@@ -157,13 +157,15 @@
   -webkit-transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
-  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
-  
-  /* performance */
-  pointer-events: auto;
-  /* overflow: hidden; <-- this improves perf on mobile, but breaks backface visibility. */
-  /* isolation: isolate; <-- this improves perf, but breaks backface visibility on Chrome. */
-}
+	  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
+	  
+	  /* performance */
+	  pointer-events: auto;
+	  /* Allow vertical scrolling gestures on touch devices when the card isn't active. */
+	  touch-action: pan-y;
+	  /* overflow: hidden; <-- this improves perf on mobile, but breaks backface visibility. */
+	  /* isolation: isolate; <-- this improves perf, but breaks backface visibility on Chrome. */
+	}
 
 button.card__rotator {
   /* because the card is a button, there's some default

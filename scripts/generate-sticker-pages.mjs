@@ -4,9 +4,15 @@ import path from "node:path";
 const ROOT = process.cwd();
 const STICKERS_JSON = path.join(ROOT, "public", "data", "stickers.json");
 const OUT_ROOT = path.join(ROOT, "stickers");
-const EXAMPLES_ROUTES = [
-  { dir: path.join(ROOT, "examples"), name: "examples" },
-  { dir: path.join(ROOT, "example"), name: "example" }
+const STATIC_ROUTES = [
+  { dir: path.join(ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
+  { dir: path.join(ROOT, "example"), name: "example", description: "Local card effect demos (no licensed imagery)." },
+  { dir: path.join(ROOT, "work"), name: "work", description: "Work" },
+  { dir: path.join(ROOT, "about"), name: "about", description: "About" },
+  { dir: path.join(ROOT, "services"), name: "services", description: "Services" },
+  { dir: path.join(ROOT, "contact"), name: "contact", description: "Contact" },
+  { dir: path.join(ROOT, "privacy"), name: "privacy", description: "Privacy policy" },
+  { dir: path.join(ROOT, "terms"), name: "terms", description: "Terms and conditions" }
 ];
 
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
@@ -17,7 +23,7 @@ const fullSlugFromStickerId = (id) => (id ?? "").toString().replace(/^stickers-/
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
 
-const htmlForExamples = (name) => `<!DOCTYPE html>
+const htmlForRoute = ({ name, description }) => `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -25,7 +31,7 @@ const htmlForExamples = (name) => `<!DOCTYPE html>
     <meta name="color-scheme" content="light dark" />
 
     <title>birki stickers / ${name}</title>
-    <meta name="description" content="Local card effect demos (no licensed imagery)." />
+    <meta name="description" content="${description}" />
 
     <link rel="icon" href="/favicon.png" />
 
@@ -107,7 +113,7 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
 
     <title>birki stickers / ${slug}</title>
     <meta name="description" content="Sticker card inspect view." />
@@ -115,8 +121,23 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
     <link rel="icon" href="/favicon.png" />
 
     <script>
-      // Inspect pages are intentionally dark-only and should not mutate localStorage.
-      document.documentElement.dataset.theme = "dark";
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const systemDark =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : systemDark
+                ? "dark"
+                : "light";
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          // Ignore (e.g. privacy mode blocking storage).
+        }
+      })();
     </script>
 
     <!-- fonts (local) -->
@@ -175,9 +196,9 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
 const main = () => {
   // These routes are pure static entrypoints for Vite multi-page builds.
   // They are intentionally generated so they don't have to be committed.
-  for (const route of EXAMPLES_ROUTES) {
+  for (const route of STATIC_ROUTES) {
     ensureDir(route.dir);
-    fs.writeFileSync(path.join(route.dir, "index.html"), htmlForExamples(route.name), "utf8");
+    fs.writeFileSync(path.join(route.dir, "index.html"), htmlForRoute(route), "utf8");
   }
 
   const stickers = readJson(STICKERS_JSON) || [];
