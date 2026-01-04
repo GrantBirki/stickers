@@ -26,6 +26,8 @@
         </svg>
         <span class="studio-footer__source-text">source code</span>
       </a>
+
+      <div class="studio-footer__signature">Made with ❤️ by Grant Birkinbine</div>
     </div>
   </div>
 </footer>
@@ -33,88 +35,46 @@
 <style>
   .studio-footer {
     /*
-      Use the site's tokens, but create a flatter "paper" tint for the footer.
-      No hardcoded colors: everything derives from existing variables.
+      Footer intentionally inherits the same page background (no panel, no vignette).
+      No hardcoded colors: everything derives from the global theme variables.
     */
     /* Match the page background exactly so the footer reads as part of the page. */
     --footer-bg: var(--bg);
     --footer-fg: var(--fg);
     --footer-muted: var(--muted);
-    --footer-rule: color-mix(in srgb, var(--rule) 82%, transparent);
+    --footer-rule: var(--rule);
     --footer-wordmark: color-mix(in srgb, var(--footer-fg) 94%, var(--footer-bg) 6%);
-    --footer-vignette: color-mix(in srgb, var(--footer-fg) 8%, transparent);
 
     position: relative;
-    background-color: var(--footer-bg);
+    /* Let the true page background show through (no footer panel). */
+    background: transparent;
     color: var(--footer-fg);
     overflow: hidden;
     margin-top: auto;
 
-    transition: background-color 220ms ease, color 220ms ease;
+    transition: color 220ms ease;
   }
 
   :global(:root[data-theme="dark"]) .studio-footer {
-    --footer-rule: color-mix(in srgb, var(--rule) 90%, transparent);
     /* Avoid pure-white glare in dark mode. */
     --footer-wordmark: color-mix(in srgb, var(--footer-fg) 90%, var(--footer-bg) 10%);
-    --footer-vignette: color-mix(in srgb, var(--footer-fg) 10%, transparent);
-  }
-
-  /* Subtle material depth: vignette + grain (no viewport-dependent gradients). */
-  .studio-footer::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(900px circle at 12% 10%, var(--footer-vignette), transparent 62%),
-      radial-gradient(900px circle at 88% 86%, var(--footer-vignette), transparent 66%);
-    opacity: 0.55;
-  }
-
-  .studio-footer::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    /* Cheap, uniform "film grain" using ultra-low-contrast stripes. */
-    background-image:
-      repeating-linear-gradient(
-        0deg,
-        color-mix(in srgb, var(--footer-fg) 3%, transparent) 0px,
-        transparent 1px,
-        transparent 3px
-      ),
-      repeating-linear-gradient(
-        90deg,
-        color-mix(in srgb, var(--footer-fg) 2%, transparent) 0px,
-        transparent 1px,
-        transparent 4px
-      );
-    opacity: 0.08;
-    mix-blend-mode: overlay;
   }
 
   .studio-footer__inner {
     max-width: 1200px;
     margin: 0 auto;
-    padding: clamp(60px, 8vw, 92px) clamp(20px, 6vw, 64px);
+    /* Reduce bottom whitespace without cramping the mark. */
+    padding: clamp(56px, 8vw, 92px) clamp(20px, 6vw, 64px) clamp(34px, 5vw, 58px);
     /* Subtle inset so the rule + link align with the "B" rather than the container edge. */
     --brand-inset: clamp(2px, 1vw, 14px);
     position: relative;
-    z-index: 1;
   }
 
   .studio-footer__rule {
     height: 1px;
     margin-left: var(--brand-inset);
-    background: linear-gradient(
-      to right,
-      transparent,
-      color-mix(in srgb, var(--footer-rule) 70%, var(--footer-fg) 30%),
-      transparent
-    );
-    opacity: 0.95;
+    margin-right: var(--brand-inset);
+    background: var(--footer-rule);
   }
 
   .studio-footer__source:focus-visible {
@@ -124,11 +84,10 @@
   }
 
   .studio-footer__hero {
-    padding-top: clamp(34px, 5vw, 56px);
-    padding-bottom: clamp(26px, 4vw, 48px);
-    padding-left: var(--brand-inset);
+    padding-top: clamp(30px, 4.5vw, 52px);
+    padding-bottom: clamp(10px, 2.2vw, 20px);
     display: grid;
-    gap: clamp(22px, 3.2vw, 38px);
+    gap: clamp(16px, 3vw, 30px);
     transition: color 220ms ease;
   }
 
@@ -139,35 +98,15 @@
     font-variation-settings: "wght" 900, "wdth" 100, "opsz" 24;
     font-kerning: normal;
     text-rendering: geometricPrecision;
-    letter-spacing: -0.072em;
+    letter-spacing: -0.074em;
     line-height: 0.82;
-    /* ~6% smaller than previous to give the mark breathing room. */
-    font-size: clamp(70px, 15.2vw, 216px);
+    /* Slightly larger to reclaim space while staying comfortable. */
+    font-size: clamp(74px, 16.2vw, 232px);
     color: var(--footer-wordmark);
     user-select: none;
     pointer-events: none;
     transition: color 220ms ease;
-  }
-
-  /*
-    Subtle "pixel notch" cut-outs:
-    overlay a handful of tiny squares in the footer background color.
-    They're positioned by percentage within the wordmark box (intentionally minimal).
-  */
-  .studio-footer__wordmark::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    --n: 0.08em;
-    background:
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 10% 54% / var(--n) var(--n) no-repeat,
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 16% 41% / var(--n) var(--n) no-repeat,
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 33% 62% / var(--n) var(--n) no-repeat,
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 52% 39% / var(--n) var(--n) no-repeat,
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 62% 57% / var(--n) var(--n) no-repeat,
-      linear-gradient(var(--footer-bg), var(--footer-bg)) 78% 44% / var(--n) var(--n) no-repeat;
-    opacity: 0.95;
+    margin-left: var(--brand-inset);
   }
 
   .studio-footer__source {
@@ -190,6 +129,7 @@
     color: var(--footer-fg);
     opacity: 0.86;
     text-decoration: none;
+    margin-left: var(--brand-inset);
     transition:
       opacity 180ms ease,
       background-color 220ms ease,
@@ -235,6 +175,14 @@
   .studio-footer__source:hover .studio-footer__source-text::after {
     transform: scaleX(1);
     opacity: 0.7;
+  }
+
+  .studio-footer__signature {
+    text-align: center;
+    justify-self: center;
+    font-size: 0.9rem;
+    line-height: 1.25;
+    color: color-mix(in srgb, var(--footer-fg) 58%, var(--footer-bg) 42%);
   }
 
   @media (prefers-reduced-motion: reduce) {
