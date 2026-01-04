@@ -90,14 +90,20 @@
 </script>
 
 <section class="home">
-  <h1>Sticker Drops</h1>
-  <p class="home__sub">
-    A collection of sticker drops from Birki.
-  </p>
-  <p class="home__sub home__sub--slack">
-    Do you work with Birki? Follow the <code class="inline-code">#birki-sticker-drops</code> channel
-    in Slack to catch a limited edition sticker drop!
-  </p>
+  <header class="home__header">
+    <div class="home__eyebrow">Limited Editions</div>
+    <h1 class="home__title">Sticker Drops</h1>
+    <p class="home__desc">A collection of sticker drops from Grant.</p>
+    <p class="home__cta">
+      <span class="home__cta-lead">Do you work with Grant?</span>
+      <span>Follow</span>
+      <code class="inline-code">
+        <span>#birki-sticker-drops</span>
+      </code>
+      <span>in Slack to catch the next sticker drop.</span>
+    </p>
+    <div class="home__rule" aria-hidden="true"></div>
+  </header>
 
   <CardList>
     {#if isLoading}
@@ -157,33 +163,67 @@
 
 <style>
   .home {
-    padding-top: 20px;
+    padding-top: clamp(22px, 4vw, 46px);
   }
 
-  .home__sub {
-    margin: 0 0 20px;
-    opacity: 0.85;
+  .home__header {
+    max-width: 68ch;
+    margin-bottom: clamp(26px, 4vw, 46px);
   }
 
-  .home__sub--slack {
-    margin-top: -10px;
-  }
-
-  /* GitHub-esque inline code pill that stays readable in both themes. */
-  .inline-code {
+  .home__eyebrow {
     font-family: var(--font-mono);
-    font-size: 0.92em;
-    padding: 0.12em 0.4em;
-    border-radius: 6px;
-    background: hsla(220, 14%, 96%, 1);
-    border: 1px solid hsla(220, 14%, 78%, 0.9);
-    color: var(--text);
-    white-space: nowrap;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--muted) 72%, var(--bg) 28%);
+    margin: 0 0 10px;
   }
 
-  :global(:root[data-theme="dark"]) .inline-code {
-    background: hsla(215, 28%, 17%, 1);
-    border-color: hsla(215, 20%, 55%, 0.35);
+  .home__title {
+    margin: 0;
+    font-size: clamp(2.3rem, 4.8vw, 3.35rem);
+    font-weight: 820;
+    font-stretch: 100%;
+    font-optical-sizing: none;
+    font-variation-settings: "wght" 820, "wdth" 100, "opsz" var(--opsz-heading);
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+
+  .home__desc {
+    margin: clamp(12px, 1.6vw, 16px) 0 0;
+    font-size: clamp(1.05rem, 1.5vw, 1.22rem);
+    line-height: 1.45;
+    color: var(--muted);
+    max-width: 56ch;
+  }
+
+  /* Slack callout: distinct, but quiet. */
+  .home__cta {
+    margin: clamp(14px, 1.9vw, 18px) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding-left: 14px;
+    border-left: 1px solid var(--border);
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--text) 86%, var(--bg) 14%);
+  }
+
+  .home__cta-lead {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--text) 70%, var(--bg) 30%);
+  }
+
+  .home__rule {
+    height: 1px;
+    margin-top: clamp(18px, 3.2vw, 30px);
+    background: linear-gradient(to right, var(--border), transparent);
   }
 
   /* "Liquid glass" floating action button shown when a homepage card is expanded. */

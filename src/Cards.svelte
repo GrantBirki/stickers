@@ -61,6 +61,13 @@
 			opacity: 1 !important;
 			transition: none;
 		}
+
+		/* Ensure the "fan" layout math doesn't shrink/offset cards on small screens. */
+		:global( .card-grid > .card:not(.active) ) {
+			--card-scale: 1 !important;
+			--translate-x: 0px !important;
+			--translate-y: 0px !important;
+		}
 	}
 
 	@media screen and (min-width: 600px) and (max-width: 900px) {
