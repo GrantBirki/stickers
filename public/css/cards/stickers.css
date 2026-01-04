@@ -102,6 +102,42 @@
   }
 }
 
+/*
+  Extra-small phones (roughly iPhone SE / 280-390px wide):
+  The card shrinks with the viewport, but we intentionally bump sticker type for readability.
+  On very small widths the description can wrap and the bottom meta region runs out of space,
+  which then gets clipped by the card face's overflow/border radius.
+*/
+@media (max-width: 420px) {
+  .card[data-set="stickers"] {
+    /* Give the meta area a little more room without dramatically shrinking the art window. */
+    --sticker-safe: 4.5%;
+    --sticker-art-bottom: 32%;
+    --sticker-meta-gap: 2.25%;
+    --sticker-footer-gap: 0.8%;
+  }
+
+  .card[data-set="stickers"][data-front-shape="square"] {
+    --sticker-art-bottom: 30%;
+    --sticker-meta-gap: 2%;
+  }
+
+  .card[data-set="stickers"] .sticker__meta {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 340px) {
+  /* On ultra-narrow screens, prevent the description from wrapping into clipped lines. */
+  .card[data-set="stickers"] .sticker__desc {
+    display: block;
+    -webkit-line-clamp: initial;
+    -webkit-box-orient: initial;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
 /* Mid-size devices (small tablets / narrow desktop): avoid "shrunk" typography. */
 @media (min-width: 521px) and (max-width: 900px) {
   .card[data-set="stickers"] {
@@ -457,12 +493,15 @@
   font-optical-sizing: none;
   font-variation-settings: "opsz" var(--opsz-body);
   font-size: var(--sticker-date-size);
+  line-height: 1.15;
   letter-spacing: 0.04em;
   opacity: 0.85;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* Prevent descenders from getting clipped by subpixel rounding at small sizes. */
+  padding-bottom: 0.08em;
   align-self: center;
 }
 
@@ -479,6 +518,8 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  /* Same deal: small extra padding avoids clipped glyph descenders on narrow screens. */
+  padding-bottom: 0.10em;
 }
 
 .card[data-set="stickers"] .sticker__footer {
