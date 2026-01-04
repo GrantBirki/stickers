@@ -2,6 +2,9 @@
 
 [![build](https://github.com/GrantBirki/stickers/actions/workflows/build.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/build.yml)
 [![test](https://github.com/GrantBirki/stickers/actions/workflows/test.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/test.yml)
+[![lint](https://github.com/GrantBirki/stickers/actions/workflows/lint.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/lint.yml)
+[![deploy](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml)
+[![Unlock On Merge](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml)
 
 The website for stickers.birki.io - Grant's collection of sticker drops!
 
