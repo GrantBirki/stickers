@@ -36,9 +36,6 @@
   };
 
   onMount(() => {
-    // This view is intentionally dark-only.
-    document.documentElement.dataset.theme = "dark";
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 

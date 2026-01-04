@@ -113,7 +113,7 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
 
     <title>birki stickers / ${slug}</title>
     <meta name="description" content="Sticker card inspect view." />
@@ -121,8 +121,23 @@ const htmlForSlug = (slug) => `<!DOCTYPE html>
     <link rel="icon" href="/favicon.png" />
 
     <script>
-      // Inspect pages are intentionally dark-only and should not mutate localStorage.
-      document.documentElement.dataset.theme = "dark";
+      (() => {
+        try {
+          const stored = localStorage.getItem("theme");
+          const systemDark =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+          const theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : systemDark
+                ? "dark"
+                : "light";
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          // Ignore (e.g. privacy mode blocking storage).
+        }
+      })();
     </script>
 
     <!-- fonts (local) -->
