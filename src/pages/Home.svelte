@@ -223,6 +223,7 @@
   .home__cta-body {
     display: block;
     margin-top: 6px;
+    font-size: 1em;
   }
 
   /* GitHub-esque inline code pill that stays readable in both themes. */
