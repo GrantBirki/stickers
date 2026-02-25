@@ -9,9 +9,13 @@ process.env.VITE_SITE_URL = process.env.VITE_SITE_URL || "";
 process.env.VITE_BASE = process.env.VITE_BASE || "/";
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode, command }) => {
 
-  const venv = loadEnv(mode, process.cwd(), '')
+  const projectRoot = process.cwd();
+  const generatedPagesRoot = resolve(projectRoot, ".generated-pages");
+  const buildEntryRoot = command === "build" ? generatedPagesRoot : projectRoot;
+
+  const venv = loadEnv(mode, projectRoot, '')
   const env = Object.keys(venv)
     .filter((item) => item.startsWith("VITE_"))
     .reduce((cur, key) => {
@@ -39,9 +43,9 @@ export default defineConfig(({mode}) => {
     };
   };
 
-  const stickerInputs = () => {
+  const stickerInputs = (entryRoot) => {
     try {
-      const raw = fs.readFileSync(resolve(process.cwd(), "public/data/stickers.json"), "utf8");
+      const raw = fs.readFileSync(resolve(projectRoot, "public/data/stickers.json"), "utf8");
       const list = JSON.parse(raw) || [];
       const used = new Set();
       const inputs = {};
@@ -52,7 +56,7 @@ export default defineConfig(({mode}) => {
         const slug = base && !used.has(base) ? base : full;
         if (!slug) continue;
         used.add(slug);
-        inputs[`stickers-${slug}`] = resolve(process.cwd(), "stickers", slug, "index.html");
+        inputs[`stickers-${slug}`] = resolve(entryRoot, "stickers", slug, "index.html");
       }
       return inputs;
     } catch {
@@ -61,6 +65,8 @@ export default defineConfig(({mode}) => {
   };
 
   return {
+    root: buildEntryRoot,
+    publicDir: resolve(projectRoot, "public"),
     base,
     plugins: [svelte(), htmlPlugin()],
     resolve: isTest
@@ -69,7 +75,7 @@ export default defineConfig(({mode}) => {
           // `import "svelte"` to the server entrypoint. Force the client runtime so
           // @testing-library/svelte can mount components in jsdom.
           alias: [
-            { find: /^svelte$/, replacement: resolve(process.cwd(), "node_modules/svelte/src/index-client.js") }
+            { find: /^svelte$/, replacement: resolve(projectRoot, "node_modules/svelte/src/index-client.js") }
           ]
         }
       : undefined,
@@ -117,18 +123,22 @@ export default defineConfig(({mode}) => {
       }
     },
     build: {
+      outDir: resolve(projectRoot, "dist"),
+      // outDir is outside `root` when `root` points at `.generated-pages` during
+      // production builds, so enable explicit cleanup to avoid stale artifacts.
+      emptyOutDir: true,
       rollupOptions: {
         input: {
-          main: resolve(process.cwd(), "index.html"),
-          examples: resolve(process.cwd(), "examples/index.html"),
-          example: resolve(process.cwd(), "example/index.html"),
-          work: resolve(process.cwd(), "work/index.html"),
-          about: resolve(process.cwd(), "about/index.html"),
-          services: resolve(process.cwd(), "services/index.html"),
-          contact: resolve(process.cwd(), "contact/index.html"),
-          privacy: resolve(process.cwd(), "privacy/index.html"),
-          terms: resolve(process.cwd(), "terms/index.html"),
-          ...stickerInputs()
+          main: resolve(buildEntryRoot, "index.html"),
+          examples: resolve(buildEntryRoot, "examples/index.html"),
+          example: resolve(buildEntryRoot, "example/index.html"),
+          work: resolve(buildEntryRoot, "work/index.html"),
+          about: resolve(buildEntryRoot, "about/index.html"),
+          services: resolve(buildEntryRoot, "services/index.html"),
+          contact: resolve(buildEntryRoot, "contact/index.html"),
+          privacy: resolve(buildEntryRoot, "privacy/index.html"),
+          terms: resolve(buildEntryRoot, "terms/index.html"),
+          ...stickerInputs(buildEntryRoot)
         }
       }
     },

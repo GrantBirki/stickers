@@ -70,8 +70,8 @@ jobs:
           node-version-file: .node-version
           cache: 'npm'
     
-      - name: install dependencies
-        run: npm ci
+      - name: bootstrap
+        run: script/bootstrap
 
       # configure the GitHub Pages action
       - name: setup pages
@@ -79,7 +79,7 @@ jobs:
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # pin@v5.0.0
 
       - name: build
-        run: npm run build
+        run: script/build
         env:
           VITE_SITE_URL: ${{ env.web_url }}
 

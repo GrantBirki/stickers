@@ -23,10 +23,10 @@ jobs:
           node-version-file: .node-version
           cache: 'npm'
 
-      - name: install dependencies
-        run: npm ci
+      - name: bootstrap
+        run: script/bootstrap
 
       - name: build
-        run: npm run build
+        run: script/build
         env:
           VITE_SITE_URL: https://stickers.birki.io
