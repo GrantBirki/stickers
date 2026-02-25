@@ -15,15 +15,15 @@
     "test": "./script/test"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
+    "@eslint/js": "^10.0.1",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.3.1",
     "@vitest/coverage-v8": "^4.0.16",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.2",
     "eslint-plugin-svelte": "^3.13.1",
     "globals": "^17.0.0",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.1.0",
     "svelte": "^5.53.0",
     "svelte-check": "^4.3.5",
     "typescript": "^5.9.3",
