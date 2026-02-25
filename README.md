@@ -31,13 +31,16 @@ still support direct links (no server-side routing required).
 
 - Script: `scripts/generate-sticker-pages.mjs`
 - Outputs:
-  - `stickers/<slug>/index.html` (one folder per sticker)
-  - `examples/index.html` (hidden CSS effect playground route)
-  - `example/index.html` (alias for `/examples/`)
-  - `work/index.html`, `about/index.html`, `services/index.html`, `contact/index.html`, `privacy/index.html`, `terms/index.html`
+  - `.generated-pages/stickers/<slug>/index.html` (one folder per sticker)
+  - `.generated-pages/examples/index.html` (hidden CSS effect playground route)
+  - `.generated-pages/example/index.html` (alias for `/examples/`)
+  - `.generated-pages/work/index.html`, `.generated-pages/about/index.html`, `.generated-pages/services/index.html`, `.generated-pages/contact/index.html`, `.generated-pages/privacy/index.html`, `.generated-pages/terms/index.html`
+  - `.generated-pages/index.html` (copied from root `index.html`)
+  - `.generated-pages/src -> ../src` symlink (so generated HTML can reference `/src/main.js` during build)
 - When it runs:
   - `npm run dev` runs it automatically via `predev`
   - `npm run build` runs it automatically via `prebuild`
+  - Vite build uses `.generated-pages/` as the temporary build root, so repo root doesn't get cluttered with generated route folders
 
 You can also run it manually:
 

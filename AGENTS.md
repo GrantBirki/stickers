@@ -48,15 +48,26 @@ Practical boundary:
 This repo is moving toward a wrapper-script workflow under `./script/` as the primary developer UX.
 If you are automating repetitive commands, prefer adding/updating a `./script/<name>` wrapper.
 
-Current wrappers:
+Canonical wrappers:
 
-1. `./script/server`
-   - Contents: runs `npm run dev`.
-   - Purpose: single canonical entrypoint for local dev server.
+1. `./script/bootstrap`
+   - Local behavior: `npm install`.
+   - CI behavior (`CI=true`): `npm ci`.
+   - Use this everywhere dependencies are installed (local setup + GitHub Actions).
+2. `./script/server`
+   - Runs local dev server (`npm run dev`).
+3. `./script/build`
+   - Runs production build (`npm run build`).
+4. `./script/lint`
+   - Runs lint/type validation (`npm run validate`).
+5. `./script/test`
+   - Runs test suite with coverage via Vitest.
 
-2. `./script/test`
-   - Contents: runs Vitest with coverage via `./node_modules/.bin/vitest run --coverage`.
-   - Purpose: single canonical entrypoint for tests and coverage enforcement.
+NPM lifecycle hooks (supporting wrappers):
+
+1. `predev`: generates static route entrypoint HTML into `.generated-pages/` before dev server startup.
+2. `prebuild`: generates static route entrypoint HTML into `.generated-pages/` before production build.
+3. No cleanup lifecycle hook is required because generated HTML no longer lands in repo-root route folders.
 
 Why this matters:
 
@@ -71,14 +82,8 @@ Conventions for script wrappers:
    - `set -euo pipefail`
 2. Keep wrappers small and focused (delegate to npm/tool commands).
 3. Prefer adding a wrapper over documenting long ad hoc command sequences.
-4. When possible, reference wrappers in docs and agent instructions.
-5. If a task is “daily-driver” (server, test, lint, build), it should probably have a wrapper.
-
-Potential near-term wrappers (not required yet, but aligned with this model):
-
-1. `./script/build` -> `npm run build`
-2. `./script/validate` -> `npm run validate`
-3. `./script/generate` -> `node scripts/generate-sticker-pages.mjs`
+4. Always use wrappers in CI jobs (do not duplicate raw `npm ci`, `npm run build`, etc. in workflows).
+5. If a task is “daily-driver” (bootstrap, server, build, lint, test), it should have a wrapper.
 
 ## 3) Environment And Toolchain Requirements
 
@@ -91,16 +96,17 @@ Pinned runtime:
 
 Core npm scripts:
 
-1. `predev`: generates static sticker and route entrypoint HTML
+1. `predev`: generates static sticker and route entrypoint HTML under `.generated-pages/`
 2. `dev`: Vite dev server
-3. `prebuild`: regenerates static entrypoint HTML
+3. `prebuild`: regenerates static entrypoint HTML under `.generated-pages/`
 4. `build`: Vite build
 5. `validate`: ESLint + svelte-check
 6. `test`: delegates to `./script/test`
 
-Practical note:
+Wrapper-first practical note:
 
-1. The generator script must run before dev/build, and this is already wired with `predev` and `prebuild`.
+1. Use wrappers (`./script/*`) for humans/agents/CI; treat raw npm scripts as implementation details.
+2. Dev/build generation is automatic via `predev`/`prebuild`; generated entrypoints are isolated in `.generated-pages/`.
 
 ## 4) Deep Architecture Map
 
@@ -217,17 +223,19 @@ Script: `scripts/generate-sticker-pages.mjs`.
 
 What it generates:
 
-1. `stickers/<slug>/index.html` for each sticker from data.
+1. `.generated-pages/stickers/<slug>/index.html` for each sticker from data.
 2. Static route entrypoints:
-   - `examples/index.html`
-   - `example/index.html`
-   - `work/index.html`
-   - `about/index.html`
-   - `services/index.html`
-   - `contact/index.html`
-   - `privacy/index.html`
-   - `terms/index.html`
-3. Card CSS bundle: `public/css/cards/all.css`.
+   - `.generated-pages/examples/index.html`
+   - `.generated-pages/example/index.html`
+   - `.generated-pages/work/index.html`
+   - `.generated-pages/about/index.html`
+   - `.generated-pages/services/index.html`
+   - `.generated-pages/contact/index.html`
+   - `.generated-pages/privacy/index.html`
+   - `.generated-pages/terms/index.html`
+3. `.generated-pages/index.html` copied from repo-root `index.html`.
+4. `.generated-pages/src` symlink to `src/` so generated HTML can still import `/src/main.js`.
+5. Card CSS bundle: `public/css/cards/all.css`.
 
 Why this exists:
 
@@ -236,10 +244,17 @@ Why this exists:
 
 Repository tracking policy for generated sticker routes:
 
-1. Generated `stickers/<slug>/index.html` files are build artifacts.
-2. They should not be committed by default.
-3. The root directory `/stickers/` is gitignored so these files do not pollute `git status`.
-4. This is intentionally root-scoped so `public/img/stickers/**` remains trackable.
+1. Generated route entrypoints are build artifacts under `.generated-pages/**`.
+2. `.generated-pages/` is gitignored and should remain untracked by default.
+3. Runtime asset paths like `public/img/stickers/**` stay tracked and are not part of this ignore pattern.
+4. Generated route HTML should not appear in repo root anymore.
+5. Deployable artifacts remain in `dist/**`, which is what GitHub Pages workflows upload.
+
+Developer ergonomics policy for root cleanliness:
+
+1. Generation happens in a hidden build root (`.generated-pages/`) instead of repo-root route folders.
+2. `vite.config.js` sets `root` to `.generated-pages/` for `vite build` while keeping dev-root as project root.
+3. Result: direct-link static route support is preserved without root clutter and without post-command cleanup scripts.
 
 ### 4.8 Build Configuration
 
@@ -247,7 +262,8 @@ Repository tracking policy for generated sticker routes:
 
 1. Loads env (`VITE_*`) and provides `%VITE_SITE_URL%`/`%VITE_BASE%` replacement via HTML plugin.
 2. Computes dynamic Rollup input entries for sticker pages by reading `public/data/stickers.json`.
-3. Configures test environment and coverage thresholds.
+3. Pins build output to project-root `dist/` even when build entry root is `.generated-pages/`.
+4. Configures test environment and coverage thresholds.
 
 ## 5) Sticker Data Contract (Practical Schema)
 
@@ -310,80 +326,36 @@ Operational detail:
 
 1. PR comments support `.deploy`-driven production branch deployment flow.
 2. New PR template comment includes deployment instructions.
+3. GitHub Actions jobs are wrapper-driven:
+   - bootstrap: `script/bootstrap`
+   - build: `script/build`
+   - lint: `script/lint`
+   - test: `script/test`
+4. `script/build` triggers `prebuild`, which regenerates `.generated-pages/` before `vite build`.
+5. GitHub Pages deployment remains safe because workflows upload only `dist/`.
 
-## 8) Sevbot Branch Audit (main...sevbot)
+## 8) Why Untracked Route Files Appeared Previously (And Why They Should Not Now)
 
-Audit scope:
+Root cause in the old approach:
 
-1. Compared `main` to `HEAD` on branch `sevbot`.
-2. Also inspected current uncommitted workspace state.
+1. Generation wrote route HTML into repo-root folders (`/stickers`, `/about`, `/example`, etc.).
+2. If those folders were not ignored, `git status` surfaced many untracked generated files.
+3. A broad ignore like `stickers/` is dangerous because it can also hide `public/img/stickers/**` in some Git workflows/tools.
 
-Committed branch delta (`main...HEAD`):
+Current fix and expected behavior:
 
-1. Modified `.gitignore`
-   - removed `stickers/` ignore entry
-2. Modified `public/data/stickers.json`
-   - added `sevbot` sticker record
-3. Added image asset
-   - `public/img/stickers/i-have-no-mouth-and-i-must-scream.png`
+1. Generated route HTML now lives under `.generated-pages/**` only.
+2. `.generated-pages/` is ignored, so generation no longer pollutes root status.
+3. Runtime assets remain in tracked `public/**` paths, including `public/img/stickers/**`.
+4. Build output remains `dist/**`; CI deploys only `dist/**` to GitHub Pages.
 
-No other committed files differ from `main` in this branch.
-
-Current uncommitted workspace state (observed during this audit):
-
-1. Staged new file: `script/server`
-2. `AGENTS.md` added as a new untracked file.
-3. Local policy correction: `.gitignore` re-adds root `/stickers/` to hide generated route artifacts without affecting `public/img/stickers/**`.
-
-Why `stickers/*` files appeared previously:
-
-1. Generation script ran via `predev`/`prebuild` (or manual generator run).
-2. This branch removed `stickers/` from `.gitignore`, so generated files became visible as untracked.
-3. A broad `stickers/` ignore pattern can also match `public/img/stickers/**`, which is not desired.
-4. Local fix uses root-scoped `/stickers/` ignore to match intended generated-artifact behavior.
-
-## 9) What Matched vs Diverged From Prior “Mirror Mike” Guidance
-
-Prior guidance intent was: add sevbot card and mirror `mike-mike-dms` wiring unless explicitly changed.
-Here is what was actually done.
-
-Matched:
-
-1. New sticker image added under `public/img/stickers/`.
-2. New sticker entry added to `public/data/stickers.json`.
-3. Uses sticker set and required metadata fields.
-4. Reuses existing `card_back_img` (`/img/card_back_oai_dark.png`).
-5. New inspect route slug resolves to `/stickers/sevbot/`.
-
-Diverged (intentionally or otherwise):
-
-1. `name`
-   - Mike pattern: `#mike-mike-dms`
-   - Sevbot actual: `sevbot` (no `#` prefix)
-2. `rarity`
-   - Mike uses `spiral-holographic`
-   - Sevbot uses `ultra-rare`
-3. `card_front_img`
-   - Mike uses `/img/card_front_texture_silver_holo.png`
-   - Sevbot uses `/img/card_front_texture_silver.png`
-4. `description`
-   - Earlier ask suggested placeholder text for now
-   - Sevbot uses concrete text: `I Have No Mouth, and I Must Scream`
-5. `drop_date`
-   - Mike: `2026-01-02`
-   - Sevbot actual set to `2026-03-16`
-6. Repo behavior around generated pages
-   - Ignore removed for `stickers/`, so generated inspect pages now appear as local changes unless ignored/committed by policy.
-
-None of these divergences inherently break the app. They mostly affect visual style, naming consistency, and workflow hygiene.
-
-## 10) Workflow Guardrails For Future Changes
+## 9) Workflow Guardrails For Future Changes
 
 When adding/updating stickers:
 
 1. Add/verify image asset in `public/img/stickers/`.
 2. Add/update row in `public/data/stickers.json`.
-3. Run generation (`node scripts/generate-sticker-pages.mjs` or `npm run dev` / `npm run build`).
+3. Run generation (`node scripts/generate-sticker-pages.mjs` or `./script/server` / `./script/build`).
 4. Run tests via `./script/test`.
 5. Verify homepage render, card inspect route, and metadata correctness.
 
@@ -401,17 +373,19 @@ When touching static generation behavior:
    - `vite.config.js` sticker input generation
 2. A mismatch here can cause broken direct routes or missing build inputs.
 
-## 11) Resolved Repo Policy: Generated Sticker Entrypoints Are Untracked
+## 10) Resolved Repo Policy: Generated Sticker Entrypoints Are Untracked
 
 Decision:
 
-1. Do not commit generated `stickers/<slug>/index.html` files by default.
-2. Keep root `/stickers/` in `.gitignore`.
+1. Do not commit generated inspect route HTML artifacts (source generation path: `.generated-pages/stickers/<slug>/index.html`).
+2. Keep `.generated-pages/` in `.gitignore`.
 3. Keep runtime asset directories like `public/img/stickers/` tracked.
+4. Do not commit generated route entrypoint HTML (it should stay in `.generated-pages/**` only).
+5. Do not reintroduce root-level route generation + cleanup unless there is a hard Vite regression that forces it.
 
 Rationale:
 
-1. Generation is already guaranteed by `predev` and `prebuild`.
+1. Generation is guaranteed by `predev` and `prebuild`.
 2. CI/deploy runs build steps that regenerate required files.
 3. Tracking generated route HTML adds churn with little source-of-truth value.
 
@@ -420,17 +394,18 @@ When this policy should be revisited:
 1. If deployment ever changes to require checked-in prebuilt route HTML without running build generation.
 2. If an explicit archival/versioning requirement for generated HTML is introduced.
 
-## 12) Quick Command Cheatsheet
+## 11) Quick Command Cheatsheet
 
 Preferred local commands:
 
-1. Start dev server: `./script/server`
-2. Run tests + coverage: `./script/test`
-3. Generate pages manually: `node scripts/generate-sticker-pages.mjs`
-4. Validate lint + svelte-check: `npm run validate`
-5. Build: `npm run build`
+1. Bootstrap dependencies: `./script/bootstrap`
+2. Start dev server: `./script/server`
+3. Build: `./script/build`
+4. Lint + type-check: `./script/lint`
+5. Run tests + coverage: `./script/test`
+6. Generate pages manually (rare): `node scripts/generate-sticker-pages.mjs`
 
-## 13) Final Notes For Agents
+## 12) Final Notes For Agents
 
 1. Treat `public/data/stickers.json` as the source of truth for sticker inventory.
 2. Do not assume inspect pages are available unless generation has run.

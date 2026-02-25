@@ -23,8 +23,8 @@ jobs:
           node-version-file: .node-version
           cache: 'npm'
 
-      - name: install dependencies
-        run: npm ci
+      - name: bootstrap
+        run: script/bootstrap
 
       - name: build
         run: script/build

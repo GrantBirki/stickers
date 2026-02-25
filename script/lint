@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Keep lint job behavior aligned with existing CI expectations:
+# ESLint + svelte-check.
+npm run validate
+

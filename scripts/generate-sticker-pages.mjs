@@ -4,6 +4,10 @@ import path from "node:path";
 const ROOT = process.cwd();
 const STICKERS_JSON = path.join(ROOT, "public", "data", "stickers.json");
 const PUBLIC_ROOT = path.join(ROOT, "public");
+const GENERATED_ROOT = path.join(ROOT, ".generated-pages");
+const MAIN_INDEX_SRC = path.join(ROOT, "index.html");
+const MAIN_INDEX_OUT = path.join(GENERATED_ROOT, "index.html");
+const GENERATED_SRC_LINK = path.join(GENERATED_ROOT, "src");
 const OG_DEFAULT_PUBLIC_PATH = "/og/default.png";
 const SITE_NAME = "birki stickers";
 // These placeholders are replaced by `vite.config.js`'s `html-transform` plugin.
@@ -11,16 +15,16 @@ const SITE_NAME = "birki stickers";
 const SITE_URL_PLACEHOLDER = "%VITE_SITE_URL%";
 const BASE_PLACEHOLDER = "%VITE_BASE%";
 const CARD_CSS_BUNDLE_PUBLIC_PATH = "/css/cards/all.css";
-const OUT_ROOT = path.join(ROOT, "stickers");
+const OUT_ROOT = path.join(GENERATED_ROOT, "stickers");
 const STATIC_ROUTES = [
-  { dir: path.join(ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
-  { dir: path.join(ROOT, "example"), name: "example", description: "Local card effect demos (no licensed imagery)." },
-  { dir: path.join(ROOT, "work"), name: "work", description: "Work" },
-  { dir: path.join(ROOT, "about"), name: "about", description: "About" },
-  { dir: path.join(ROOT, "services"), name: "services", description: "Services" },
-  { dir: path.join(ROOT, "contact"), name: "contact", description: "Contact" },
-  { dir: path.join(ROOT, "privacy"), name: "privacy", description: "Privacy policy" },
-  { dir: path.join(ROOT, "terms"), name: "terms", description: "Terms and conditions" }
+  { dir: path.join(GENERATED_ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
+  { dir: path.join(GENERATED_ROOT, "example"), name: "example", description: "Local card effect demos (no licensed imagery)." },
+  { dir: path.join(GENERATED_ROOT, "work"), name: "work", description: "Work" },
+  { dir: path.join(GENERATED_ROOT, "about"), name: "about", description: "About" },
+  { dir: path.join(GENERATED_ROOT, "services"), name: "services", description: "Services" },
+  { dir: path.join(GENERATED_ROOT, "contact"), name: "contact", description: "Contact" },
+  { dir: path.join(GENERATED_ROOT, "privacy"), name: "privacy", description: "Privacy policy" },
+  { dir: path.join(GENERATED_ROOT, "terms"), name: "terms", description: "Terms and conditions" }
 ];
 
 const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
@@ -30,6 +34,23 @@ const baseSlugFromStickerId = (id) =>
 const fullSlugFromStickerId = (id) => (id ?? "").toString().replace(/^stickers-/, "");
 
 const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
+
+const ensureDirSymlink = (linkPath, targetPath) => {
+  try {
+    const stat = fs.lstatSync(linkPath);
+    if (stat.isSymbolicLink()) {
+      const linkedTo = path.resolve(path.dirname(linkPath), fs.readlinkSync(linkPath));
+      if (linkedTo === targetPath) return;
+    }
+    fs.rmSync(linkPath, { recursive: true, force: true });
+  } catch {
+    // Missing path is expected on first run.
+  }
+
+  ensureDir(path.dirname(linkPath));
+  const relativeTarget = path.relative(path.dirname(linkPath), targetPath) || ".";
+  fs.symlinkSync(relativeTarget, linkPath, "dir");
+};
 
 const escapeHtmlAttr = (v) =>
   (v ?? "")
@@ -285,8 +306,15 @@ const htmlForSlug = ({ slug, title, description }) => {
 
 const main = () => {
   buildCardCssBundle();
+  // Rebuild the generated-root workspace from scratch so removed stickers/routes
+  // don't leave stale HTML entrypoints behind.
+  fs.rmSync(GENERATED_ROOT, { recursive: true, force: true });
+  ensureDir(GENERATED_ROOT);
+  fs.copyFileSync(MAIN_INDEX_SRC, MAIN_INDEX_OUT);
+  ensureDirSymlink(GENERATED_SRC_LINK, path.join(ROOT, "src"));
+
   // These routes are pure static entrypoints for Vite multi-page builds.
-  // They are intentionally generated so they don't have to be committed.
+  // They are intentionally generated into a hidden folder to keep repo root clean.
   for (const route of STATIC_ROUTES) {
     ensureDir(route.dir);
     fs.writeFileSync(path.join(route.dir, "index.html"), htmlForRoute(route), "utf8");
