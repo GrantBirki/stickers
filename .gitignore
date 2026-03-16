@@ -1,6 +1,7 @@
 tmp/
 node_modules/
 dist/
+.generated-pages/
 .DS_Store
 .env
 .env.*

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# In CI we want deterministic, lockfile-faithful installs.
+# Locally we default to npm install for convenience.
+if [[ "${CI:-}" == "true" ]]; then
+  npm ci
+else
+  npm install
+fi
+
