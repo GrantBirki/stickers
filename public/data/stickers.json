@@ -11,5 +11,18 @@
     "drop_date": "2026-01-02",
     "description": "Cryptic ramblings from Mike",
     "total_prints": 10
+  },
+  {
+    "id": "sevbot",
+    "name": "sevbot",
+    "set": "stickers",
+    "number": "0002",
+    "rarity": "ultra-rare",
+    "sticker_img": "/img/stickers/i-have-no-mouth-and-i-must-scream.png",
+    "card_front_img": "/img/card_front_texture_silver.png",
+    "card_back_img": "/img/card_back_oai_dark.png",
+    "drop_date": "2026-03-16",
+    "description": "I Have No Mouth, and I Must Scream",
+    "total_prints": 10
   }
 ]

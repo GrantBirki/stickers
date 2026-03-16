@@ -5,3 +5,11 @@ dist/
 .DS_Store
 .env
 .env.*
+example/
+examples/
+work/
+about/
+services/
+contact/
+privacy/
+terms/
