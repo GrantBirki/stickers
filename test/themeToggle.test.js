@@ -27,12 +27,12 @@ test("ThemeToggle honors stored theme and toggles/persists on click", async () =
 
   const button = await screen.findByRole("switch", { name: /toggle theme/i });
   expect(document.documentElement.dataset.theme).toBe("dark");
-  expect(button).toHaveAttribute("aria-checked", "true");
+  expect(button.getAttribute("aria-checked")).toBe("true");
 
   await fireEvent.click(button);
   expect(localStorage.getItem("theme")).toBe("light");
   expect(document.documentElement.dataset.theme).toBe("light");
-  expect(button).toHaveAttribute("aria-checked", "false");
+  expect(button.getAttribute("aria-checked")).toBe("false");
 });
 
 test("ThemeToggle follows system theme until user locks a choice", async () => {

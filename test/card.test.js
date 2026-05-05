@@ -45,10 +45,10 @@ test("Card renders a sticker card with derived image URLs, metadata, and data at
 
   const root = container.querySelector(".card");
   expect(root).not.toBe(null);
-  expect(root).toHaveAttribute("data-set", "stickers");
+  expect(root.getAttribute("data-set")).toBe("stickers");
   expect(root.className).toMatch(/water/);
-  expect(root).toHaveAttribute("data-sticker-foil", "full");
-  expect(root).toHaveAttribute("data-front-shape", "rect");
+  expect(root.getAttribute("data-sticker-foil")).toBe("full");
+  expect(root.getAttribute("data-front-shape")).toBe("rect");
   expect(root.classList.contains("masked")).toBe(true);
 
   // Derived alt text and relative src normalization.
@@ -59,11 +59,11 @@ test("Card renders a sticker card with derived image URLs, metadata, and data at
   expect(back.getAttribute("src")).toBe("/img/back.png");
 
   // Sticker metadata block.
-  expect(screen.getByText("Foo")).toBeInTheDocument();
-  expect(screen.getByText("2026/01/02")).toBeInTheDocument();
-  expect(screen.getByText("First drop")).toBeInTheDocument();
-  expect(screen.getByText("Total prints: 10")).toBeInTheDocument();
-  expect(screen.getByText("0001")).toBeInTheDocument();
+  expect(screen.getByText("Foo")).toBeTruthy();
+  expect(screen.getByText("2026/01/02")).toBeTruthy();
+  expect(screen.getByText("First drop")).toBeTruthy();
+  expect(screen.getByText("Total prints: 10")).toBeTruthy();
+  expect(screen.getByText("0001")).toBeTruthy();
 
   // Front override styles (when card_front_img is provided for sticker cards).
   const front = container.querySelector(".card__front");
@@ -76,7 +76,7 @@ test("Card renders a sticker card with derived image URLs, metadata, and data at
   await fireEvent.load(face);
 
   await waitFor(() => expect(root.classList.contains("loading")).toBe(false));
-  expect(root).toHaveAttribute("data-front-shape", "square");
+  expect(root.getAttribute("data-front-shape")).toBe("square");
   expect(front.getAttribute("style")).toMatch(/--mask: url\(mask\.png\)/);
   expect(front.getAttribute("style")).toMatch(/--foil: url\(foil\.png\)/);
 });

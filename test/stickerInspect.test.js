@@ -32,7 +32,7 @@ test("StickerInspect loads a sticker by base slug and restores body overflow on 
   expect(document.body.style.overflow).toBe("hidden");
 
   // flip_on_click is forced on the inspect view.
-  expect(await screen.findByLabelText("Flip card: Foo Sticker.")).toBeInTheDocument();
+  expect(await screen.findByLabelText("Flip card: Foo Sticker.")).toBeTruthy();
 
   unmount();
   expect(document.body.style.overflow).toBe("scroll");
@@ -55,7 +55,7 @@ test("StickerInspect falls back to matching full slug and normalizes leading/tra
   );
 
   render(StickerInspect, { props: { slug: "/bar-002/" } });
-  expect(await screen.findByLabelText("Flip card: Bar Sticker.")).toBeInTheDocument();
+  expect(await screen.findByLabelText("Flip card: Bar Sticker.")).toBeTruthy();
 });
 
 test("StickerInspect ignores null ids while matching full slugs", async () => {
@@ -76,7 +76,7 @@ test("StickerInspect ignores null ids while matching full slugs", async () => {
   );
 
   render(StickerInspect, { props: { slug: "foo-001" } });
-  expect(await screen.findByLabelText("Flip card: Foo Sticker.")).toBeInTheDocument();
+  expect(await screen.findByLabelText("Flip card: Foo Sticker.")).toBeTruthy();
 });
 
 test("StickerInspect normalizes nullish slugs safely", async () => {

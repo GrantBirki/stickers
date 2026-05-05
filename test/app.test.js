@@ -22,16 +22,16 @@ test("App routes home and examples pages", async () => {
   window.history.pushState({}, "", "/");
   render(App);
 
-  expect(await screen.findByRole("heading", { level: 1, name: "Sticker Drops" })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1, name: "Sticker Drops" })).toBeTruthy();
 
   window.history.pushState({}, "", "/examples");
   window.dispatchEvent(new PopStateEvent("popstate"));
-  expect(await screen.findByRole("heading", { level: 1, name: "Examples" })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1, name: "Examples" })).toBeTruthy();
 
   // The route also matches singular /example.
   window.history.pushState({}, "", "/example");
   window.dispatchEvent(new PopStateEvent("popstate"));
-  expect(await screen.findByRole("heading", { level: 1, name: "Examples" })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1, name: "Examples" })).toBeTruthy();
 });
 
 test("App scrolls to a hash target after mount", async () => {
@@ -67,14 +67,14 @@ test("App routes static pages and includes ThemeToggle + Footer outside inspect 
 
   render(App);
 
-  expect(await screen.findByRole("heading", { level: 1, name: "Work" })).toBeInTheDocument();
-  expect(screen.getByRole("switch", { name: /toggle theme/i })).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /source code/i })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1, name: "Work" })).toBeTruthy();
+  expect(screen.getByRole("switch", { name: /toggle theme/i })).toBeTruthy();
+  expect(screen.getByRole("link", { name: /source code/i })).toBeTruthy();
 
   // popstate navigation updates the rendered page.
   window.history.pushState({}, "", "/about/");
   window.dispatchEvent(new PopStateEvent("popstate"));
-  expect(await screen.findByRole("heading", { level: 1, name: "About" })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1, name: "About" })).toBeTruthy();
 });
 
 test("App routes /stickers/* to StickerInspect and hides ThemeToggle/Footer", async () => {
@@ -100,7 +100,7 @@ test("App routes /stickers/* to StickerInspect and hides ThemeToggle/Footer", as
   expect(screen.queryByRole("switch", { name: /toggle theme/i })).toBe(null);
   expect(screen.queryByRole("link", { name: /source code/i })).toBe(null);
 
-  expect(await screen.findByLabelText("Flip card: Foo.")).toBeInTheDocument();
+  expect(await screen.findByLabelText("Flip card: Foo.")).toBeTruthy();
 
   const main = document.querySelector("main.content");
   expect(main.classList.contains("content--inspect")).toBe(true);
