@@ -12,10 +12,10 @@ import Examples from "../src/pages/Examples.svelte";
 test("Examples renders the playground page and grouped card sections", () => {
   const { container } = render(Examples);
 
-  expect(screen.getByRole("heading", { level: 1, name: "Examples" })).toBeInTheDocument();
-  expect(screen.getByText("#mike-mike-dms")).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 1, name: "Examples" })).toBeTruthy();
+  expect(screen.getByText("#mike-mike-dms")).toBeTruthy();
 
-  expect(screen.getByRole("link", { name: "Basic / Non-Holo" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Basic / Non-Holo" })).toBeTruthy();
 
   const cards = screen.getAllByTestId("card-stub");
   expect(cards.length).toBeGreaterThan(5);
@@ -23,4 +23,3 @@ test("Examples renders the playground page and grouped card sections", () => {
   // The showcase card in the header is explicitly marked showcase={true}.
   expect(container.querySelector('[data-showcase="true"]')).not.toBe(null);
 });
-

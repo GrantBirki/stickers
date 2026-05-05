@@ -12,5 +12,5 @@ test("Footer renders a link to the source repo", () => {
   expect(link.getAttribute("rel")).toMatch(/noopener/);
   expect(link.getAttribute("rel")).toMatch(/noreferrer/);
 
-  expect(screen.getByText(/Made with/i)).toBeInTheDocument();
+  expect(screen.getByText(/Made with/i)).toBeTruthy();
 });

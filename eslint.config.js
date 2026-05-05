@@ -44,6 +44,14 @@ export default [
     },
   },
 
+  // Core ESLint cannot see assignments consumed only by Svelte markup.
+  {
+    files: ['src/**/*.svelte', 'test/**/*.svelte'],
+    rules: {
+      'no-useless-assignment': 'off',
+    },
+  },
+
   // Node tests.
   {
     files: ['test/**/*.{js,mjs,cjs}'],

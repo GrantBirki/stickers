@@ -47,7 +47,7 @@ test("Home loads stickers, builds slugs, and drives the inspect FAB navigation",
 
   render(Home);
 
-  expect(screen.getByText("loading...")).toBeInTheDocument();
+  expect(screen.getByText("loading...")).toBeTruthy();
 
   const foo = await screen.findByLabelText("Expand card: Foo.");
   const fooTwo = await screen.findByLabelText("Expand card: Foo Two.");
@@ -116,7 +116,7 @@ test("Home appends a mystery card when configured via site.json", async () => {
   render(Home);
 
   // Mystery card is still a sticker card, but uses a special "mystery" face and alt text.
-  expect(await screen.findByAltText("A mystery card")).toBeInTheDocument();
+  expect(await screen.findByAltText("A mystery card")).toBeTruthy();
 });
 
 test("Home falls back to default site config when site.json is not ok", async () => {
