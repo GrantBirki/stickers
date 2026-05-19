@@ -35,7 +35,7 @@
     "card_front_img": "/img/card_front_texture_silver_holo.png",
     "card_back_img": "/img/card_back_oai_dark.png",
     "drop_date": "2026-05-19",
-    "description": "Silence Developer",
+    "description": "github.com/Lightning-AI/pytorch-lightning/issues/21691#issuecomment-4357905493",
     "total_prints": 10
   }
 ]
