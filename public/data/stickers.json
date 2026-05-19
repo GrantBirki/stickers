@@ -24,5 +24,18 @@
     "drop_date": "2026-03-16",
     "description": "I Have No Mouth, and I Must Scream",
     "total_prints": 10
+  },
+  {
+    "id": "silence-developer",
+    "name": "Silence Developer",
+    "set": "stickers",
+    "number": "0003",
+    "rarity": "shiny-vmax",
+    "sticker_img": "/img/stickers/silence-developer.png",
+    "card_front_img": "/img/card_front_texture_silver_holo.png",
+    "card_back_img": "/img/card_back_oai_dark.png",
+    "drop_date": "2026-05-19",
+    "description": "Silence Developer",
+    "total_prints": 10
   }
 ]
