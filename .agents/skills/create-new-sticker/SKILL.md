@@ -1,5 +1,5 @@
 ---
-name: Create new sticker
+name: create-new-sticker
 description: Add a new sticker card to this stickers repo from a provided image, including vendoring the asset, updating sticker data, choosing card backing/effects, validating, and opening a PR.
 ---
 

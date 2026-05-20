@@ -2,4 +2,4 @@ interface:
   display_name: "Create New Sticker"
   short_description: "Add a vendored sticker card, validate it, and open a PR."
   brand_color: "#0F172A"
-  default_prompt: "Create a new sticker from the provided image and open a PR."
+  default_prompt: "Use $create-new-sticker to create a new sticker from the provided image and open a PR."
