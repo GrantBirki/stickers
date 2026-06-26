@@ -1,6 +1,48 @@
 import js from '@eslint/js';
 import svelte from 'eslint-plugin-svelte';
-import globals from 'globals';
+
+const readonlyGlobals = (names) => Object.fromEntries(names.map((name) => [name, 'readonly']));
+
+const browserGlobals = readonlyGlobals([
+  'AbortController',
+  'CustomEvent',
+  'Event',
+  'FocusEvent',
+  'HTMLElement',
+  'IntersectionObserver',
+  'MouseEvent',
+  'PointerEvent',
+  'PopStateEvent',
+  'Storage',
+  'URL',
+  'cancelAnimationFrame',
+  'clearInterval',
+  'clearTimeout',
+  'console',
+  'document',
+  'fetch',
+  'globalThis',
+  'history',
+  'localStorage',
+  'location',
+  'queueMicrotask',
+  'requestAnimationFrame',
+  'sessionStorage',
+  'setInterval',
+  'setTimeout',
+  'window',
+]);
+
+const nodeGlobals = readonlyGlobals([
+  'Buffer',
+  'URL',
+  'clearTimeout',
+  'console',
+  'global',
+  'globalThis',
+  'process',
+  'setTimeout',
+]);
 
 const unusedVarsRule = [
   'error',
@@ -36,7 +78,7 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        ...globals.browser,
+        ...browserGlobals,
       },
     },
     rules: {
@@ -59,8 +101,8 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        ...globals.node,
-        ...globals.browser,
+        ...nodeGlobals,
+        ...browserGlobals,
       },
     },
     rules: {
@@ -75,7 +117,7 @@ export default [
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
-        ...globals.node,
+        ...nodeGlobals,
       },
     },
     rules: {

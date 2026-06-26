@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { render, screen } from "@testing-library/svelte";
+import { render, screen } from "./helpers/svelte.js";
 
 import StaticPage from "../src/pages/StaticPage.svelte";
 

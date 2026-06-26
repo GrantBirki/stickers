@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/svelte";
+import { render, screen, fireEvent } from "./helpers/svelte.js";
 
 import ThemeToggle from "../src/lib/components/ThemeToggle.svelte";
 

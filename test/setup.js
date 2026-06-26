@@ -1,5 +1,5 @@
 import { afterEach, vi } from "vitest";
-import { cleanup } from "@testing-library/svelte";
+import { cleanup } from "./helpers/svelte.js";
 
 import { activeCard } from "../src/lib/stores/activeCard.js";
 import { activeStickerId } from "../src/lib/stores/activeStickerId.js";
