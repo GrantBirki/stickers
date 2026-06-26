@@ -73,7 +73,7 @@ export default defineConfig(({ mode, command }) => {
       ? {
           // Vitest loads modules through Vite's SSR pipeline, which can otherwise resolve
           // `import "svelte"` to the server entrypoint. Force the client runtime so
-          // @testing-library/svelte can mount components in jsdom.
+          // local component tests can mount components in jsdom.
           alias: [
             { find: /^svelte$/, replacement: resolve(projectRoot, "node_modules/svelte/src/index-client.js") }
           ]
@@ -99,7 +99,7 @@ export default defineConfig(({ mode, command }) => {
         deps: {
           // Ensure Vite transforms these deps so imports use the configured resolver
           // (otherwise Node resolves Svelte's default export to the server entry).
-          inline: ["svelte", "@testing-library/svelte", "@testing-library/svelte-core"]
+          inline: ["svelte"]
         }
       },
       restoreMocks: true,

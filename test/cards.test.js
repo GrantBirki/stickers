@@ -1,5 +1,5 @@
 import { test, expect } from "vitest";
-import { render, waitFor } from "@testing-library/svelte";
+import { render, waitFor } from "./helpers/svelte.js";
 
 import Cards from "../src/Cards.svelte";
 import { activeCard } from "../src/lib/stores/activeCard.js";

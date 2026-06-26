@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/svelte";
+import { render, screen } from "./helpers/svelte.js";
 
 import StickerInspect from "../src/pages/StickerInspect.svelte";
 

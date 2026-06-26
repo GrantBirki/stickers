@@ -1,5 +1,5 @@
 import { test, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/svelte";
+import { render, screen, fireEvent, waitFor } from "./helpers/svelte.js";
 
 import Home from "../src/pages/Home.svelte";
 
