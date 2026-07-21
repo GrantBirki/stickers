@@ -1,35 +1,16 @@
 {
   "compilerOptions": {
     "moduleResolution": "Bundler",
-    "target": "ESNext",
+    "target": "ES2022",
     "module": "ESNext",
-    "ignoreDeprecations": "6.0",
     "strict": true,
-    "noEmit": true,
-    "allowJs": false,
     "allowImportingTsExtensions": true,
-    /**
-     * svelte-preprocess cannot figure out whether you have
-     * a value or a type, so tell TypeScript to enforce using
-     * `import type` instead of `import` for Types.
-     */
+    "rewriteRelativeImportExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
-    "resolveJsonModule": true,
-    /**
-     * To have warnings / errors of the Svelte compiler at the
-     * correct position, enable source maps by default.
-     */
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    /** Svelte component scripts and repository modules are TypeScript-only. */
-    "checkJs": false
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "noEmit": true
   },
-  /**
-   * Use global.d.ts instead of compilerOptions.types
-   * to avoid limiting type declarations.
-   */
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte"]
+  "include": ["src/**/*.ts"]
 }
