@@ -1,9 +1,9 @@
-import { test, expect } from "vitest";
+import { test, expect } from "./test-utils.ts";
 
 import { get } from "svelte/store";
 
-import { activeCard } from "../src/lib/stores/activeCard.js";
-import { activeStickerId } from "../src/lib/stores/activeStickerId.js";
+import { activeCard } from "../src/lib/stores/activeCard.ts";
+import { activeStickerId } from "../src/lib/stores/activeStickerId.ts";
 
 test("activeCard store defaults to undefined and can be updated", () => {
   expect(get(activeCard)).toBe(undefined);

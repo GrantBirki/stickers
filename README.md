@@ -10,10 +10,13 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 
 ## Dev
 
-- `npm install`
-- `npm run dev`
-- `npm run build`
-- `npm run validate` (runs ESLint + svelte-check)
+- Bootstrap dependencies: `./script/bootstrap`
+- Start the development server: `./script/server`
+- Build the production site: `./script/build`
+- Run strict TypeScript and Svelte checks: `./script/lint`
+- Run tests with coverage: `./script/test`
+
+The project uses TypeScript throughout. Tests run on Node's built-in test runner, assertion library, mocks, timers, and V8 coverage; `jsdom` is retained only to provide the browser DOM needed by Svelte component tests. Registry-managed dependencies are exact-pinned in `package.json` and `package-lock.json`.
 
 ## Generated Sticker Inspect Pages
 
@@ -29,23 +32,23 @@ This repo generates a **dark-mode-only** "inspect" page for every sticker in `pu
 We generate a few small static HTML entrypoints so the site can be hosted as a fully static build and
 still support direct links (no server-side routing required).
 
-- Script: `scripts/generate-sticker-pages.mjs`
+- Script: `scripts/generate-sticker-pages.mts`
 - Outputs:
   - `.generated-pages/stickers/<slug>/index.html` (one folder per sticker)
   - `.generated-pages/examples/index.html` (hidden CSS effect playground route)
   - `.generated-pages/example/index.html` (alias for `/examples/`)
   - `.generated-pages/work/index.html`, `.generated-pages/about/index.html`, `.generated-pages/services/index.html`, `.generated-pages/contact/index.html`, `.generated-pages/privacy/index.html`, `.generated-pages/terms/index.html`
   - `.generated-pages/index.html` (copied from root `index.html`)
-  - `.generated-pages/src -> ../src` symlink (so generated HTML can reference `/src/main.js` during build)
+  - `.generated-pages/src -> ../src` symlink (so generated HTML can reference `/src/main.ts` during build)
 - When it runs:
-  - `npm run dev` runs it automatically via `predev`
-  - `npm run build` runs it automatically via `prebuild`
+  - `./script/server` generates the pages before starting Vite
+  - `./script/build` generates the pages before building with Vite
   - Vite build uses `.generated-pages/` as the temporary build root, so repo root doesn't get cluttered with generated route folders
 
 You can also run it manually:
 
 ```bash
-node scripts/generate-sticker-pages.mjs
+node scripts/generate-sticker-pages.mts
 ```
 
 Notes:

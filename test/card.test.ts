@@ -1,10 +1,10 @@
-import { test, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "./helpers/svelte.js";
+import { test, expect, vi } from "./test-utils.ts";
+import { render, screen, fireEvent, waitFor } from "./helpers/svelte.ts";
 import { get } from "svelte/store";
 
 import Card from "../src/lib/components/Card.svelte";
-import { activeCard } from "../src/lib/stores/activeCard.js";
-import { activeStickerId } from "../src/lib/stores/activeStickerId.js";
+import { activeCard } from "../src/lib/stores/activeCard.ts";
+import { activeStickerId } from "../src/lib/stores/activeStickerId.ts";
 
 const setVisibility = (state) => {
   const original = Object.getOwnPropertyDescriptor(document, "visibilityState");

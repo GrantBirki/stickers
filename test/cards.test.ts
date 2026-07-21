@@ -1,8 +1,8 @@
-import { test, expect } from "vitest";
-import { render, waitFor } from "./helpers/svelte.js";
+import { test, expect } from "./test-utils.ts";
+import { render, waitFor } from "./helpers/svelte.ts";
 
 import Cards from "../src/Cards.svelte";
-import { activeCard } from "../src/lib/stores/activeCard.js";
+import { activeCard } from "../src/lib/stores/activeCard.ts";
 
 test("Cards toggles the .active class when the activeCard element is inside the grid", async () => {
   const { container } = render(Cards);

@@ -1,17 +1,19 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
 
   // Zero-deps theme toggle:
   // - sets `data-theme="light|dark"` on <html>
   // - persists explicit choice in localStorage
   // - defaults to OS preference if nothing is stored
-  let theme = "light"; // applied theme: "light" | "dark"
+  type Theme = "light" | "dark";
+
+  let theme: Theme = "light";
   let locked = false; // if true, user explicitly chose a theme (stored)
 
   const getSystemTheme = () =>
     window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
 
-  const apply = (t) => {
+  const apply = (t: Theme) => {
     theme = t;
     document.documentElement.dataset.theme = t;
   };

@@ -1,12 +1,13 @@
-<script>
+<script lang="ts">
   import CardList from "../Cards.svelte";
   import Card from "../lib/components/Card.svelte";
+  import type { CardData } from "../lib/types.ts";
 
   const FACE = "/img/stickers/mike-mike-dms-sticker.png";
   const BACK = "/img/oai_back.png";
   const NAME = "#mike-mike-dms";
 
-  const base = {
+  const base: Omit<CardData, "id"> = {
     name: NAME,
     card_front_img: FACE,
     card_back_img: BACK,
@@ -14,7 +15,7 @@
     subtypes: ["Basic"]
   };
 
-  const withBase = (c) => ({
+  const withBase = (c: Omit<CardData, "name">): CardData => ({
     ...base,
     ...c
   });

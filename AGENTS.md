@@ -3,7 +3,7 @@
 This file is the operational guide for humans and coding agents working in this repository.
 It is intentionally detailed and specific to how `stickers` actually works right now.
 
-Last updated: February 25, 2026 (based on current branch state and local workspace inspection).
+Last updated: July 20, 2026 (based on current branch state and local workspace inspection).
 
 ## 1) Project Mission And Operating Model
 
@@ -55,19 +55,19 @@ Canonical wrappers:
    - CI behavior (`CI=true`): `npm ci`.
    - Use this everywhere dependencies are installed (local setup + GitHub Actions).
 2. `./script/server`
-   - Runs local dev server (`npm run dev`).
+   - Generates static entrypoints, then runs the local Vite dev server directly.
 3. `./script/build`
-   - Runs production build (`npm run build`).
+   - Generates static entrypoints, then runs the production Vite build directly.
 4. `./script/lint`
-   - Runs lint/type validation (`npm run validate`).
+   - Runs strict TypeScript and Svelte validation with `svelte-check`.
 5. `./script/test`
-   - Runs test suite with coverage via Vitest.
+   - Runs the test suite with Node's built-in test runner and V8 coverage.
 
-NPM lifecycle hooks (supporting wrappers):
+Wrapper behavior:
 
-1. `predev`: generates static route entrypoint HTML into `.generated-pages/` before dev server startup.
-2. `prebuild`: generates static route entrypoint HTML into `.generated-pages/` before production build.
-3. No cleanup lifecycle hook is required because generated HTML no longer lands in repo-root route folders.
+1. `script/server` and `script/build` call `node scripts/generate-sticker-pages.mts` explicitly before Vite.
+2. `script/lint` and `script/test` invoke their installed binaries or Node directly, avoiding extra package-manager command layers.
+3. No cleanup lifecycle hook is required because generated HTML never lands in repo-root route folders.
 
 Why this matters:
 
@@ -80,7 +80,7 @@ Conventions for script wrappers:
 1. Use Bash with:
    - `#!/usr/bin/env bash`
    - `set -euo pipefail`
-2. Keep wrappers small and focused (delegate to npm/tool commands).
+2. Keep wrappers small and focused (delegate to Node or installed tool binaries).
 3. Prefer adding a wrapper over documenting long ad hoc command sequences.
 4. Always use wrappers in CI jobs (do not duplicate raw `npm ci`, `npm run build`, etc. in workflows).
 5. If a task is “daily-driver” (bootstrap, server, build, lint, test), it should have a wrapper.
@@ -91,22 +91,22 @@ Pinned runtime:
 
 1. Node version from `.node-version`: `24.11.1`
 2. Package manager: `npm`
-3. Frontend stack: Svelte 5 + Vite 7
-4. Test stack: Vitest + Testing Library + jsdom
+3. Language: strict TypeScript for application, component, build, and test source
+4. Frontend stack: Svelte 5 + Vite 8
+5. Test stack: Node `node:test` + `node:assert` + built-in V8 coverage, with jsdom only for browser DOM behavior
 
 Core npm scripts:
 
-1. `predev`: generates static sticker and route entrypoint HTML under `.generated-pages/`
-2. `dev`: Vite dev server
-3. `prebuild`: regenerates static entrypoint HTML under `.generated-pages/`
-4. `build`: Vite build
-5. `validate`: ESLint + svelte-check
-6. `test`: delegates to `./script/test`
+1. `dev`: delegates to `./script/server`
+2. `build`: delegates to `./script/build`
+3. `check`, `lint`, and `validate`: delegate to `./script/lint`
+4. `test`: delegates to `./script/test`
 
 Wrapper-first practical note:
 
 1. Use wrappers (`./script/*`) for humans/agents/CI; treat raw npm scripts as implementation details.
-2. Dev/build generation is automatic via `predev`/`prebuild`; generated entrypoints are isolated in `.generated-pages/`.
+2. Dev/build generation is explicit inside `script/server` and `script/build`; generated entrypoints are isolated in `.generated-pages/`.
+3. The six direct npm dependencies are exact-pinned. Do not reintroduce ESLint, Vitest, or general testing-library packages for behavior covered by the current TypeScript, Svelte, and Node standard tooling.
 
 ## 4) Deep Architecture Map
 
@@ -114,7 +114,7 @@ Wrapper-first practical note:
 
 Main entry:
 
-1. `src/main.js` mounts `App` into `#app` with Svelte 5 `mount()`.
+1. `src/main.ts` mounts `App` into `#app` with Svelte 5 `mount()`.
 
 Router behavior in `src/App.svelte`:
 
@@ -154,7 +154,7 @@ Router behavior in `src/App.svelte`:
 
 ### 4.4 Slug Semantics
 
-Helper: `src/lib/helpers/stickerSlugs.js`.
+Helper: `src/lib/helpers/stickerSlugs.ts`.
 
 Rules:
 
@@ -219,7 +219,7 @@ Card effect styles:
 
 ### 4.7 Build-Time Static Entrypoint Generation
 
-Script: `scripts/generate-sticker-pages.mjs`.
+Script: `scripts/generate-sticker-pages.mts`.
 
 What it generates:
 
@@ -234,7 +234,7 @@ What it generates:
    - `.generated-pages/privacy/index.html`
    - `.generated-pages/terms/index.html`
 3. `.generated-pages/index.html` copied from repo-root `index.html`.
-4. `.generated-pages/src` symlink to `src/` so generated HTML can still import `/src/main.js`.
+4. `.generated-pages/src` symlink to `src/` so generated HTML can still import `/src/main.ts`.
 5. Card CSS bundle: `public/css/cards/all.css`.
 
 Why this exists:
@@ -253,17 +253,17 @@ Repository tracking policy for generated sticker routes:
 Developer ergonomics policy for root cleanliness:
 
 1. Generation happens in a hidden build root (`.generated-pages/`) instead of repo-root route folders.
-2. `vite.config.js` sets `root` to `.generated-pages/` for `vite build` while keeping dev-root as project root.
+2. `vite.config.ts` sets `root` to `.generated-pages/` for `vite build` while keeping dev-root as project root.
 3. Result: direct-link static route support is preserved without root clutter and without post-command cleanup scripts.
 
 ### 4.8 Build Configuration
 
-`vite.config.js`:
+`vite.config.ts`:
 
 1. Loads env (`VITE_*`) and provides `%VITE_SITE_URL%`/`%VITE_BASE%` replacement via HTML plugin.
 2. Computes dynamic Rollup input entries for sticker pages by reading `public/data/stickers.json`.
 3. Pins build output to project-root `dist/` even when build entry root is `.generated-pages/`.
-4. Configures test environment and coverage thresholds.
+4. Test compilation is intentionally separate: `test/svelte-loader.ts` compiles Svelte components for Node's test runner.
 
 ## 5) Sticker Data Contract (Practical Schema)
 
@@ -294,22 +294,21 @@ Primary test command:
 
 1. `./script/test`
 
-Current observed result (local run on Feb 25, 2026):
+Current observed result (local run on July 20, 2026):
 
 1. 13 test files passed
 2. 49 tests passed
 3. Coverage thresholds passed
 
-Lint/type checks:
+Static checks:
 
-1. `npm run validate` runs ESLint + svelte-check.
+1. `./script/lint` runs strict TypeScript and Svelte diagnostics through `svelte-check`.
 
-Coverage thresholds are strict and intentional in `vite.config.js`:
+Coverage thresholds are strict and intentional in `script/test`:
 
 1. lines: 98
 2. functions: 100
 3. branches: 87
-4. statements: 98
 
 ## 7) CI/CD And Deployment Notes
 
@@ -331,7 +330,7 @@ Operational detail:
    - build: `script/build`
    - lint: `script/lint`
    - test: `script/test`
-4. `script/build` triggers `prebuild`, which regenerates `.generated-pages/` before `vite build`.
+4. `script/build` regenerates `.generated-pages/` before invoking the installed Vite binary.
 5. GitHub Pages deployment remains safe because workflows upload only `dist/`.
 
 ## 8) Why Untracked Route Files Appeared Previously (And Why They Should Not Now)
@@ -355,7 +354,7 @@ When adding/updating stickers:
 
 1. Add/verify image asset in `public/img/stickers/`.
 2. Add/update row in `public/data/stickers.json`.
-3. Run generation (`node scripts/generate-sticker-pages.mjs` or `./script/server` / `./script/build`).
+3. Run generation (`node scripts/generate-sticker-pages.mts` or `./script/server` / `./script/build`).
 4. Run tests via `./script/test`.
 5. Verify homepage render, card inspect route, and metadata correctness.
 
@@ -368,9 +367,9 @@ When changing command workflows:
 When touching static generation behavior:
 
 1. Keep slug logic aligned across:
-   - `src/lib/helpers/stickerSlugs.js`
-   - `scripts/generate-sticker-pages.mjs`
-   - `vite.config.js` sticker input generation
+   - `src/lib/helpers/stickerSlugs.ts`
+   - `scripts/generate-sticker-pages.mts`
+   - `vite.config.ts` sticker input generation
 2. A mismatch here can cause broken direct routes or missing build inputs.
 
 ## 10) Resolved Repo Policy: Generated Sticker Entrypoints Are Untracked
@@ -385,7 +384,7 @@ Decision:
 
 Rationale:
 
-1. Generation is guaranteed by `predev` and `prebuild`.
+1. Generation is guaranteed by the `script/server` and `script/build` entrypoints used locally and in CI.
 2. CI/deploy runs build steps that regenerate required files.
 3. Tracking generated route HTML adds churn with little source-of-truth value.
 
@@ -403,7 +402,7 @@ Preferred local commands:
 3. Build: `./script/build`
 4. Lint + type-check: `./script/lint`
 5. Run tests + coverage: `./script/test`
-6. Generate pages manually (rare): `node scripts/generate-sticker-pages.mjs`
+6. Generate pages manually (rare): `node scripts/generate-sticker-pages.mts`
 
 ## 12) Final Notes For Agents
 

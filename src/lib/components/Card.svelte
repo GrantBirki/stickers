@@ -1,18 +1,35 @@
-<script>
+<script lang="ts">
   import { spring } from "svelte/motion";
   import { onDestroy, onMount } from "svelte";
-  import { activeCard } from "../stores/activeCard.js";
-  import { activeStickerId } from "../stores/activeStickerId.js";
-  import { orientation, resetBaseOrientation } from "../stores/orientation.js";
-  import { clamp, round, adjust } from "../helpers/Math.js";
+  import { activeCard } from "../stores/activeCard.ts";
+  import { activeStickerId } from "../stores/activeStickerId.ts";
+  import { orientation, resetBaseOrientation } from "../stores/orientation.ts";
+  import { clamp, round, adjust } from "../helpers/Math.ts";
+  import type { OrientationReading } from "../stores/orientation.ts";
+  import type { CardText, CardTextList } from "../types.ts";
+
+  interface Point {
+    x: number;
+    y: number;
+  }
+
+  interface GlarePoint extends Point {
+    o: number;
+  }
+
+  interface SpringUpdate {
+    background: Point;
+    rotate: Point;
+    glare: GlarePoint;
+  }
 
   // card metadata props
   export let id = "";
   export let name = "";
-  export let number = "";
+  export let number: CardText = "";
   export let set = "";
-  export let types = "";
-  export let subtypes = "basic";
+  export let types: CardTextList = "";
+  export let subtypes: CardTextList = "basic";
   export let supertype = "pokémon";
   export let rarity = "common";
   export let hidden = false;
@@ -44,7 +61,7 @@
   // Sticker/trading-card metadata (optional)
   export let drop_date = "";
   export let description = "";
-  export let total_prints = "";
+  export let total_prints: CardText = "";
 
   const randomSeed = {
     x: Math.random(),
@@ -65,7 +82,7 @@
   let back_img = back;
   let front_img = "";
 
-  const resolveImgSrc = (src) => {
+  const resolveImgSrc = (src: string): string => {
     if (!src) return "";
     // Absolute/served assets (http(s), /public/*, data URLs) should be used as-is.
     if (src.startsWith("http") || src.startsWith("/") || src.startsWith("data:")) return src;
@@ -74,7 +91,7 @@
     return `/${cleaned}`;
   };
 
-  const cssUrl = (src) => {
+  const cssUrl = (src: string): string => {
     const resolved = resolveImgSrc(src);
     if (!resolved) return "none";
     // Quote to survive URLs with parens/spaces.
@@ -82,10 +99,10 @@
   };
 
 
-  let thisCard;
-  let repositionTimer;
-  let rafId = null;
-  let pendingSpringUpdate = null;
+  let thisCard: HTMLElement;
+  let repositionTimer: number | undefined;
+  let rafId: number | null = null;
+  let pendingSpringUpdate: SpringUpdate | null = null;
 
   let active = false;
   let interacting = false;
@@ -104,21 +121,21 @@
   let springScale = spring(1, springPopoverSettings);
   let springFlip = spring(0, springPopoverSettings);
 
-  let showcaseInterval;
-  let showcaseTimerStart;
-  let showcaseTimerEnd;
+  let showcaseInterval: number | undefined;
+  let showcaseTimerStart: number | undefined;
+  let showcaseTimerEnd: number | undefined;
   let showcaseRunning = showcase;
 
   const endShowcase = () => {
     if (showcaseRunning) {
-      clearTimeout(showcaseTimerEnd);
-      clearTimeout(showcaseTimerStart);
-      clearInterval(showcaseInterval);
+      if (showcaseTimerEnd !== undefined) clearTimeout(showcaseTimerEnd);
+      if (showcaseTimerStart !== undefined) clearTimeout(showcaseTimerStart);
+      if (showcaseInterval !== undefined) clearInterval(showcaseInterval);
       showcaseRunning = false;
     }
   };
 
-  const interact = (e) => {
+  const interact = (event: PointerEvent | MouseEvent | TouchEvent) => {
     
     endShowcase();
 
@@ -133,16 +150,14 @@
 
     interacting = true;
 
-    if (e.type === "touchmove") {
-      e.clientX = e.touches[0].clientX;
-      e.clientY = e.touches[0].clientY;
-    }
-
-    const $el = e.target;
+    const touch = event.type === "touchmove" ? (event as TouchEvent).touches[0] : undefined;
+    const clientX = touch?.clientX ?? (event as MouseEvent).clientX;
+    const clientY = touch?.clientY ?? (event as MouseEvent).clientY;
+    const $el = event.target as HTMLElement;
     const rect = $el.getBoundingClientRect(); // get element's current size/position
     const absolute = {
-      x: e.clientX - rect.left, // get mouse position from left
-      y: e.clientY - rect.top, // get mouse position from right
+      x: clientX - rect.left, // get mouse position from left
+      y: clientY - rect.top, // get mouse position from right
     };
     const percent = {
       x: clamp(round((100 / rect.width) * absolute.x)),
@@ -186,7 +201,7 @@
     }
   };
 
-  const interactEnd = (_e, delay = 500) => {
+  const interactEnd = (_event: Event | null = null, delay = 500) => {
     // Cancel any pending animation frame
     if (rafId !== null) {
       cancelAnimationFrame(rafId);
@@ -213,7 +228,7 @@
     }, delay);
   };
 
-  const activate = (_e) => {
+  const activate = (_event: MouseEvent) => {
     if (flip_on_click) {
       flipped = !flipped;
       springFlip.set(flipped ? 180 : 0);
@@ -232,12 +247,13 @@
     }
   };
 
-  const deactivate = (e) => {
+  const deactivate = (event: FocusEvent) => {
     if (expanded) return;
     // Clicking the homepage "inspect" button should not collapse the active card
     // before the navigation click can fire.
-    const isInspectButton = (el) => !!el?.closest?.('[data-inspect-button="true"]');
-    const nextFocus = e?.relatedTarget;
+    const isInspectButton = (element: EventTarget | null): boolean =>
+      element instanceof Element && !!element.closest('[data-inspect-button="true"]');
+    const nextFocus = event.relatedTarget;
     if (isInspectButton(nextFocus)) return;
     // Some mobile browsers fire `blur` with a null `relatedTarget`. In those cases,
     // the new focus (if any) is still available on `document.activeElement`.
@@ -246,8 +262,8 @@
     $activeCard = undefined;
   };
 
-  const reposition = (_e) => {
-    clearTimeout(repositionTimer);
+  const reposition = (_event: Event) => {
+    if (repositionTimer !== undefined) clearTimeout(repositionTimer);
     repositionTimer = setTimeout(() => {
       if ($activeCard && $activeCard === thisCard) {
         setCenter();
@@ -327,7 +343,7 @@
     }
 
     document.removeEventListener("visibilitychange", onVisibilityChange);
-    clearTimeout(repositionTimer);
+    if (repositionTimer !== undefined) clearTimeout(repositionTimer);
     if (rafId !== null) cancelAnimationFrame(rafId);
     pendingSpringUpdate = null;
     endShowcase();
@@ -362,11 +378,11 @@
     --translate-y: ${$springTranslate.y}px;
 	`;
 
-  const normalize = (v) => (v ?? "").toString().toLowerCase();
-  const normalizeList = (v) =>
+  const normalize = (v: unknown): string => (v ?? "").toString().toLowerCase();
+  const normalizeList = (v: unknown): string =>
     Array.isArray(v) ? v.join(" ").toLowerCase() : normalize(v);
 
-  const formatDropDate = (v) => {
+  const formatDropDate = (v: unknown): string => {
     if (!v) return "";
     // Support `YYYY-MM-DD` -> `YYYY/MM/DD` for a more card-like look.
     return v.toString().trim().replace(/^(\d{4})-(\d{2})-(\d{2})$/, "$1/$2/$3");
@@ -401,7 +417,7 @@
       isStickerCard && rarityAttr && !["common", "uncommon"].includes(rarityAttr) ? "full" : "art";
   }
 
-  const orientate = (e) => {
+  const orientate = (e: OrientationReading) => {
 
     const x = e.relative.gamma;
     const y = e.relative.beta;
@@ -444,7 +460,7 @@
         : ``;
   }
 
-  const updateSprings = ( background, rotate, glare ) => {
+  const updateSprings = (background: Point, rotate: Point, glare: GlarePoint) => {
 
     springBackground.stiffness = springInteractSettings.stiffness;
     springBackground.damping = springInteractSettings.damping;
@@ -474,12 +490,12 @@
 
   document.addEventListener("visibilitychange", onVisibilityChange);
 
-  const imageLoader = (e) => {
+  const imageLoader = (event: Event) => {
     loading = false;
 
     // Detect if the provided face image is roughly square (e.g. a sticker),
     // so we can apply nicer "centered with padding" layout rules.
-    const imgEl = e?.currentTarget;
+    const imgEl = event.currentTarget as HTMLImageElement | null;
     if (imgEl?.naturalWidth && imgEl?.naturalHeight) {
       const ratio = imgEl.naturalWidth / imgEl.naturalHeight;
       isSquareFront = Math.abs(ratio - 1) < 0.05;
@@ -536,7 +552,7 @@
             });
           }, 20);
           showcaseTimerEnd = setTimeout(() => {
-            clearInterval(showcaseInterval);
+            if (showcaseInterval !== undefined) clearInterval(showcaseInterval);
             interactEnd(null, 0);
           }, 4000);
         } else {

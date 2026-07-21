@@ -4,31 +4,23 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node scripts/generate-sticker-pages.mjs",
-    "prebuild": "node scripts/generate-sticker-pages.mjs",
-    "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
+    "dev": "./script/server",
+    "build": "./script/build",
     "preview": "vite preview",
-    "check": "svelte-check --fail-on-warnings",
-    "lint": "eslint . --max-warnings=0",
-    "validate": "npm run lint && npm run check",
+    "check": "./script/lint",
+    "lint": "./script/lint",
+    "validate": "./script/lint",
     "test": "./script/test"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
-    "@vitest/coverage-v8": "^4.1.5",
-    "eslint": "^10.3.0",
-    "eslint-plugin-svelte": "^3.17.1",
-    "jsdom": "^29.1.1",
-    "svelte": "^5.55.7",
-    "svelte-check": "^4.4.7",
-    "typescript": "^6.0.3",
-    "vite": "8.0.16",
-    "vitest": "^4.1.5"
+    "@sveltejs/vite-plugin-svelte": "7.0.0",
+    "jsdom": "29.1.1",
+    "svelte": "5.55.7",
+    "svelte-check": "4.4.7",
+    "typescript": "6.0.3",
+    "vite": "8.0.16"
   },
   "overrides": {
-    "brace-expansion": "5.0.7",
     "undici": "7.28.0"
   }
 }

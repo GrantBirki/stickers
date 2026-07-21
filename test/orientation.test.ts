@@ -1,6 +1,6 @@
-import { test, expect } from "vitest";
+import { test, expect } from "./test-utils.ts";
 
-import { orientation, resetBaseOrientation } from "../src/lib/stores/orientation.js";
+import { orientation, resetBaseOrientation } from "../src/lib/stores/orientation.ts";
 
 test("orientation store computes absolute + relative values and cleans up listeners", () => {
   resetBaseOrientation();

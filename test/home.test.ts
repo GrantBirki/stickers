@@ -1,5 +1,5 @@
-import { test, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "./helpers/svelte.js";
+import { test, expect, vi } from "./test-utils.ts";
+import { render, screen, fireEvent, waitFor } from "./helpers/svelte.ts";
 
 import Home from "../src/pages/Home.svelte";
 
@@ -76,8 +76,8 @@ test("Home loads stickers, builds slugs, and drives the inspect FAB navigation",
   Object.defineProperty(inspect, "focus", { value: focusThrows, configurable: true });
   await fireEvent.touchStart(inspect);
   expect(focusThrows).toHaveBeenCalledTimes(2);
-  expect(focusThrows.mock.calls[0][0]).toEqual({ preventScroll: true });
-  expect(focusThrows.mock.calls[1][0]).toBe(undefined);
+  expect(focusThrows.mock.calls[0].arguments[0]).toEqual({ preventScroll: true });
+  expect(focusThrows.mock.calls[1].arguments[0]).toBe(undefined);
 
   // Normal click navigates via history/pushState and emits a popstate event.
   const pushStateSpy = vi.spyOn(window.history, "pushState");
@@ -86,7 +86,7 @@ test("Home loads stickers, builds slugs, and drives the inspect FAB navigation",
   await fireEvent.click(inspect, { button: 0 });
   expect(pushStateSpy).toHaveBeenCalledWith({}, "", "/stickers/foo");
   expect(dispatchSpy).toHaveBeenCalled();
-  expect(dispatchSpy.mock.calls.at(-1)[0].type).toBe("popstate");
+  expect(dispatchSpy.mock.calls.at(-1).arguments[0].type).toBe("popstate");
 
   // Modifier keys or non-left clicks should be ignored.
   pushStateSpy.mockClear();

@@ -1,19 +1,20 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
 
   import CardList from "../Cards.svelte";
   import Card from "../lib/components/Card.svelte";
-  import { activeStickerId } from "../lib/stores/activeStickerId.js";
-  import { baseSlugFromStickerId, fullSlugFromStickerId } from "../lib/helpers/stickerSlugs.js";
+  import { activeStickerId } from "../lib/stores/activeStickerId.ts";
+  import { baseSlugFromStickerId, fullSlugFromStickerId } from "../lib/helpers/stickerSlugs.ts";
+  import type { CardData, SiteConfig } from "../lib/types.ts";
 
   let isLoading = true;
-  let stickers = [];
-  let stickerSlugsById = {};
-  let siteConfig = { display_next_card_as_hidden: false };
+  let stickers: CardData[] = [];
+  let stickerSlugsById: Record<string, string> = {};
+  let siteConfig: SiteConfig = { display_next_card_as_hidden: false };
 
-  const buildSlugMap = (list) => {
-    const used = Object.create(null);
-    const map = {};
+  const buildSlugMap = (list: CardData[]): Record<string, string> => {
+    const used: Record<string, boolean> = Object.create(null);
+    const map: Record<string, string> = {};
     for (const item of list || []) {
       const base = baseSlugFromStickerId(item?.id);
       const full = fullSlugFromStickerId(item?.id);
@@ -25,21 +26,25 @@
     return map;
   };
 
-  const getStickers = async () => {
+  const getStickers = async (): Promise<CardData[]> => {
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}data/stickers.json`);
       if (!res.ok) return [];
-      return await res.json();
+      const value: unknown = await res.json();
+      return Array.isArray(value) ? value as CardData[] : [];
     } catch {
       return [];
     }
   };
 
-  const getSiteConfig = async () => {
+  const getSiteConfig = async (): Promise<SiteConfig> => {
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}data/site.json`);
       if (!res.ok) return { display_next_card_as_hidden: false };
-      return await res.json();
+      const value = await res.json() as Partial<SiteConfig> | null;
+      return {
+        display_next_card_as_hidden: value?.display_next_card_as_hidden === true,
+      };
     } catch {
       return { display_next_card_as_hidden: false };
     }
@@ -73,11 +78,11 @@
 
   onMount(loadStickers);
 
-  $: activeSlug = stickerSlugsById[$activeStickerId];
+  $: activeSlug = $activeStickerId ? stickerSlugsById[$activeStickerId] : undefined;
   $: inspectHref = activeSlug ? `/stickers/${activeSlug}` : "";
 
-  const focusInspectButton = (e) => {
-    const el = e?.currentTarget;
+  const focusInspectButton = (event: PointerEvent | TouchEvent) => {
+    const el = event.currentTarget as HTMLAnchorElement | null;
     if (!el?.focus) return;
     // Mobile Safari often doesn't move focus on tap. The card component collapses
     // on `blur`, so force focus here so `relatedTarget`/`activeElement` stays
@@ -89,7 +94,7 @@
     }
   };
 
-  const onInspectClick = (e) => {
+  const onInspectClick = (e: MouseEvent) => {
     if (!inspectHref) return;
     // Let users open in a new tab/window with modifier keys.
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
