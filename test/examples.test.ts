@@ -1,11 +1,5 @@
-import { test, expect, vi } from "vitest";
-import { render, screen } from "./helpers/svelte.js";
-
-import CardStub from "./mocks/CardStub.svelte";
-
-vi.mock("../src/lib/components/Card.svelte", () => ({
-  default: CardStub,
-}));
+import { test, expect } from "./test-utils.ts";
+import { render, screen } from "./helpers/svelte.ts";
 
 import Examples from "../src/pages/Examples.svelte";
 
@@ -17,9 +11,9 @@ test("Examples renders the playground page and grouped card sections", () => {
 
   expect(screen.getByRole("link", { name: "Basic / Non-Holo" })).toBeTruthy();
 
-  const cards = screen.getAllByTestId("card-stub");
+  const cards = container.querySelectorAll(".card");
   expect(cards.length).toBeGreaterThan(5);
 
   // The showcase card in the header is explicitly marked showcase={true}.
-  expect(container.querySelector('[data-showcase="true"]')).not.toBe(null);
+  expect(container.querySelector(".showcase .card")).not.toBe(null);
 });

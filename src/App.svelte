@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
 
   import Home from "./pages/Home.svelte";
@@ -42,7 +42,7 @@
     };
   });
 
-  const STATIC_PAGES = {
+  const STATIC_PAGES: Record<string, { title: string; subtitle: string }> = {
     "/work": {
       title: "Work",
       subtitle: "Selected projects and experiments."

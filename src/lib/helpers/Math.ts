@@ -1,10 +1,4 @@
-/**
- * return a value that has been rounded to a set precision
- * @param {Number} value the value to round
- * @param {Number} precision the precision (decimal places), default: 3
- * @returns {Number}
- */
-const round = (value, precision = 3) => parseFloat(value.toFixed(precision));
+const round = (value: number, precision = 3): number => parseFloat(value.toFixed(precision));
 
 /**
  * return a value that has been limited between min & max
@@ -13,7 +7,7 @@ const round = (value, precision = 3) => parseFloat(value.toFixed(precision));
  * @param {Number} max maximum value to allow, default: 100
  * @returns {Number}
  */
-const clamp = (value, min = 0, max = 100 ) => {
+const clamp = (value: number, min = 0, max = 100): number => {
 	return Math.min(Math.max(value, min), max);
 };
 
@@ -27,8 +21,14 @@ const clamp = (value, min = 0, max = 100 ) => {
  * @param {Number} toMax max value to re-map to
  * @returns {Number} 
  */
-const adjust = (value, fromMin, fromMax, toMin, toMax) => {
+const adjust = (
+  value: number,
+  fromMin: number,
+  fromMax: number,
+  toMin: number,
+  toMax: number,
+): number => {
 	return round(toMin + (toMax - toMin) * (value - fromMin) / (fromMax - fromMin));
 };
 
-export { round, clamp, adjust }
+export { round, clamp, adjust };

@@ -1,10 +1,10 @@
-<script>
+<script lang="ts">
 	
-	import { activeCard } from "./lib/stores/activeCard.js";
+	import { activeCard } from "./lib/stores/activeCard.ts";
 	
-	let thisGrid;
+	let thisGrid: HTMLElement | undefined;
 	
-	$: active = thisGrid && thisGrid.contains( $activeCard );
+	$: active = Boolean(thisGrid && $activeCard && thisGrid.contains($activeCard));
 	
 </script>
 

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
 
   import Card from "../lib/components/Card.svelte";
@@ -6,17 +6,19 @@
     baseSlugFromStickerId,
     fullSlugFromStickerId,
     normalizePathSlug,
-  } from "../lib/helpers/stickerSlugs.js";
+  } from "../lib/helpers/stickerSlugs.ts";
+  import type { CardData } from "../lib/types.ts";
 
   export let slug = "";
 
-  let sticker = null;
+  let sticker: CardData | null = null;
 
   const loadSticker = async () => {
     try {
       const res = await fetch(`${import.meta.env.BASE_URL}data/stickers.json`);
       if (!res.ok) return null;
-      const list = await res.json();
+      const value: unknown = await res.json();
+      const list = Array.isArray(value) ? value as CardData[] : [];
       const target = normalizePathSlug(slug);
       return (
         (list || []).find((item) => baseSlugFromStickerId(item?.id) === target) ||

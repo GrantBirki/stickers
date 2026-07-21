@@ -1,5 +1,5 @@
-import { test, expect, vi } from "vitest";
-import { render, screen } from "./helpers/svelte.js";
+import { test, expect, vi } from "./test-utils.ts";
+import { render, screen } from "./helpers/svelte.ts";
 
 import App from "../src/App.svelte";
 

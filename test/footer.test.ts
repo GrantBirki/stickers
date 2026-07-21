@@ -1,5 +1,5 @@
-import { test, expect } from "vitest";
-import { render, screen } from "./helpers/svelte.js";
+import { test, expect } from "./test-utils.ts";
+import { render, screen } from "./helpers/svelte.ts";
 
 import Footer from "../src/lib/components/Footer.svelte";
 

@@ -1,6 +1,29 @@
 import fs from "node:fs";
 import path from "node:path";
 
+interface StaticRoute {
+  dir: string;
+  name: string;
+  description: string;
+}
+
+interface StickerRecord {
+  id?: unknown;
+  name?: string;
+  description?: string;
+}
+
+interface PageMetadata {
+  name: string;
+  description: string;
+}
+
+interface StickerPageMetadata {
+  slug: string;
+  title: string;
+  description: string;
+}
+
 const ROOT = process.cwd();
 const STICKERS_JSON = path.join(ROOT, "public", "data", "stickers.json");
 const PUBLIC_ROOT = path.join(ROOT, "public");
@@ -10,13 +33,13 @@ const MAIN_INDEX_OUT = path.join(GENERATED_ROOT, "index.html");
 const GENERATED_SRC_LINK = path.join(GENERATED_ROOT, "src");
 const OG_DEFAULT_PUBLIC_PATH = "/og/default.png";
 const SITE_NAME = "birki stickers";
-// These placeholders are replaced by `vite.config.js`'s `html-transform` plugin.
+// These placeholders are replaced by `vite.config.ts`'s `html-transform` plugin.
 // Keep them as plain strings in the generated HTML (don't resolve at generation time).
 const SITE_URL_PLACEHOLDER = "%VITE_SITE_URL%";
 const BASE_PLACEHOLDER = "%VITE_BASE%";
 const CARD_CSS_BUNDLE_PUBLIC_PATH = "/css/cards/all.css";
 const OUT_ROOT = path.join(GENERATED_ROOT, "stickers");
-const STATIC_ROUTES = [
+const STATIC_ROUTES: StaticRoute[] = [
   { dir: path.join(GENERATED_ROOT, "examples"), name: "examples", description: "Local card effect demos (no licensed imagery)." },
   { dir: path.join(GENERATED_ROOT, "example"), name: "example", description: "Local card effect demos (no licensed imagery)." },
   { dir: path.join(GENERATED_ROOT, "work"), name: "work", description: "Work" },
@@ -27,15 +50,16 @@ const STATIC_ROUTES = [
   { dir: path.join(GENERATED_ROOT, "terms"), name: "terms", description: "Terms and conditions" }
 ];
 
-const readJson = (p) => JSON.parse(fs.readFileSync(p, "utf8"));
+const readJson = <T>(filePath: string): T => JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
 
-const baseSlugFromStickerId = (id) =>
+const baseSlugFromStickerId = (id: unknown): string =>
   (id ?? "").toString().replace(/^stickers-/, "").replace(/-\d+$/, "");
-const fullSlugFromStickerId = (id) => (id ?? "").toString().replace(/^stickers-/, "");
+const fullSlugFromStickerId = (id: unknown): string =>
+  (id ?? "").toString().replace(/^stickers-/, "");
 
-const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
+const ensureDir = (dirPath: string): void => fs.mkdirSync(dirPath, { recursive: true });
 
-const ensureDirSymlink = (linkPath, targetPath) => {
+const ensureDirSymlink = (linkPath: string, targetPath: string): void => {
   try {
     const stat = fs.lstatSync(linkPath);
     if (stat.isSymbolicLink()) {
@@ -52,22 +76,22 @@ const ensureDirSymlink = (linkPath, targetPath) => {
   fs.symlinkSync(relativeTarget, linkPath, "dir");
 };
 
-const escapeHtmlAttr = (v) =>
-  (v ?? "")
+const escapeHtmlAttr = (value: unknown): string =>
+  (value ?? "")
     .toString()
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-const escapeHtmlText = (v) =>
-  (v ?? "")
+const escapeHtmlText = (value: unknown): string =>
+  (value ?? "")
     .toString()
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-const publicPathToFsPath = (publicPath) =>
+const publicPathToFsPath = (publicPath: string): string =>
   path.join(PUBLIC_ROOT, (publicPath || "").toString().replace(/^\/+/, ""));
 
 const CARD_CSS_SOURCES = [
@@ -99,7 +123,7 @@ const CARD_CSS_SOURCES = [
   "/css/cards/stickers.css",
 ];
 
-const buildCardCssBundle = () => {
+const buildCardCssBundle = (): void => {
   const outPath = publicPathToFsPath(CARD_CSS_BUNDLE_PUBLIC_PATH);
   ensureDir(path.dirname(outPath));
 
@@ -113,25 +137,25 @@ const buildCardCssBundle = () => {
   fs.writeFileSync(outPath, chunks.join("\n"), "utf8");
 };
 
-const pickOgImage = (candidates) => {
-  for (const candidate of candidates || []) {
+const pickOgImage = (candidates: Array<string | undefined>): string => {
+  for (const candidate of candidates) {
     if (!candidate) continue;
     if (fs.existsSync(publicPathToFsPath(candidate))) return candidate;
   }
   return OG_DEFAULT_PUBLIC_PATH;
 };
 
-const absoluteUrlForPublicPath = (publicPath) => {
+const absoluteUrlForPublicPath = (publicPath: string): string => {
   const cleaned = (publicPath || "").toString().replace(/^\/+/, "");
   return `${SITE_URL_PLACEHOLDER}${BASE_PLACEHOLDER}${cleaned}`;
 };
 
-const absoluteUrlForRoute = (routePath) => {
+const absoluteUrlForRoute = (routePath: string): string => {
   const cleaned = (routePath || "").toString().replace(/^\/+/, "");
   return `${SITE_URL_PLACEHOLDER}${BASE_PLACEHOLDER}${cleaned}`;
 };
 
-const htmlForRoute = ({ name, description }) => {
+const htmlForRoute = ({ name, description }: PageMetadata): string => {
   const title = `${SITE_NAME} / ${name}`;
   const routePath = `${name}/`;
   const ogImage = pickOgImage([`/og/${name}.png`, OG_DEFAULT_PUBLIC_PATH]);
@@ -212,13 +236,13 @@ const htmlForRoute = ({ name, description }) => {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
 `;
 };
 
-const htmlForSlug = ({ slug, title, description }) => {
+const htmlForSlug = ({ slug, title, description }: StickerPageMetadata): string => {
   const routePath = `stickers/${slug}/`;
   const ogImage = pickOgImage([`/og/stickers/${slug}.png`, OG_DEFAULT_PUBLIC_PATH]);
   const ogImageUrl = absoluteUrlForPublicPath(ogImage);
@@ -298,13 +322,13 @@ const htmlForSlug = ({ slug, title, description }) => {
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
 `;
 };
 
-const main = () => {
+const main = (): void => {
   buildCardCssBundle();
   // Rebuild the generated-root workspace from scratch so removed stickers/routes
   // don't leave stale HTML entrypoints behind.
@@ -320,7 +344,7 @@ const main = () => {
     fs.writeFileSync(path.join(route.dir, "index.html"), htmlForRoute(route), "utf8");
   }
 
-  const stickers = readJson(STICKERS_JSON) || [];
+  const stickers = readJson<StickerRecord[]>(STICKERS_JSON) || [];
   ensureDir(OUT_ROOT);
 
   const used = new Set();

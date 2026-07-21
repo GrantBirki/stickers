@@ -1,7 +1,8 @@
 import { flushSync, mount, unmount as svelteUnmount } from "svelte";
 
 const mounted = new Set();
-const DEFAULT_TIMEOUT_MS = 1000;
+// Node runs test files in isolated workers, so allow room for concurrent Svelte compilation.
+const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_INTERVAL_MS = 10;
 
 const toMatcher = (matcher) => {

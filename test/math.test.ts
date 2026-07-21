@@ -1,6 +1,6 @@
-import { test, expect } from "vitest";
+import { test, expect } from "./test-utils.ts";
 
-import { adjust, clamp, round } from "../src/lib/helpers/Math.js";
+import { adjust, clamp, round } from "../src/lib/helpers/Math.ts";
 
 test("round() rounds to the default precision (3) and returns a number", () => {
   expect(round(1.23456)).toBe(1.235);
