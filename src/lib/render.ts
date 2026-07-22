@@ -140,7 +140,7 @@ export const renderCard = (card: CardData, options: CardRenderOptions = {}): str
   }
 
   const action = options.flipOnClick ? "Flip" : "Expand";
-  return `<div ${attrs}><div class="card__translater"><button class="card__rotator" type="button" data-flip-on-click="${options.flipOnClick === true}" aria-label="${action} card: ${escapeHtml(card.name)}."><img class="card__back" src="${escapeHtml(back)}" alt="The back of a trading card" loading="lazy" width="660" height="921" /><div class="card__front">${face}</div></button></div></div>`;
+  return `<div ${attrs}><div class="card__translater"><button class="card__rotator" type="button" data-card-name="${escapeHtml(card.name)}" data-flip-on-click="${options.flipOnClick === true}" aria-label="${action} card: ${escapeHtml(card.name)}."><img class="card__back" src="${escapeHtml(back)}" alt="The back of a trading card" loading="lazy" width="660" height="921" /><div class="card__front">${face}</div></button></div></div>`;
 };
 
 export const renderCardGrid = (cards: CardData[], slugs: Record<string, string> = {}): string =>

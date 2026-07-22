@@ -104,9 +104,55 @@ export const initializeTheme = (documentRef: Document, windowRef: Window): (() =
 
 export const initializeCards = (documentRef: Document, windowRef: Window): (() => void) => {
   const cleanups: Array<() => void> = [];
+  const motionTimers = new Map<HTMLElement, Map<string, number>>();
+  let pointerFrame: number | undefined;
+  let pendingPointer: { button: HTMLButtonElement; card: HTMLElement; clientX: number; clientY: number } | undefined;
   let active: HTMLElement | undefined;
   let orientationBase: { beta: number; gamma: number } | undefined;
   const inspectButton = documentRef.querySelector<HTMLAnchorElement>(".inspect-fab");
+  const cancelPointerUpdate = (card?: HTMLElement): void => {
+    if (card && pendingPointer?.card !== card) return;
+    if (pointerFrame !== undefined) windowRef.cancelAnimationFrame(pointerFrame);
+    pointerFrame = undefined;
+    pendingPointer = undefined;
+  };
+  const schedulePointerUpdate = (card: HTMLElement, button: HTMLButtonElement, event: PointerEvent): void => {
+    pendingPointer = { card, button, clientX: event.clientX, clientY: event.clientY };
+    if (pointerFrame !== undefined) return;
+    pointerFrame = windowRef.requestAnimationFrame(() => {
+      pointerFrame = undefined;
+      const pointer = pendingPointer;
+      pendingPointer = undefined;
+      if (!pointer) return;
+      setInteraction(pointer.card, interactionFromPoint(pointer.button.getBoundingClientRect(), pointer.clientX, pointer.clientY));
+    });
+  };
+  const clearMotionClass = (card: HTMLElement, className: string): void => {
+    const timers = motionTimers.get(card);
+    const timer = timers?.get(className);
+    if (timer !== undefined) windowRef.clearTimeout(timer);
+    timers?.delete(className);
+    card.classList.remove(className);
+  };
+  const setMotionClass = (card: HTMLElement, className: string, duration: number, flush = false): void => {
+    clearMotionClass(card, className);
+    card.classList.add(className);
+    if (flush) void card.offsetWidth;
+    const timers = motionTimers.get(card) ?? new Map<string, number>();
+    timers.set(className, windowRef.setTimeout(() => {
+      card.classList.remove(className);
+      timers.delete(className);
+    }, duration));
+    motionTimers.set(card, timers);
+  };
+  const setFlip = (card: HTMLElement, button: HTMLButtonElement, flipped: boolean): void => {
+    cancelPointerUpdate(card);
+    setMotionClass(card, "flipping", 700, true);
+    card.dataset.flipped = String(flipped);
+    card.style.setProperty("--flip", flipped ? "180deg" : "0deg");
+    const name = button.dataset.cardName || "card";
+    button.setAttribute("aria-label", `${flipped ? "Show front of" : "Show back of"} card: ${name}.`);
+  };
   const recenter = (card: HTMLElement): void => {
     const rect = card.getBoundingClientRect();
     const scale = Math.min((windowRef.innerWidth / rect.width) * 0.9, (windowRef.innerHeight / rect.height) * 0.9, 1.75);
@@ -116,23 +162,39 @@ export const initializeCards = (documentRef: Document, windowRef: Window): (() =
   };
   const deactivate = (): void => {
     if (!active) return;
+    const previous = active;
+    const button = previous.querySelector<HTMLButtonElement>(".card__rotator");
+    cancelPointerUpdate(previous);
+    clearMotionClass(previous, "activating");
+    clearMotionClass(previous, "entering");
+    clearMotionClass(previous, "flipping");
+    setMotionClass(previous, "settling", 600, true);
     active.classList.remove("active", "interacting");
     active.closest(".card-grid")?.classList.remove("active");
     active.style.setProperty("--translate-x", "0px");
     active.style.setProperty("--translate-y", "0px");
     active.style.setProperty("--card-scale", "1");
+    active.style.setProperty("--pop-rotate", "0deg");
+    active.style.setProperty("--flip", "0deg");
+    active.dataset.flipped = "false";
+    if (button) button.setAttribute("aria-label", `Expand card: ${button.dataset.cardName || "card"}.`);
     resetInteraction(active);
     active = undefined;
     orientationBase = undefined;
     if (inspectButton) inspectButton.hidden = true;
   };
   const activate = (card: HTMLElement): void => {
-    if (active === card) return deactivate();
+    cancelPointerUpdate(card);
     deactivate();
     active = card;
+    clearMotionClass(card, "settling");
     card.classList.add("active", "interacting");
     card.closest(".card-grid")?.classList.add("active");
+    setMotionClass(card, "activating", 1200, true);
     recenter(card);
+    card.style.setProperty("--pop-rotate", "360deg");
+    const button = card.querySelector<HTMLButtonElement>(".card__rotator");
+    if (button) button.setAttribute("aria-label", `Show back of card: ${button.dataset.cardName || "card"}.`);
     if (inspectButton && card.dataset.inspectHref) {
       inspectButton.href = card.dataset.inspectHref;
       inspectButton.hidden = false;
@@ -144,19 +206,29 @@ export const initializeCards = (documentRef: Document, windowRef: Window): (() =
     if (!button) continue;
     const onClick = (): void => {
       if (button.dataset.flipOnClick === "true") {
-        const flipped = card.dataset.flipped !== "true";
-        card.dataset.flipped = String(flipped);
-        card.style.setProperty("--flip", flipped ? "180deg" : "0deg");
-      } else activate(card);
+        setFlip(card, button, card.dataset.flipped !== "true");
+      } else if (active === card) {
+        setFlip(card, button, card.dataset.flipped !== "true");
+      } else {
+        activate(card);
+      }
+    };
+    const onPointerEnter = (): void => {
+      if (active && active !== card) return;
+      clearMotionClass(card, "settling");
+      setMotionClass(card, "entering", 180);
     };
     const onPointerMove = (event: PointerEvent): void => {
       if (active && active !== card) return;
       card.classList.add("interacting");
-      setInteraction(card, interactionFromPoint(button.getBoundingClientRect(), event.clientX, event.clientY));
+      schedulePointerUpdate(card, button, event);
     };
     const onPointerLeave = (): void => {
+      cancelPointerUpdate(card);
+      clearMotionClass(card, "entering");
+      setMotionClass(card, "settling", 600, true);
       if (active !== card) card.classList.remove("interacting");
-      windowRef.setTimeout(() => resetInteraction(card), 120);
+      resetInteraction(card);
     };
     const onFocusOut = (event: FocusEvent): void => {
       const next = event.relatedTarget;
@@ -164,11 +236,13 @@ export const initializeCards = (documentRef: Document, windowRef: Window): (() =
       if (active === card) deactivate();
     };
     button.addEventListener("click", onClick);
-    button.addEventListener("pointermove", onPointerMove);
+    button.addEventListener("pointerenter", onPointerEnter);
+    button.addEventListener("pointermove", onPointerMove, { passive: true });
     button.addEventListener("pointerleave", onPointerLeave);
     button.addEventListener("focusout", onFocusOut);
     cleanups.push(() => {
       button.removeEventListener("click", onClick);
+      button.removeEventListener("pointerenter", onPointerEnter);
       button.removeEventListener("pointermove", onPointerMove);
       button.removeEventListener("pointerleave", onPointerLeave);
       button.removeEventListener("focusout", onFocusOut);
@@ -207,11 +281,15 @@ export const initializeCards = (documentRef: Document, windowRef: Window): (() =
   documentRef.addEventListener("visibilitychange", onVisibility);
   if (documentRef.querySelector(".inspect")) documentRef.body.style.overflow = "hidden";
   return () => {
+    cancelPointerUpdate();
     deactivate();
     documentRef.body.style.overflow = "";
     windowRef.removeEventListener("scroll", onScroll);
     windowRef.removeEventListener("deviceorientation", onOrientation);
     documentRef.removeEventListener("visibilitychange", onVisibility);
+    for (const timers of motionTimers.values()) {
+      for (const timer of timers.values()) windowRef.clearTimeout(timer);
+    }
     cleanups.forEach((cleanup) => cleanup());
   };
 };
