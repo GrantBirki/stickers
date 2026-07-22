@@ -6,72 +6,102 @@
 [![deploy](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/deploy.yml)
 [![Unlock On Merge](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml/badge.svg)](https://github.com/GrantBirki/stickers/actions/workflows/unlock-on-merge.yml)
 
-The website for stickers.birki.io — Grant's collection of sticker drops.
-
-The project is a static TypeScript site with one exact-pinned development dependency: TypeScript itself. Page generation, the development server, testing, assertions, coverage, file operations, and HTTP serving use Node's standard library. The browser receives repository-owned HTML, CSS, images, fonts, and a small TypeScript-compiled interaction module; no client framework or third-party runtime code is shipped.
+The website for stickers.birki.io - Grant's collection of sticker drops!
 
 ## Dev
 
-- Bootstrap the exact lockfile: `./script/bootstrap`
-- Start the local static server: `./script/server`
+- Bootstrap dependencies: `./script/bootstrap`
+- Start the development server: `./script/server`
 - Build the production site: `./script/build`
-- Run strict TypeScript checks: `./script/lint`
-- Run standard-library tests with V8 coverage: `./script/test`
+- Run strict TypeScript and Svelte checks: `./script/lint`
+- Run tests with coverage: `./script/test`
 
-The wrappers are the supported interface for humans, automation, and CI. Local dependency installation requires [Socket Firewall](https://socket.dev/products/socket-firewall); CI uses lockfile-faithful `npm ci`.
+The project uses TypeScript throughout. Tests run on Node's built-in test runner, assertion library, mocks, timers, and V8 coverage; `jsdom` is retained only to provide the browser DOM needed by Svelte component tests. Registry-managed dependencies are exact-pinned in `package.json` and `package-lock.json`.
 
-## Architecture
+## Generated Sticker Inspect Pages
 
-Source data lives in `public/data/stickers.json` and `public/data/site.json`. `scripts/build.mts` copies repository-owned public assets into `dist/`, combines the card effect stylesheets, and renders complete static HTML for every route. `tsc` then compiles the small browser runtime from `src/` into `dist/assets/`.
+This repo generates a **dark-mode-only** "inspect" page for every sticker in `public/data/stickers.json`.
 
-Important source files:
+- Route shape: `/stickers/<slug>/`
+- Example: `id: "mike-mike-dms"` -> `/stickers/mike-mike-dms/`
+- The inspect page intentionally has **no header, no footer, and no theme toggle**. It renders just the
+  card in the expanded ("large") state so you can inspect/iterate on styling.
 
-- `src/lib/render.ts`: escaping, card markup, page shells, metadata, and route content
-- `src/lib/browser.ts`: theme selection, card pointer/orientation effects, expansion, flipping, and showcase animation
-- `src/lib/examples.ts`: examples-page card data
-- `src/lib/helpers/`: pure math and sticker-slug helpers
-- `scripts/build.mts`: dependency-free production builder
-- `scripts/server.mts`: dependency-free local static server with safe path resolution
-- `public/css/app.css`: application layout and component styles
-- `public/css/cards/`: card effect styles
+### How The Pages Are Generated
 
-## Generated Routes
+We generate a few small static HTML entrypoints so the site can be hosted as a fully static build and
+still support direct links (no server-side routing required).
 
-`./script/build` writes all deployable output to `dist/`:
+- Script: `scripts/generate-sticker-pages.mts`
+- Outputs:
+  - `.generated-pages/stickers/<slug>/index.html` (one folder per sticker)
+  - `.generated-pages/examples/index.html` (hidden CSS effect playground route)
+  - `.generated-pages/example/index.html` (alias for `/examples/`)
+  - `.generated-pages/work/index.html`, `.generated-pages/about/index.html`, `.generated-pages/services/index.html`, `.generated-pages/contact/index.html`, `.generated-pages/privacy/index.html`, `.generated-pages/terms/index.html`
+  - `.generated-pages/index.html` (copied from root `index.html`)
+  - `.generated-pages/src -> ../src` symlink (so generated HTML can reference `/src/main.ts` during build)
+- When it runs:
+  - `./script/server` generates the pages before starting Vite
+  - `./script/build` generates the pages before building with Vite
+  - Vite build uses `.generated-pages/` as the temporary build root, so repo root doesn't get cluttered with generated route folders
 
-- `/`
-- `/examples/` and `/example/`
-- `/work/`, `/about/`, `/services/`, `/contact/`, `/privacy/`, and `/terms/`
-- `/stickers/<slug>/` for every sticker
+You can also run it manually:
 
-The inspect route has no header, footer, or theme toggle. Clicking its card flips between the front and back.
+```bash
+node scripts/generate-sticker-pages.mts
+```
 
-Sticker slugs are derived by stripping a `stickers-` prefix and a trailing numeric suffix such as `-001`. If two stickers collide on the same base slug, later cards use the full identifier suffix.
+Notes:
 
-Generated files are not committed. The repository owns source data and assets; CI regenerates `dist/` from them for each build.
+- `<slug>` is derived from the sticker `id` by stripping the `stickers-` prefix and the trailing numeric
+  suffix (e.g. `-001`). If multiple stickers would collide on the same base slug, the full id suffix is
+  used to keep slugs unique.
 
 ## Site Config
 
 Global site toggles live in `public/data/site.json`.
 
-- `display_next_card_as_hidden`: when `true`, the homepage appends a muted mystery card using `public/img/mystery.png`.
+- `display_next_card_as_hidden` (boolean): when `true`, the next card slot on the homepage shows a
+  dark/muted "mystery" placeholder using `public/img/mystery.png`.
 
-## Open Graph Images
+## Open Graph / Social Preview Images
 
-Place PNG previews in `public/og/`:
+This site ships Open Graph + Twitter meta tags for rich link previews (Twitter/X, Discord, iMessage,
+Slack, etc).
 
-- Default: `public/og/default.png`
-- Route-specific: `public/og/about.png`, `public/og/contact.png`, and similar
-- Sticker-specific: `public/og/stickers/<slug>.png`
+To add preview images, just drop PNGs in `public/og/`:
 
-The recommended size is 1200×630. Set `VITE_SITE_URL` during deployment for absolute canonical and social URLs.
+- Default (used everywhere unless overridden): `public/og/default.png`
+- Optional per-route overrides:
+  - `public/og/about.png` -> `/about/`
+  - `public/og/contact.png` -> `/contact/`
+  - `public/og/services.png` -> `/services/`
+  - `public/og/work.png` -> `/work/`
+  - `public/og/privacy.png` -> `/privacy/`
+  - `public/og/terms.png` -> `/terms/`
+- Optional per-sticker overrides:
+  - `public/og/stickers/<slug>.png` -> `/stickers/<slug>/`
+
+Recommended image size: **1200x630**.
+
+Meta tags use `%VITE_SITE_URL%` and `%VITE_BASE%` at build time.
+
+- For deployments: set `VITE_SITE_URL` (and optionally `VITE_BASE`) in your CI/deploy environment
+  so builds output absolute URLs (best compatibility for previews).
+- If `VITE_SITE_URL` is not set, the site will fall back to relative URLs in the built HTML.
+
+## Fonts
+
+This site uses **local** Mona Sans variable fonts (no Google Fonts / CDNs).
+
+- Font files: `public/fonts/mona-sans/` (includes `OFL.txt`)
+- `@font-face` + typography defaults: `public/css/global.css`
 
 ## Adding A Sticker Card
 
-1. Put the sticker image in `public/img/stickers/`.
-2. Optionally put a custom back image under `public/img/`.
-3. Add an entry to `public/data/stickers.json`.
-4. Run `./script/test`.
+1) Put the sticker image in `public/img/stickers/` (PNG works great).
+2) (Optional) Put a custom back image somewhere under `public/img/` (for example `public/img/backs/`).
+3) Add an entry to `public/data/stickers.json`.
 
 Example:
 
@@ -91,29 +121,55 @@ Example:
 }
 ```
 
-Image fields are public-root paths. `card_front_img` and `card_back_img` are optional; the renderer supplies the standard card textures when they are absent.
+Notes:
+
+- `sticker_img`, `card_front_img`, and `card_back_img` are public paths (they should start with `/img/...`).
+- `card_front_img` is optional; if omitted the default sticker face texture is used.
+- `card_back_img` is optional; if omitted the default back image is used.
+- After adding a sticker, the inspect page will be generated automatically (see "Generated Sticker Inspect Pages").
 
 ## Rarity Tokens
 
-- `holofoil` → Rare Holo
-- `spiral-holographic` → custom spiral holographic effect
-- `common` → Common
-- `uncommon` → Uncommon
-- `galaxy` → Rare Holo Cosmos
-- `rare` → Amazing Rare
-- `radiant` → Radiant Rare
-- `holographic` → Trainer Gallery Rare Holo
-- `steel` → Rare Holo V
-- `ultra-rare` → Rare Ultra
-- `rare-rainbow` → Rare Rainbow
-- `holofoil-alt-1` → Rare Holo VMAX
-- `holofoil-alt-2` → Rare Holo VSTAR
-- `ancient` → Rare Secret
-- `shiny` → Rare Shiny
+This project uses short rarity tokens everywhere (no long rarity names with spaces).
+Set these on the `rarity` field in `public/data/stickers.json`.
 
-## Assets And Availability
+- `holofoil` -> `Rare Holo`
+- `spiral-holographic` -> Custom combo of `holographic` and `holofoil-alt-1`
+- `common` -> `Common`
+- `uncommon` -> `Uncommon`
+- `galaxy` -> `Rare Holo Cosmos`
+- `rare` -> `Amazing Rare`
+- `radiant` -> `Radiant Rare`
+- `holographic` -> `Trainer Gallery Rare Holo`
+- `steel` -> `Rare Holo V`
+- `ultra-rare` -> `Rare Ultra`
+- `rare-rainbow` -> `Rare Rainbow`
+- `holofoil-alt-1` -> `Rare Holo VMAX`
+- `holofoil-alt-2` -> `Rare Holo VSTAR`
+- `ancient` -> `Rare Secret`
+- `shiny` -> `Rare Shiny`
 
-Mona Sans fonts, card art, textures, Open Graph images, and all runtime CSS are served from this repository. Runtime availability does not depend on a CDN or package registry.
+## Card Backs
+
+Each card can optionally set its own back image with the `card_back_img` field (example above).
+
+If `card_back_img` is not provided (or is `null`), the card uses the default back image set in
+`src/lib/components/Card.svelte`.
+
+## Examples
+
+The CSS effect playground renders on `/examples/` (and an alias at `/example/`).
+It intentionally repeats a single local image so the site doesn't ship licensed card art.
+This page is intentionally not linked from the UI; visit it directly by typing `/examples/`.
+
+## Deployment
+
+This site is designed to deploy as a static build.
+
+- Output folder: `dist/`
+- Custom domain: `https://stickers.birki.io` (root path)
+  - No special base-path config is needed for this setup (it builds with `/` as the base by default).
+  - If you ever deploy to a GitHub project subpath instead, set `VITE_BASE=/your-repo-name/` at build time.
 
 ## Acknowledgements
 

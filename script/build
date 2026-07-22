@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-node scripts/build.mts
-./node_modules/.bin/tsc --project tsconfig.build.json
+node scripts/generate-sticker-pages.mts
+./node_modules/.bin/vite build

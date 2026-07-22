@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./node_modules/.bin/tsc --project tsconfig.json --noEmit
+# TypeScript and the Svelte compiler now own the static-analysis surface.
+./node_modules/.bin/svelte-check --fail-on-warnings
