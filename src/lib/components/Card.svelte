@@ -101,6 +101,7 @@
 
   let thisCard: HTMLElement;
   let repositionTimer: number | undefined;
+  let interactEndTimer: number | undefined;
   let rafId: number | null = null;
   let pendingSpringUpdate: SpringUpdate | null = null;
 
@@ -135,8 +136,13 @@
     }
   };
 
+  const cancelInteractEnd = () => {
+    if (interactEndTimer === undefined) return;
+    clearTimeout(interactEndTimer);
+    interactEndTimer = undefined;
+  };
+
   const interact = (event: PointerEvent | MouseEvent | TouchEvent) => {
-    
     endShowcase();
 
     if (!isVisible) {
@@ -148,6 +154,7 @@
       return (interacting = false);
     }
 
+    cancelInteractEnd();
     interacting = true;
 
     const touch = event.type === "touchmove" ? (event as TouchEvent).touches[0] : undefined;
@@ -202,6 +209,8 @@
   };
 
   const interactEnd = (_event: Event | null = null, delay = 500) => {
+    cancelInteractEnd();
+
     // Cancel any pending animation frame
     if (rafId !== null) {
       cancelAnimationFrame(rafId);
@@ -209,7 +218,8 @@
     }
     pendingSpringUpdate = null;
 
-    setTimeout(function () {
+    interactEndTimer = setTimeout(function () {
+      interactEndTimer = undefined;
       const snapStiff = 0.01;
       const snapDamp = 0.06;
       interacting = false;
@@ -344,6 +354,7 @@
 
     document.removeEventListener("visibilitychange", onVisibilityChange);
     if (repositionTimer !== undefined) clearTimeout(repositionTimer);
+    cancelInteractEnd();
     if (rafId !== null) cancelAnimationFrame(rafId);
     pendingSpringUpdate = null;
     endShowcase();
@@ -485,7 +496,18 @@
   const onVisibilityChange = () => {
     isVisible = document.visibilityState === "visible";
     endShowcase();
+
+    if (!isVisible && $activeCard === thisCard) {
+      $activeCard = undefined;
+      activeStickerId.set(undefined);
+    }
+
     reset();
+
+    if (isVisible && expanded) {
+      $activeCard = thisCard;
+      resetBaseOrientation();
+    }
   };
 
   document.addEventListener("visibilitychange", onVisibilityChange);

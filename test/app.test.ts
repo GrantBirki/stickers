@@ -39,11 +39,11 @@ test("App scrolls to a hash target after mount", async () => {
 
   try {
     const anchor = document.createElement("div");
-    anchor.id = "target";
+    anchor.id = "⚓-basic";
     anchor.scrollIntoView = vi.fn();
     document.body.appendChild(anchor);
 
-    window.history.pushState({}, "", "/work#target");
+    window.history.pushState({}, "", "/examples#%E2%9A%93-basic");
     render(App);
 
     // scrollToHash uses setTimeout(..., 0) to wait for render.
@@ -104,4 +104,35 @@ test("App routes /stickers/* to StickerInspect and hides ThemeToggle/Footer", as
 
   const main = document.querySelector("main.content");
   expect(main.classList.contains("content--inspect")).toBe(true);
+});
+
+test("App strips Vite's base path before matching routes", async () => {
+  vi.stubGlobal("__VITE_BASE_URL__", "/stickers-site/");
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      okJson([
+        {
+          id: "stickers-foo-001",
+          name: "Foo",
+          set: "stickers",
+          rarity: "common",
+          sticker_img: "/img/stickers/foo.png",
+        },
+      ])
+    )
+  );
+
+  window.history.pushState({}, "", "/stickers-site/stickers/foo");
+  render(App);
+
+  expect(await screen.findByLabelText("Flip card: Foo.")).toBeTruthy();
+
+  window.history.pushState({}, "", "/stickers-site/examples");
+  window.dispatchEvent(new PopStateEvent("popstate"));
+  expect(await screen.findByRole("heading", { level: 1, name: "Examples" })).toBeTruthy();
+
+  window.history.pushState({}, "", "/stickers-site/about");
+  window.dispatchEvent(new PopStateEvent("popstate"));
+  expect(await screen.findByRole("heading", { level: 1, name: "About" })).toBeTruthy();
 });

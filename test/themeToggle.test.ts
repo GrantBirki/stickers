@@ -79,3 +79,22 @@ test("ThemeToggle falls back to system theme when storage access fails", async (
 
   getItem.mockRestore();
 });
+
+test("ThemeToggle applies a choice when persisting it fails", async () => {
+  localStorage.setItem("theme", "light");
+  setMatchMedia({ prefersDark: false });
+
+  const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    throw new Error("blocked");
+  });
+
+  render(ThemeToggle);
+
+  const button = await screen.findByRole("switch", { name: /toggle theme/i });
+  await fireEvent.click(button);
+
+  expect(document.documentElement.dataset.theme).toBe("dark");
+  expect(button.getAttribute("aria-checked")).toBe("true");
+
+  setItem.mockRestore();
+});

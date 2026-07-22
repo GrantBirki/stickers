@@ -8,18 +8,31 @@
   import ThemeToggle from "./lib/components/ThemeToggle.svelte";
   import Footer from "./lib/components/Footer.svelte";
 
+  const basePath = (import.meta.env.BASE_URL || "/").replace(/\/+$/, "") || "/";
+  const routePath = (pathname: string): string => {
+    if (basePath === "/") return pathname;
+    if (pathname === basePath) return "/";
+    return pathname.startsWith(`${basePath}/`) ? pathname.slice(basePath.length) : pathname;
+  };
+
   // Initialize from the current URL so we don't flash the normal layout
   // on "direct link" routes like /examples/* or /stickers/*.
-  let path = typeof window !== "undefined" ? window.location.pathname || "/" : "/";
+  let path = typeof window !== "undefined" ? routePath(window.location.pathname || "/") : "/";
 
   const updatePath = () => {
-    path = window.location.pathname || "/";
+    path = routePath(window.location.pathname || "/");
   };
 
   const scrollToHash = () => {
     const hash = window.location.hash;
     if (!hash) return;
-    const el = document.querySelector(hash);
+    let id: string;
+    try {
+      id = decodeURIComponent(hash.slice(1));
+    } catch {
+      return;
+    }
+    const el = document.getElementById(id);
     if (!el) return;
     // Wait a beat so the page has rendered.
     setTimeout(() => el.scrollIntoView(), 0);

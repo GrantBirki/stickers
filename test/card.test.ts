@@ -7,12 +7,13 @@ import { activeCard } from "../src/lib/stores/activeCard.ts";
 import { activeStickerId } from "../src/lib/stores/activeStickerId.ts";
 
 const setVisibility = (state) => {
+  let currentState = state;
   const original = Object.getOwnPropertyDescriptor(document, "visibilityState");
   Object.defineProperty(document, "visibilityState", {
     configurable: true,
-    get: () => state,
+    get: () => currentState,
   });
-  return () => {
+  const restore = () => {
     if (original) {
       Object.defineProperty(document, "visibilityState", original);
     } else {
@@ -20,6 +21,10 @@ const setVisibility = (state) => {
       delete document.visibilityState;
     }
   };
+  restore.set = (nextState) => {
+    currentState = nextState;
+  };
+  return restore;
 };
 
 test("Card renders a sticker card with derived image URLs, metadata, and data attributes", async () => {
@@ -271,6 +276,36 @@ test("interact() is blocked when the page is hidden or when another card is acti
   expect(rootB.classList.contains("interacting")).toBe(false);
 });
 
+test("hiding the document clears an active homepage card", async () => {
+  const visibility = setVisibility("visible");
+
+  try {
+    const { container } = render(Card, {
+      props: {
+        id: "stickers-visibility",
+        name: "Visibility",
+        set: "stickers",
+        rarity: "common",
+        sticker_img: "/img/stickers/visibility.png",
+      },
+    });
+
+    const button = await screen.findByLabelText("Expand card: Visibility.");
+    const root = container.querySelector(".card");
+    await fireEvent.click(button);
+    await waitFor(() => expect(root.classList.contains("active")).toBe(true));
+
+    visibility.set("hidden");
+    document.dispatchEvent(new Event("visibilitychange"));
+
+    await waitFor(() => expect(root.classList.contains("active")).toBe(false));
+    expect(get(activeCard)).toBe(undefined);
+    expect(get(activeStickerId)).toBe(undefined);
+  } finally {
+    visibility();
+  }
+});
+
 test("pointer/touch interaction schedules animation work and is cancelled on mouseout", async () => {
   vi.useFakeTimers();
 
@@ -350,6 +385,47 @@ test("interact runs a queued RAF update when not cancelled", async () => {
     // Further events should still be handled without errors.
     await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
     vi.runOnlyPendingTimers();
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test("interaction cancels a delayed spring reset after pointer re-entry", async () => {
+  vi.useFakeTimers();
+
+  try {
+    vi.stubGlobal("requestAnimationFrame", (cb) => setTimeout(() => cb(Date.now()), 0));
+    vi.stubGlobal("cancelAnimationFrame", (id) => clearTimeout(id));
+
+    const { container } = render(Card, {
+      props: {
+        id: "stickers-reenter",
+        name: "Re-enter",
+        set: "stickers",
+        rarity: "common",
+        sticker_img: "/img/stickers/reenter.png",
+      },
+    });
+
+    const button = await screen.findByLabelText("Expand card: Re-enter.");
+    const root = container.querySelector(".card");
+    button.getBoundingClientRect = () => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      width: 100,
+      height: 200,
+    });
+
+    await fireEvent.pointerMove(button, { clientX: 10, clientY: 20 });
+    await fireEvent.mouseOut(button);
+    vi.advanceTimersByTime(250);
+
+    await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
+    vi.advanceTimersByTime(500);
+
+    expect(root.classList.contains("interacting")).toBe(true);
   } finally {
     vi.useRealTimers();
   }

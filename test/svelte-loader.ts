@@ -12,7 +12,7 @@ export async function load(
 
   const source = (await readFile(new URL(url), "utf8")).replaceAll(
     "import.meta.env.BASE_URL",
-    '"/"',
+    '(globalThis.__VITE_BASE_URL__ ?? "/")',
   );
   const compiled = compile(source, {
     filename: new URL(url).pathname,

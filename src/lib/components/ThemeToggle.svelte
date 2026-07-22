@@ -21,7 +21,11 @@
   const toggle = () => {
     const next = theme === "dark" ? "light" : "dark";
     locked = true;
-    localStorage.setItem("theme", next);
+    try {
+      localStorage.setItem("theme", next);
+    } catch {
+      // The in-memory choice still applies when storage is unavailable.
+    }
     apply(next);
   };
 
