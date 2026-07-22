@@ -86,6 +86,7 @@ describe("static rendering", () => {
     assert.match(html, /Test &amp; &lt;Card&gt;/);
     assert.match(html, /2026\/01\/02/);
     assert.match(html, /fetchpriority="high"/);
+    assert.match(html, /data-card-name="Test &amp; &lt;Card&gt;"/);
   });
 
   test("common, mystery, and demo cards take their distinct render paths", () => {

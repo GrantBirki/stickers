@@ -70,6 +70,7 @@
 
   /* Card flip (used by sticker inspect pages). */
   --flip: 0deg;
+  --pop-rotate: 0deg;
 }
 
 .card,
@@ -151,13 +152,14 @@
   --translate-z: calc(var(--card-scale) * 150px + 0.01px); /* add 150px to the z-axis to ensure the card is always in front of the others */
   -webkit-transform: translate3d(var(--translate-x), var(--translate-y), var(--translate-z)) scale(var(--card-scale));
   transform: translate3d(var(--translate-x), var(--translate-y), var(--translate-z)) scale(var(--card-scale));
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card__rotator {
-  -webkit-transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
+  -webkit-transform: rotateY(calc(var(--rotate-x) + var(--pop-rotate) + var(--flip))) rotateX(var(--rotate-y));
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
-	  transform: rotateY(calc(var(--rotate-x) + var(--flip))) rotateX(var(--rotate-y));
+	  transform: rotateY(calc(var(--rotate-x) + var(--pop-rotate) + var(--flip))) rotateX(var(--rotate-y));
 	  
 	  /* performance */
 	  pointer-events: auto;
@@ -177,9 +179,8 @@ button.card__rotator {
   appearance: none;
 }
 
-.card__rotator,
-.card.active .card__rotator:focus {
-  transition: box-shadow 0.4s ease, opacity .33s ease-out;
+.card__rotator {
+  transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, opacity .33s ease-out;
   box-shadow: 
     0 0 3px -1px transparent, 
     0 0 2px 1px transparent, 
@@ -187,6 +188,47 @@ button.card__rotator {
     0px 10px 20px -5px black, 
     0 2px 15px -5px black,
     0 0 20px 0px transparent;
+}
+
+/* Preserve direct, responsive pointer tracking after the gentle entry phase. */
+.card.interacting:not(.entering):not(.settling):not(.activating):not(.flipping) .card__rotator {
+  transition: box-shadow 0.4s ease, opacity .33s ease-out;
+}
+
+.card.entering .card__rotator {
+  transition: transform 180ms ease-out, box-shadow 0.4s ease, opacity .33s ease-out;
+}
+
+.card.settling .card__rotator {
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, opacity .33s ease-out;
+}
+
+.card.activating .card__translater {
+  transition: transform 1200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.card.activating .card__rotator {
+  transition: transform 1200ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease, opacity .33s ease-out;
+}
+
+.card.flipping .card__rotator {
+  transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease, opacity .33s ease-out;
+}
+
+.card.entering .card__shine,
+.card.entering .card__glare,
+.card.settling .card__shine,
+.card.settling .card__glare {
+  transition: opacity 420ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card__translater,
+  .card__rotator,
+  .card__shine,
+  .card__glare {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .card.active .card__rotator,
