@@ -1,180 +1,412 @@
 # AGENTS.md
 
-This is the operational guide for humans and coding agents working in `stickers`.
+This file is the operational guide for humans and coding agents working in this repository.
+It is intentionally detailed and specific to how `stickers` actually works right now.
 
-## Project Mission
+Last updated: July 21, 2026.
 
-`stickers` is a static TypeScript site for interactive sticker trading cards. The repository deliberately owns its runtime assets and minimizes registry dependencies to reduce supply-chain exposure and maintenance churn.
+## 1) Project Mission And Operating Model
 
-The project has one exact-pinned development dependency: TypeScript. Do not add a package when a small, maintainable Node or browser standard-library implementation is sufficient.
+`stickers` is a static Svelte + Vite site for interactive sticker trading cards.
 
-## Operating Model
+The repo is deliberately data-driven:
 
 1. Card data lives in `public/data/stickers.json`.
-2. Global display configuration lives in `public/data/site.json`.
-3. `scripts/build.mts` renders complete static HTML for every route and copies public assets to `dist/`.
-4. `tsc` compiles the browser interaction code to `dist/assets/`.
-5. GitHub Pages deploys `dist/`.
+2. The homepage reads that JSON and renders cards dynamically.
+3. Build-time scripts generate static HTML entrypoints for direct-link routes (including per-sticker inspect pages).
+4. CSS rarity/effect styles are applied through card `data-*` attributes.
 
-There is no client framework, bundler, third-party test runner, DOM emulator, or production package dependency.
+The key design constraints are:
 
-## Scripts To Rule Them All
+1. Keep runtime behavior simple and deterministic.
+2. Keep deploy artifacts static-host friendly (no server-side routing required).
+3. Keep card additions primarily as data changes, not component rewrites.
 
-Use repository wrappers instead of raw implementation commands:
+### 1.1 Availability/Ownership Philosophy (Important)
+
+This repo intentionally vendors runtime assets when practical so the site owns its availability.
+
+Examples in this codebase:
+
+1. Fonts are vendored locally under `public/fonts/mona-sans/` (no external font CDN dependency).
+2. Card/sticker imagery and textures are local under `public/img/**`.
+3. Open Graph images are local under `public/og/**`.
+
+Working principle:
+
+1. Prefer shipping assets from the repo instead of relying on third-party hosts.
+2. Optimize for long-term reliability of `stickers.birki.io`.
+3. Larger repo size is acceptable for critical runtime assets.
+
+Practical boundary:
+
+1. Very large/generated dependency directories like `node_modules/` are not committed due size/churn.
+2. Vendoring preference applies primarily to runtime assets needed by the deployed site.
+
+## 2) Scripts To Rule Them All (Important)
+
+This repo is moving toward a wrapper-script workflow under `./script/` as the primary developer UX.
+If you are automating repetitive commands, prefer adding/updating a `./script/<name>` wrapper.
+
+Canonical wrappers:
 
 1. `./script/bootstrap`
-   - CI: deterministic `npm ci`.
-   - Local: `sfw npm install`; fails closed when Socket Firewall is unavailable.
+   - Local behavior: `sfw npm install`; fails closed when Socket Firewall is unavailable.
+   - CI behavior (`CI=true`): `npm ci`.
+   - Use this everywhere dependencies are installed (local setup + GitHub Actions).
 2. `./script/server`
-   - Builds the site and serves `dist/` at `127.0.0.1:5173` by default.
+   - Generates static entrypoints, then runs the local Vite dev server directly.
 3. `./script/build`
-   - Renders pages and compiles only the browser TypeScript entrypoint and its imports.
+   - Generates static entrypoints, then runs the production Vite build directly.
 4. `./script/lint`
-   - Runs strict TypeScript validation without emitting files.
+   - Runs strict TypeScript and Svelte validation with `svelte-check`.
 5. `./script/test`
-   - Builds, runs `node:test`, and enforces V8 coverage thresholds.
+   - Runs the test suite with Node's built-in test runner and V8 coverage.
 
-Keep wrappers strict and small with `#!/usr/bin/env bash` and `set -euo pipefail`. CI jobs must call wrappers.
+Wrapper behavior:
 
-## Toolchain And Dependency Policy
+1. `script/server` and `script/build` call `node scripts/generate-sticker-pages.mts` explicitly before Vite.
+2. `script/lint` and `script/test` invoke their installed binaries or Node directly, avoiding extra package-manager command layers.
+3. No cleanup lifecycle hook is required because generated HTML never lands in repo-root route folders.
 
-- Node version: `.node-version`
-- Package manager: npm
-- Registry dependency: exact-pinned `typescript`
-- Test stack: `node:test`, `node:assert`, and built-in V8 coverage
-- Build/server stack: Node filesystem, path, and HTTP modules
+Why this matters:
 
-Use Socket Firewall for supported local package-manager operations. Never introduce floating dependency constraints. Any new dependency requires a concrete explanation of why repository-owned code or the standard library is not appropriate and must account for its full transitive graph.
+1. Fewer command variations across humans, CI, and agents.
+2. Easier onboarding (`./script/server`, `./script/test` are memorable).
+3. Easier to evolve underlying commands without changing every doc/tooling location.
 
-Retain TypeScript because it provides the actual strict type-check and browser emit. Node's native type stripping is appropriate for repository scripts and tests, but it does not replace type checking or downlevel browser output.
+Conventions for script wrappers:
 
-## Architecture Map
+1. Use Bash with:
+   - `#!/usr/bin/env bash`
+   - `set -euo pipefail`
+2. Keep wrappers small and focused (delegate to Node or installed tool binaries).
+3. Prefer adding a wrapper over documenting long ad hoc command sequences.
+4. Always use wrappers in CI jobs (do not duplicate raw `npm ci`, `npm run build`, etc. in workflows).
+5. If a task is “daily-driver” (bootstrap, server, build, lint, test), it should have a wrapper.
 
-### Static Renderer
+## 3) Environment And Toolchain Requirements
 
-`src/lib/render.ts` owns:
+Pinned runtime:
 
-- HTML escaping
-- public/base URL normalization
-- sticker slug collision handling
-- deterministic card markup and visual seeds
-- homepage, examples, static-page, and inspect-page markup
-- shared metadata and document shell
+1. Node version from `.node-version`: `24.11.1`
+2. Package manager: `npm`
+3. Language: strict TypeScript for application, component, build, and test source
+4. Frontend stack: Svelte 5 + Vite 8
+5. Test stack: Node `node:test` + `node:assert` + built-in V8 coverage, with jsdom only for browser DOM behavior
 
-All untrusted or data-file text must pass through `escapeHtml` before entering generated markup. Avoid adding `innerHTML` browser mutations; render trusted structure at build time.
+Core npm scripts:
 
-### Browser Runtime
+1. `dev`: delegates to `./script/server`
+2. `build`: delegates to `./script/build`
+3. `check`, `lint`, and `validate`: delegate to `./script/lint`
+4. `test`: delegates to `./script/test`
 
-`src/lib/browser.ts` owns:
+Wrapper-first practical note:
 
-- light/dark theme selection and persistence
-- pointer-to-card effect calculations
-- device-orientation card effects
-- homepage card expansion and inspect-button selection
-- inspect-page card flipping
-- example showcase animation
+1. Use wrappers (`./script/*`) for humans/agents/CI; treat raw npm scripts as implementation details.
+2. Dev/build generation is explicit inside `script/server` and `script/build`; generated entrypoints are isolated in `.generated-pages/`.
+3. The six direct npm dependencies are exact-pinned. Do not reintroduce ESLint, Vitest, or general testing-library packages for behavior covered by the current TypeScript, Svelte, and Node standard tooling.
+4. Svelte's motion primitives are a deliberate performance dependency for the card springs. Do not replace them with a custom animation runtime without real-browser evidence that the replacement preserves interaction latency and visual behavior.
+5. `jsdom` is test-only and retained for standards-heavy DOM behavior. Do not replace it with a partial in-repo DOM implementation.
+6. `test/dependencies.test.ts` enforces no production dependencies, the approved direct development packages and override, manifest/lockfile agreement, exact pins, and a maximum of 115 resolved packages.
 
-`src/main.ts` only initializes and composes browser behavior. Keep the runtime small and browser-native.
+## 4) Deep Architecture Map
 
-### Examples
+### 4.1 Runtime App Routing
 
-`src/lib/examples.ts` is the data source for `/examples/` and `/example/`. It deliberately reuses one local image so the repository does not ship licensed card art.
+Main entry:
 
-### Static Build
+1. `src/main.ts` mounts `App` into `#app` with Svelte 5 `mount()`.
 
-`scripts/build.mts`:
+Router behavior in `src/App.svelte`:
 
-1. Recreates `dist/`.
-2. Copies `public/` recursively.
-3. Combines ordered card CSS sources into `dist/css/cards/all.css`.
-4. Reads sticker and site JSON.
-5. Renders the homepage, examples aliases, static pages, and per-sticker inspect pages.
+1. Uses `window.location.pathname` (client-side path switch).
+2. Handles `popstate` and `hashchange`.
+3. Routes:
+   - `/stickers/*` -> `StickerInspect` (special fullscreen inspect experience)
+   - `/examples` or `/example` -> `Examples`
+   - static pages (`/work`, `/about`, `/services`, `/contact`, `/privacy`, `/terms`) -> `StaticPage`
+   - everything else -> `Home`
+4. On inspect routes:
+   - No theme toggle
+   - No footer
+   - Main container uses inspect-specific layout
 
-`public/css/cards/all.css` is not tracked because it is a build artifact. Keep the source order in `scripts/build.mts` aligned with the card effect cascade.
+### 4.2 Homepage Data Flow
 
-### Static Server
+`src/pages/Home.svelte`:
 
-`scripts/server.mts` serves `dist/` with Node's HTTP module. Its path resolver must continue to reject malformed URL encoding and traversal outside `dist/`.
+1. Fetches `data/stickers.json` and `data/site.json`.
+2. Builds a slug map from sticker IDs.
+3. Renders cards from data.
+4. Optionally appends a mystery placeholder card when `display_next_card_as_hidden` is `true`.
+5. Uses `activeStickerId` to show an inspect FAB when a card is active.
+6. Handles inspect navigation via `history.pushState` and a `popstate` dispatch.
 
-## Route Contract
+### 4.3 Inspect Route Data Flow
 
-Generated routes are:
+`src/pages/StickerInspect.svelte`:
 
-- `/`
-- `/examples/` and `/example/`
-- `/work/`, `/about/`, `/services/`, `/contact/`, `/privacy/`, and `/terms/`
-- `/stickers/<slug>/` for every sticker
+1. Fetches `data/stickers.json`.
+2. Matches by normalized slug in this order:
+   - base slug
+   - full slug
+3. Renders one card in inspect mode with `flip_on_click={true}`.
+4. Locks `document.body.style.overflow = "hidden"` while mounted.
 
-Inspect routes intentionally omit the top bar, theme toggle, and footer. They render one viewport-fitted card that flips on click.
+### 4.4 Slug Semantics
 
-All routes must remain direct-link compatible on static hosting. Do not replace generated route entrypoints with a server rewrite requirement.
+Helper: `src/lib/helpers/stickerSlugs.ts`.
 
-## Sticker Slugs
+Rules:
 
-Helpers live in `src/lib/helpers/stickerSlugs.ts`.
+1. `baseSlugFromStickerId(id)`:
+   - strips `stickers-` prefix
+   - strips trailing numeric suffix `-<digits>`
+2. `fullSlugFromStickerId(id)`:
+   - strips `stickers-` prefix only
+3. `normalizePathSlug(slug)`:
+   - trims leading/trailing slashes
 
-1. `baseSlugFromStickerId` strips a `stickers-` prefix and trailing numeric suffix.
-2. `fullSlugFromStickerId` strips only the prefix.
-3. `buildSlugMap` gives the first card a base slug and later collisions their full slug.
+Collision behavior:
 
-Keep renderer, route output, homepage inspect links, documentation, and tests aligned with these rules.
+1. If two stickers share a base slug, first keeps base slug, later entries use full slug.
 
-## Card Data Contract
+### 4.5 Card Component Behavior
 
-Common fields in `public/data/stickers.json`:
+Core component: `src/lib/components/Card.svelte`.
 
-- `id`: unique identifier and slug source
-- `name`: displayed title
-- `set`: use `stickers` for the sticker-card layout
-- `number`: card number
-- `rarity`: CSS rarity token
-- `sticker_img`: sticker art-window image
-- `card_front_img`: optional face texture override
-- `card_back_img`: optional back image override
-- `drop_date`: printed as `YYYY/MM/DD`
-- `description`: card metadata
-- `total_prints`: card metadata
-- `hidden` and `variant`: mystery-card behavior
+Relevant props for sticker cards:
 
-Runtime asset paths should be public-root paths such as `/img/stickers/example.png`. Prefer repository-owned assets over third-party URLs.
+1. `id`
+2. `name`
+3. `set` (must be `"stickers"` for sticker layout path)
+4. `number`
+5. `rarity`
+6. `sticker_img`
+7. `card_front_img` (optional texture/face override)
+8. `card_back_img` (optional back override)
+9. `drop_date`
+10. `description`
+11. `total_prints`
+12. `hidden` and `variant` for mystery behavior
 
-## CSS And Visual System
+Interactive behavior:
 
-- `public/css/global.css`: fonts, theme tokens, and global styling
-- `public/css/app.css`: application layout and former component-level styling
-- `public/css/cards/*.css`: card base, rarity, foil, and sticker effects
+1. Card expansion uses `activeCard` and `activeStickerId` stores.
+2. On homepage, expanded card drives inspect FAB visibility.
+3. On inspect route, cards are rendered with `flip_on_click` (front/back toggle).
+4. Includes pointer-based spring effects and device orientation reaction.
 
-Card effect CSS consumes `data-*` attributes and custom properties emitted by `renderCard`. When adding or renaming attributes, inspect the full CSS usage before changing the renderer.
+Sticker-specific rendering details:
 
-## Test And Quality Baseline
+1. Sticker cards use a dedicated layout in `public/css/cards/stickers.css`.
+2. Rarity drives foil scope:
+   - `common`/`uncommon`: art-focused behavior
+   - other rarities: full-card foil scope
 
-`./script/test` covers pure render behavior, slug collisions, HTML escaping, card variants, interaction math, build output, direct routes, server traversal protection, and the one-package lockfile invariant.
+### 4.6 CSS And Visual System
 
-Keep tests standard-library-only. Do not add jsdom or a browser emulation package. Browser integration can be expressed as small pure functions plus generated-output tests; use real-browser inspection when a change is visual or interaction-heavy.
+Global styles:
 
-## Workflow Guardrails
+1. `public/css/global.css` defines theme tokens, fonts, and baseline styling.
+2. Local Mona Sans font files are served from `public/fonts/mona-sans`.
 
-When adding a sticker:
+Card effect styles:
 
-1. Add the repository-owned image under `public/img/stickers/`.
-2. Add or update the data record.
-3. Run `./script/test`.
-4. Check the homepage and direct inspect route when the visual output changed.
+1. Split across many files in `public/css/cards/`.
+2. Bundled into `public/css/cards/all.css` by generator script.
+3. Sticker cards have dedicated styling in `public/css/cards/stickers.css`.
+4. Custom rarity effect `spiral-holographic` is implemented in `public/css/cards/spiral-holographic.css`.
 
-When changing rendering:
+### 4.7 Build-Time Static Entrypoint Generation
 
-1. Preserve HTML escaping for data-derived content.
-2. Preserve direct static routes and metadata.
-3. Keep card data attributes synchronized with CSS.
-4. Keep inspect pages free of normal-page chrome.
+Script: `scripts/generate-sticker-pages.mts`.
 
-When changing dependencies:
+What it generates:
 
-1. Audit the complete resolved graph, not only direct dependencies.
-2. Prefer removal or repository-owned code.
-3. Keep the package and lockfile exact-pinned and synchronized.
-4. Preserve the lockfile test that asserts only TypeScript is resolved unless the project owner explicitly accepts a larger graph.
+1. `.generated-pages/stickers/<slug>/index.html` for each sticker from data.
+2. Static route entrypoints:
+   - `.generated-pages/examples/index.html`
+   - `.generated-pages/example/index.html`
+   - `.generated-pages/work/index.html`
+   - `.generated-pages/about/index.html`
+   - `.generated-pages/services/index.html`
+   - `.generated-pages/contact/index.html`
+   - `.generated-pages/privacy/index.html`
+   - `.generated-pages/terms/index.html`
+3. `.generated-pages/index.html` copied from repo-root `index.html`.
+4. `.generated-pages/src` symlink to `src/` so generated HTML can still import `/src/main.ts`.
+5. Card CSS bundle: `public/css/cards/all.css`.
 
-## Availability Philosophy
+Why this exists:
 
-Critical runtime fonts, images, textures, metadata, CSS, HTML, and JavaScript are served from the repository. Larger source size is acceptable when it removes runtime availability or integrity dependencies on third parties. Generated dependency directories and `dist/` remain untracked.
+1. Allows direct navigation to route URLs on static hosting without server rewrite support.
+2. Keeps static hosting compatibility without requiring committed route HTML files.
+
+Repository tracking policy for generated sticker routes:
+
+1. Generated route entrypoints are build artifacts under `.generated-pages/**`.
+2. `.generated-pages/` is gitignored and should remain untracked by default.
+3. Runtime asset paths like `public/img/stickers/**` stay tracked and are not part of this ignore pattern.
+4. Generated route HTML should not appear in repo root anymore.
+5. Deployable artifacts remain in `dist/**`, which is what GitHub Pages workflows upload.
+
+Developer ergonomics policy for root cleanliness:
+
+1. Generation happens in a hidden build root (`.generated-pages/`) instead of repo-root route folders.
+2. `vite.config.ts` sets `root` to `.generated-pages/` for `vite build` while keeping dev-root as project root.
+3. Result: direct-link static route support is preserved without root clutter and without post-command cleanup scripts.
+
+### 4.8 Build Configuration
+
+`vite.config.ts`:
+
+1. Loads env (`VITE_*`) and provides `%VITE_SITE_URL%`/`%VITE_BASE%` replacement via HTML plugin.
+2. Computes dynamic Rollup input entries for sticker pages by reading `public/data/stickers.json`.
+3. Pins build output to project-root `dist/` even when build entry root is `.generated-pages/`.
+4. Test compilation is intentionally separate: `test/svelte-loader.ts` compiles Svelte components for Node's test runner.
+
+## 5) Sticker Data Contract (Practical Schema)
+
+Data file:
+
+1. `public/data/stickers.json`
+
+Common fields used in this repo:
+
+1. `id` (string, slug source)
+2. `name` (display title)
+3. `set` (`"stickers"` for sticker card behavior)
+4. `number` (displayed in card footer)
+5. `rarity` (maps to CSS rarity styles)
+6. `sticker_img` (primary sticker art image path)
+7. `card_front_img` (optional face texture/image override)
+8. `card_back_img` (optional back face image override)
+9. `drop_date` (formatted to `YYYY/MM/DD` on card)
+10. `description` (card metadata text)
+11. `total_prints` (card metadata text)
+12. `hidden` + `variant` for mystery placeholder behavior
+
+All image paths should be public-root paths (e.g. `/img/...`).
+
+## 6) Test And Quality Baseline
+
+Primary test command:
+
+1. `./script/test`
+
+The suite covers routing, card interactions and animation state, inspect behavior, orientation input, themes, static-page rendering, slug collisions, and the dependency boundary.
+
+Static checks:
+
+1. `./script/lint` runs strict TypeScript and Svelte diagnostics through `svelte-check`.
+
+Coverage thresholds are strict and intentional in `script/test`:
+
+1. lines: 98
+2. functions: 100
+3. branches: 87
+
+## 7) CI/CD And Deployment Notes
+
+GitHub workflows include:
+
+1. `build.yml`
+2. `test.yml`
+3. `lint.yml`
+4. `deploy.yml`
+5. branch deploy flow (`branch-deploy.yml`)
+6. unlock-on-merge flow
+
+Operational detail:
+
+1. PR comments support `.deploy`-driven production branch deployment flow.
+2. New PR template comment includes deployment instructions.
+3. GitHub Actions jobs are wrapper-driven:
+   - bootstrap: `script/bootstrap`
+   - build: `script/build`
+   - lint: `script/lint`
+   - test: `script/test`
+4. `script/build` regenerates `.generated-pages/` before invoking the installed Vite binary.
+5. GitHub Pages deployment remains safe because workflows upload only `dist/`.
+
+## 8) Why Untracked Route Files Appeared Previously (And Why They Should Not Now)
+
+Root cause in the old approach:
+
+1. Generation wrote route HTML into repo-root folders (`/stickers`, `/about`, `/example`, etc.).
+2. If those folders were not ignored, `git status` surfaced many untracked generated files.
+3. A broad ignore like `stickers/` is dangerous because it can also hide `public/img/stickers/**` in some Git workflows/tools.
+
+Current fix and expected behavior:
+
+1. Generated route HTML now lives under `.generated-pages/**` only.
+2. `.generated-pages/` is ignored, so generation no longer pollutes root status.
+3. Runtime assets remain in tracked `public/**` paths, including `public/img/stickers/**`.
+4. Build output remains `dist/**`; CI deploys only `dist/**` to GitHub Pages.
+
+## 9) Workflow Guardrails For Future Changes
+
+When adding/updating stickers:
+
+1. Add/verify image asset in `public/img/stickers/`.
+2. Add/update row in `public/data/stickers.json`.
+3. Run generation (`node scripts/generate-sticker-pages.mts` or `./script/server` / `./script/build`).
+4. Run tests via `./script/test`.
+5. Verify homepage render, card inspect route, and metadata correctness.
+
+When changing command workflows:
+
+1. Prefer `./script/*` wrappers as stable user/agent entrypoints.
+2. Keep wrappers strict and tiny.
+3. Update docs to point to wrappers when practical.
+
+When touching static generation behavior:
+
+1. Keep slug logic aligned across:
+   - `src/lib/helpers/stickerSlugs.ts`
+   - `scripts/generate-sticker-pages.mts`
+   - `vite.config.ts` sticker input generation
+2. A mismatch here can cause broken direct routes or missing build inputs.
+
+## 10) Resolved Repo Policy: Generated Sticker Entrypoints Are Untracked
+
+Decision:
+
+1. Do not commit generated inspect route HTML artifacts (source generation path: `.generated-pages/stickers/<slug>/index.html`).
+2. Keep `.generated-pages/` in `.gitignore`.
+3. Keep runtime asset directories like `public/img/stickers/` tracked.
+4. Do not commit generated route entrypoint HTML (it should stay in `.generated-pages/**` only).
+5. Do not reintroduce root-level route generation + cleanup unless there is a hard Vite regression that forces it.
+
+Rationale:
+
+1. Generation is guaranteed by the `script/server` and `script/build` entrypoints used locally and in CI.
+2. CI/deploy runs build steps that regenerate required files.
+3. Tracking generated route HTML adds churn with little source-of-truth value.
+
+When this policy should be revisited:
+
+1. If deployment ever changes to require checked-in prebuilt route HTML without running build generation.
+2. If an explicit archival/versioning requirement for generated HTML is introduced.
+
+## 11) Quick Command Cheatsheet
+
+Preferred local commands:
+
+1. Bootstrap dependencies: `./script/bootstrap`
+2. Start dev server: `./script/server`
+3. Build: `./script/build`
+4. Lint + type-check: `./script/lint`
+5. Run tests + coverage: `./script/test`
+6. Generate pages manually (rare): `node scripts/generate-sticker-pages.mts`
+
+## 12) Final Notes For Agents
+
+1. Treat `public/data/stickers.json` as the source of truth for sticker inventory.
+2. Do not assume inspect pages are available unless generation has run.
+3. Be careful with slug collisions; base/full fallback behavior is intentional.
+4. If adding recurring workflows, prefer new `./script/*` wrappers.
+5. If the goal is “mirror an existing card exactly,” diff all field values before finalizing.

@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-./script/build
-
+# Node's built-in test runner, assertion library, mocks, timers, and V8 coverage
+# replace the Vitest stack. jsdom remains solely as the browser DOM implementation.
 node \
+  --conditions=browser \
+  --conditions=svelte \
+  --import=./test/register-loader.ts \
+  --import=./test/setup.ts \
   --experimental-test-coverage \
-  --test-coverage-include='src/lib/render.ts' \
-  --test-coverage-include='src/lib/helpers/*.ts' \
-  --test-coverage-lines=95 \
-  --test-coverage-functions=95 \
-  --test-coverage-branches=85 \
+  --test-coverage-include='src/**/*.ts' \
+  --test-coverage-include='src/**/*.svelte' \
+  --test-coverage-exclude='src/vite-env.d.ts' \
+  --test-coverage-lines=98 \
+  --test-coverage-functions=100 \
+  --test-coverage-branches=87 \
   --test \
   test/*.test.ts

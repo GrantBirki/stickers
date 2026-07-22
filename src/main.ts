@@ -1,12 +1,10 @@
-import { initializeCards, initializeTheme } from "./lib/browser.ts";
+import App from "./App.svelte";
+import { mount } from "svelte";
 
-export const start = (documentRef: Document, windowRef: Window): (() => void) => {
-  const stopTheme = initializeTheme(documentRef, windowRef);
-  const stopCards = initializeCards(documentRef, windowRef);
-  return () => {
-    stopCards();
-    stopTheme();
-  };
-};
+const target = document.getElementById("app");
+if (!target) throw new Error("Missing #app mount target");
 
-if (typeof document !== "undefined" && typeof window !== "undefined") start(document, window);
+// Svelte 5 uses `mount()` (the `new Component(...)` API is no longer valid by default).
+const app = mount(App, { target });
+
+export default app;
