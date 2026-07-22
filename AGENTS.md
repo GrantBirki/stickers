@@ -3,7 +3,7 @@
 This file is the operational guide for humans and coding agents working in this repository.
 It is intentionally detailed and specific to how `stickers` actually works right now.
 
-Last updated: July 20, 2026 (based on current branch state and local workspace inspection).
+Last updated: July 21, 2026.
 
 ## 1) Project Mission And Operating Model
 
@@ -51,7 +51,7 @@ If you are automating repetitive commands, prefer adding/updating a `./script/<n
 Canonical wrappers:
 
 1. `./script/bootstrap`
-   - Local behavior: `npm install`.
+   - Local behavior: `sfw npm install`; fails closed when Socket Firewall is unavailable.
    - CI behavior (`CI=true`): `npm ci`.
    - Use this everywhere dependencies are installed (local setup + GitHub Actions).
 2. `./script/server`
@@ -107,6 +107,9 @@ Wrapper-first practical note:
 1. Use wrappers (`./script/*`) for humans/agents/CI; treat raw npm scripts as implementation details.
 2. Dev/build generation is explicit inside `script/server` and `script/build`; generated entrypoints are isolated in `.generated-pages/`.
 3. The six direct npm dependencies are exact-pinned. Do not reintroduce ESLint, Vitest, or general testing-library packages for behavior covered by the current TypeScript, Svelte, and Node standard tooling.
+4. Svelte's motion primitives are a deliberate performance dependency for the card springs. Do not replace them with a custom animation runtime without real-browser evidence that the replacement preserves interaction latency and visual behavior.
+5. `jsdom` is test-only and retained for standards-heavy DOM behavior. Do not replace it with a partial in-repo DOM implementation.
+6. `test/dependencies.test.ts` enforces no production dependencies, the approved direct development packages and override, manifest/lockfile agreement, exact pins, and a maximum of 115 resolved packages.
 
 ## 4) Deep Architecture Map
 
@@ -294,11 +297,7 @@ Primary test command:
 
 1. `./script/test`
 
-Current observed result (local run on July 20, 2026):
-
-1. 13 test files passed
-2. 49 tests passed
-3. Coverage thresholds passed
+The suite covers routing, card interactions and animation state, inspect behavior, orientation input, themes, static-page rendering, slug collisions, and the dependency boundary.
 
 Static checks:
 
