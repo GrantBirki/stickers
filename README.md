@@ -16,7 +16,7 @@ The website for stickers.birki.io - Grant's collection of sticker drops!
 - Run strict TypeScript and Svelte checks: `./script/lint`
 - Run tests with coverage: `./script/test`
 
-The project uses TypeScript throughout. Svelte's motion primitives are retained because they provide the card's responsive spring animation without the browser lag observed in a custom animation runtime, while Vite produces the static deployable site. Tests otherwise use Node's built-in test runner, assertion library, mocks, timers, and V8 coverage; standards-heavy `jsdom` remains test-only so component interactions can be verified without maintaining a custom DOM implementation. The six direct development dependencies and the `undici` override are exact-pinned, and a policy test caps the resolved graph at 115 packages.
+The project uses TypeScript throughout. Svelte's motion primitives are retained because they provide the card's responsive spring animation without the browser lag observed in a custom animation runtime, while Vite produces the static deployable site. Tests otherwise use Node's built-in test runner, assertion library, mocks, timers, and V8 coverage; standards-heavy `jsdom` remains test-only so component interactions can be verified without maintaining a custom DOM implementation. The six direct development dependencies and four security/reproducibility overrides are exact-pinned, and a policy test caps the resolved graph at 115 packages.
 
 ## Generated Sticker Inspect Pages
 

@@ -28,6 +28,9 @@ const approvedDevDependencies = {
 };
 
 const approvedOverrides = {
+  "@emnapi/core": "1.11.0",
+  "@emnapi/runtime": "1.11.0",
+  postcss: "8.5.18",
   undici: "7.28.0",
 };
 

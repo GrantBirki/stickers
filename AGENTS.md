@@ -109,7 +109,7 @@ Wrapper-first practical note:
 3. The six direct npm dependencies are exact-pinned. Do not reintroduce ESLint, Vitest, or general testing-library packages for behavior covered by the current TypeScript, Svelte, and Node standard tooling.
 4. Svelte's motion primitives are a deliberate performance dependency for the card springs. Do not replace them with a custom animation runtime without real-browser evidence that the replacement preserves interaction latency and visual behavior.
 5. `jsdom` is test-only and retained for standards-heavy DOM behavior. Do not replace it with a partial in-repo DOM implementation.
-6. `test/dependencies.test.ts` enforces no production dependencies, the approved direct development packages and override, manifest/lockfile agreement, exact pins, and a maximum of 115 resolved packages.
+6. `test/dependencies.test.ts` enforces no production dependencies, the approved direct development packages and overrides, manifest/lockfile agreement, exact pins, and a maximum of 115 resolved packages.
 
 ## 4) Deep Architecture Map
 
