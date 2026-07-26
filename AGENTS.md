@@ -89,7 +89,7 @@ Conventions for script wrappers:
 
 Pinned runtime:
 
-1. Node version from `.node-version`: `24.11.1`
+1. Node version from `.node-version`: `24.18.0`
 2. Package manager: `npm`
 3. Language: strict TypeScript for application, component, build, and test source
 4. Frontend stack: Svelte 5 + Vite 8
