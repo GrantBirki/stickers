@@ -79,7 +79,8 @@
 	}
 
 	:global( .card-grid > .card.active ) {
-		transform: translate3d(0, 0, 0.1px)!important;
+		/* Keep active cards in front of the grid even when they shrink to fit. */
+		transform: translate3d(0, 0, 1000px)!important;
 	}
 	
 </style>
