@@ -17,12 +17,6 @@
     o: number;
   }
 
-  interface SpringUpdate {
-    background: Point;
-    rotate: Point;
-    glare: GlarePoint;
-  }
-
   // card metadata props
   export let id = "";
   export let name = "";
@@ -100,10 +94,11 @@
 
 
   let thisCard: HTMLElement;
+  let thisTranslater: HTMLElement;
   let repositionTimer: number | undefined;
   let interactEndTimer: number | undefined;
   let rafId: number | null = null;
-  let pendingSpringUpdate: SpringUpdate | null = null;
+  let pendingPointer: Point | null = null;
 
   let active = false;
   let interacting = false;
@@ -142,7 +137,7 @@
     interactEndTimer = undefined;
   };
 
-  const interact = (event: PointerEvent | MouseEvent | TouchEvent) => {
+  const interact = (event: PointerEvent) => {
     endShowcase();
 
     if (!isVisible) {
@@ -157,53 +152,33 @@
     cancelInteractEnd();
     interacting = true;
 
-    const touch = event.type === "touchmove" ? (event as TouchEvent).touches[0] : undefined;
-    const clientX = touch?.clientX ?? (event as MouseEvent).clientX;
-    const clientY = touch?.clientY ?? (event as MouseEvent).clientY;
-    const $el = event.target as HTMLElement;
-    const rect = $el.getBoundingClientRect(); // get element's current size/position
-    const absolute = {
-      x: clientX - rect.left, // get mouse position from left
-      y: clientY - rect.top, // get mouse position from right
-    };
-    const percent = {
-      x: clamp(round((100 / rect.width) * absolute.x)),
-      y: clamp(round((100 / rect.height) * absolute.y)),
-    };
-    const center = {
-      x: percent.x - 50,
-      y: percent.y - 50,
-    };
+    pendingPointer = { x: event.clientX, y: event.clientY };
 
-    // Store the latest interaction data
-    pendingSpringUpdate = {
-      background: {
-        x: adjust(percent.x, 0, 100, 37, 63),
-        y: adjust(percent.y, 0, 100, 33, 67),
-      },
-      rotate: {
-        x: round(-(center.x / 3.5)),
-        y: round(center.y / 3.5),
-      },
-      glare: {
-        x: round(percent.x),
-        y: round(percent.y),
-        o: 1,
-      }
-    };
-
-    // Schedule spring update for next frame if not already scheduled
+    // Coalesce geometry reads and spring targets as well as writes. The outer
+    // translated box follows expansion without feeding the card's tilt back
+    // into the next pointer position.
     if (rafId === null) {
       rafId = requestAnimationFrame(() => {
-        if (pendingSpringUpdate) {
-          updateSprings(
-            pendingSpringUpdate.background,
-            pendingSpringUpdate.rotate,
-            pendingSpringUpdate.glare
-          );
-          pendingSpringUpdate = null;
-        }
         rafId = null;
+        if (pendingPointer) {
+          const rect = thisTranslater.getBoundingClientRect();
+          const percent = {
+            x: clamp(round((100 / rect.width) * (pendingPointer.x - rect.left))),
+            y: clamp(round((100 / rect.height) * (pendingPointer.y - rect.top))),
+          };
+          updateSprings(
+            {
+              x: adjust(percent.x, 0, 100, 37, 63),
+              y: adjust(percent.y, 0, 100, 33, 67),
+            },
+            {
+              x: round(-(percent.x - 50) / 3.5),
+              y: round((percent.y - 50) / 3.5),
+            },
+            { x: percent.x, y: percent.y, o: 1 },
+          );
+          pendingPointer = null;
+        }
       });
     }
   };
@@ -216,7 +191,7 @@
       cancelAnimationFrame(rafId);
       rafId = null;
     }
-    pendingSpringUpdate = null;
+    pendingPointer = null;
 
     interactEndTimer = setTimeout(function () {
       interactEndTimer = undefined;
@@ -273,6 +248,7 @@
   };
 
   const reposition = (_event: Event) => {
+    if ($activeCard !== thisCard) return;
     if (repositionTimer !== undefined) clearTimeout(repositionTimer);
     repositionTimer = setTimeout(() => {
       if ($activeCard && $activeCard === thisCard) {
@@ -293,14 +269,15 @@
       x: delta.x,
       y: delta.y,
     });
+    springScale.set(Math.min(
+      (window.innerWidth / rect.width) * 0.9,
+      (window.innerHeight / rect.height) * 0.9,
+      1.75,
+    ));
   };
 
   const popover = () => {
-    const rect = thisCard.getBoundingClientRect(); // get element's size/position
     let delay = 100;
-    let scaleW = (window.innerWidth / rect.width) * 0.9;
-    let scaleH = (window.innerHeight / rect.height) * 0.9;
-    let scaleF = 1.75;
     setCenter();
     if (firstPop) {
       if (!expanded) {
@@ -312,7 +289,6 @@
       }
     }
     firstPop = false;
-    springScale.set(Math.min(scaleW, scaleH, scaleF));
     interactEnd(null, delay);
   };
 
@@ -356,7 +332,7 @@
     if (repositionTimer !== undefined) clearTimeout(repositionTimer);
     cancelInteractEnd();
     if (rafId !== null) cancelAnimationFrame(rafId);
-    pendingSpringUpdate = null;
+    pendingPointer = null;
     endShowcase();
   });
 
@@ -587,7 +563,7 @@
   });
 </script>
 
-<svelte:window on:scroll={reposition} />
+<svelte:window on:scroll={reposition} on:resize={reposition} />
 
 <div
 	  class="card {typesAttr} / interactive / "
@@ -609,12 +585,13 @@
 	  bind:this={thisCard}
 	>
   <div 
-    class="card__translater">
+    class="card__translater" bind:this={thisTranslater}>
     <button
       class="card__rotator"
       on:click={activate}
       on:pointermove={interact}
-      on:mouseout={interactEnd}
+      on:pointerleave={interactEnd}
+      on:pointercancel={interactEnd}
       on:blur={deactivate}
       aria-label={flip_on_click ? `Flip card: ${name}.` : `Expand card: ${name}.`}
       tabindex="0"
