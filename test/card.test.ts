@@ -306,7 +306,7 @@ test("hiding the document clears an active homepage card", async () => {
   }
 });
 
-test("pointer/touch interaction schedules animation work and is cancelled on mouseout", async () => {
+test("pointer interaction schedules animation work and is cancelled on pointer leave", async () => {
   vi.useFakeTimers();
 
   try {
@@ -321,7 +321,7 @@ test("pointer/touch interaction schedules animation work and is cancelled on mou
     });
 
     const button = await screen.findByLabelText("Expand card: RAF.");
-    button.getBoundingClientRect = () => ({
+    button.parentElement.getBoundingClientRect = () => ({
       x: 0,
       y: 0,
       left: 0,
@@ -334,17 +334,8 @@ test("pointer/touch interaction schedules animation work and is cancelled on mou
     // Second move should hit the "raf already scheduled" path.
     await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
 
-    // Use the real DOM event name ("touchmove") so Card's `e.type === "touchmove"`
-    // branch is exercised (testing-library's `touchMove` helper uses "touchMove").
-    const touchMove = new Event("touchmove", { bubbles: true, cancelable: true });
-    Object.defineProperty(touchMove, "touches", {
-      value: [{ clientX: 12, clientY: 34 }],
-      configurable: true,
-    });
-    await fireEvent(button, touchMove);
-
     // Cancels any pending RAF and schedules spring reset.
-    await fireEvent.mouseOut(button);
+    await fireEvent(button, new Event("pointerleave"));
     vi.runOnlyPendingTimers();
   } finally {
     vi.useRealTimers();
@@ -369,7 +360,7 @@ test("interact runs a queued RAF update when not cancelled", async () => {
     });
 
     const button = await screen.findByLabelText("Expand card: RAF Run.");
-    button.getBoundingClientRect = () => ({
+    button.parentElement.getBoundingClientRect = () => ({
       x: 0,
       y: 0,
       left: 0,
@@ -409,7 +400,7 @@ test("interaction cancels a delayed spring reset after pointer re-entry", async 
 
     const button = await screen.findByLabelText("Expand card: Re-enter.");
     const root = container.querySelector(".card");
-    button.getBoundingClientRect = () => ({
+    button.parentElement.getBoundingClientRect = () => ({
       x: 0,
       y: 0,
       left: 0,
@@ -419,7 +410,7 @@ test("interaction cancels a delayed spring reset after pointer re-entry", async 
     });
 
     await fireEvent.pointerMove(button, { clientX: 10, clientY: 20 });
-    await fireEvent.mouseOut(button);
+    await fireEvent(button, new Event("pointerleave"));
     vi.advanceTimersByTime(250);
 
     await fireEvent.pointerMove(button, { clientX: 20, clientY: 30 });
@@ -431,7 +422,64 @@ test("interaction cancels a delayed spring reset after pointer re-entry", async 
   }
 });
 
-test("scroll reposition debounces and recenters the active card", async () => {
+test("pointer bursts measure the translated card once per frame", async () => {
+  const { container } = render(Card, {
+    props: { id: "pointer-burst", name: "Pointer Burst", set: "stickers" },
+  });
+  const button = screen.getByLabelText("Expand card: Pointer Burst.");
+  const rect = { x: 0, y: 0, left: 0, top: 0, width: 100, height: 200 };
+  const measure = vi.fn(() => rect);
+  button.parentElement.getBoundingClientRect = measure;
+  const measureTilted = vi.fn(() => rect);
+  button.getBoundingClientRect = measureTilted;
+  let nextFrame;
+  const schedule = vi.fn((callback) => { nextFrame = callback; return 1; });
+  vi.stubGlobal("requestAnimationFrame", schedule);
+
+  for (let i = 0; i < 30; i++) {
+    await fireEvent.pointerMove(button, { clientX: i, clientY: i * 2 });
+  }
+  expect(schedule).toHaveBeenCalledTimes(1);
+  expect(measure).not.toHaveBeenCalled();
+  expect(measureTilted).not.toHaveBeenCalled();
+  nextFrame(0);
+  expect(measure).toHaveBeenCalledTimes(1);
+  expect(measureTilted).not.toHaveBeenCalled();
+  expect(container.querySelector(".card").classList.contains("interacting")).toBe(true);
+
+  await fireEvent.pointerMove(button, { clientX: 80, clientY: 150 });
+  expect(schedule).toHaveBeenCalledTimes(2);
+  nextFrame(16);
+  expect(measure).toHaveBeenCalledTimes(2);
+});
+
+test("pointer cancellation and unmount discard queued interaction work", async () => {
+  const { unmount } = render(Card, {
+    props: { id: "pointer-cancel", name: "Pointer Cancel", set: "stickers" },
+  });
+  const button = screen.getByLabelText("Expand card: Pointer Cancel.");
+  const cancel = vi.fn();
+  vi.stubGlobal("requestAnimationFrame", () => 42);
+  vi.stubGlobal("cancelAnimationFrame", cancel);
+
+  await fireEvent.pointerMove(button, { clientX: 40, clientY: 60 });
+  await fireEvent(button, new Event("pointercancel"));
+  expect(cancel).toHaveBeenCalledWith(42);
+  cancel.mockClear();
+  await fireEvent.pointerMove(button, { clientX: 50, clientY: 70 });
+  unmount();
+  expect(cancel).toHaveBeenCalledWith(42);
+});
+
+test("inactive cards do not schedule scroll or resize timers", () => {
+  render(Card, { props: { id: "idle", name: "Idle", set: "stickers" } });
+  const schedule = vi.spyOn(globalThis, "setTimeout");
+  window.dispatchEvent(new Event("scroll"));
+  window.dispatchEvent(new Event("resize"));
+  expect(schedule).not.toHaveBeenCalled();
+});
+
+test("scroll and resize debounce and refit the active card", async () => {
   vi.useFakeTimers();
 
   try {
@@ -473,6 +521,13 @@ test("scroll reposition debounces and recenters the active card", async () => {
     vi.advanceTimersByTime(300);
 
     expect(getRect).toHaveBeenCalled();
+
+    getRect.mockClear();
+    window.dispatchEvent(new Event("resize"));
+    window.dispatchEvent(new Event("resize"));
+    vi.advanceTimersByTime(300);
+    // Center and scale share one layout measurement after the resize burst.
+    expect(getRect).toHaveBeenCalledTimes(1);
   } finally {
     vi.useRealTimers();
   }

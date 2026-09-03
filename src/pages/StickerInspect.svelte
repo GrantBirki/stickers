@@ -73,26 +73,33 @@
   }
 
   .inspect {
+    --inspect-card-width: min(92vw, calc(86vh * var(--card-aspect)), 620px);
     min-height: 100vh;
     display: grid;
     place-items: center;
-    padding: clamp(16px, 4vmin, 44px);
+    padding: min(4vmin, 44px);
     margin: 0;
   }
 
   /* Fit the card to the viewport immediately (no popover scaling needed). */
   .inspect :global(.card) {
-    width: min(92vw, calc(86vh * var(--card-aspect)), 620px);
+    width: var(--inspect-card-width);
   }
 
-  /* Large inspect view: scale sticker typography without affecting the rest of the site. */
+  /* Size text with the card, including on short landscape viewports. Reserve
+     enough space below square artwork for the date and wrapped description. */
   .inspect :global(.card[data-set="stickers"]) {
-    font-size: clamp(26px, 4vmin, 38px);
-    --sticker-title-size: 2.5em;
-    --sticker-desc-size: 1.9em;
-    --sticker-date-size: 1.5em;
-    --sticker-prints-size: 1.5em;
-    --sticker-card-number-size: 1.5em;
+    --sticker-title-size: calc(var(--inspect-card-width) * 0.072);
+    --sticker-desc-size: calc(var(--inspect-card-width) * 0.045);
+    --sticker-date-size: calc(var(--inspect-card-width) * 0.038);
+    --sticker-prints-size: calc(var(--inspect-card-width) * 0.038);
+    --sticker-card-number-size: calc(var(--inspect-card-width) * 0.042);
     --sticker-meta-weight: 600;
+    --sticker-art-bottom: 31%;
+  }
+
+  .inspect :global(.sticker__desc) {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 </style>
