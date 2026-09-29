@@ -20,16 +20,17 @@ defaults:
   run:
     shell: bash
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
+cache-mode: none
 
 jobs:
   deployment-check:
+    permissions:
+      contents: read
+      deployments: read
     runs-on: ubuntu-latest
     outputs: # set outputs for use in downstream jobs
+      sha: ${{ steps.deployment-check.outputs.sha }}
       continue: ${{ steps.deployment-check.outputs.continue }}
 
     steps:
@@ -43,11 +44,13 @@ jobs:
           merge_deploy_mode: "true"
           environment: github-pages
 
+  # Candidate scripts, dependencies, configuration, and imports run only here.
   build:
-    if: ${{ needs.deployment-check.outputs.continue == 'true' }}
     needs: deployment-check
+    if: ${{ needs.deployment-check.outputs.continue == 'true' }}
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
         with:
@@ -55,47 +58,106 @@ jobs:
           allowlist: |
             hostname registry.npmjs.org tcp 443
 
+      - name: validate selected revision
+        env:
+          SELECTED_SHA: ${{ needs.deployment-check.outputs.sha }}
+        run: '[[ "$SELECTED_SHA" =~ ^[0-9a-f]{40}$ ]]'
+
       - name: checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v6
+        with:
+          ref: ${{ needs.deployment-check.outputs.sha }}
+          fetch-depth: 1
+          persist-credentials: false
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
+      - name: verify selected checkout
+        env:
+          SELECTED_SHA: ${{ needs.deployment-check.outputs.sha }}
+        run: 'test "$(git rev-parse HEAD)" = "$SELECTED_SHA"'
+
+      - name: setup node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
         with:
           node-version-file: .node-version
-          cache: 'npm'
-    
+          package-manager-cache: false
+
       - name: bootstrap
         run: script/bootstrap
-
-      # configure the GitHub Pages action
-      - name: setup pages
-        id: pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # pin@v6.0.0
 
       - name: build
         run: script/build
         env:
           VITE_SITE_URL: https://stickers.birki.io
 
-      # this step is custom to my site and adds a 'commit' version to the site
-      - name: write build version
-        run: echo ${GITHUB_SHA} > ./dist/version.txt
+      - name: archive site
+        run: tar --format=posix -cf "$RUNNER_TEMP/site.tar" -C dist .
 
-      - name: upload artifact
+      - name: upload build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # pin@v4.6.2
+        with:
+          name: site-${{ github.run_attempt }}-${{ needs.deployment-check.outputs.sha }}
+          path: ${{ runner.temp }}/site.tar
+          if-no-files-found: error
+          retention-days: 1
+
+  # A fresh runner treats the candidate archive strictly as static files.
+  prepare:
+    needs: [deployment-check, build]
+    if: ${{ needs.deployment-check.outputs.continue == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+
+      - name: checkout trusted packaging
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - name: verify trusted checkout
+        env:
+          TRUSTED_SHA: ${{ github.sha }}
+        run: |
+          [[ "$TRUSTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$TRUSTED_SHA"
+
+      - name: download build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # pin@v4.3.0
+        with:
+          name: site-${{ github.run_attempt }}-${{ needs.deployment-check.outputs.sha }}
+          path: ${{ runner.temp }}/site-input
+
+      - name: prepare static files
+        env:
+          SELECTED_SHA: ${{ needs.deployment-check.outputs.sha }}
+          TRUSTED_SHA: ${{ github.sha }}
+        run: python3 .github/scripts/prepare-pages.py "$RUNNER_TEMP/site-input/site.tar" "$RUNNER_TEMP/site-output" "$SELECTED_SHA" "$TRUSTED_SHA"
+
+      - name: upload pages artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # pin@v5.0.0
         with:
-          path: ./dist
+          name: pages-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/site-output
 
   deploy:
+    needs: [deployment-check, build, prepare]
     if: ${{ needs.deployment-check.outputs.continue == 'true' }}
-    needs: [ deployment-check, build ]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-
     steps:
       - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
 
       - name: deploy
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # pin@v5.0.0
+        with:
+          artifact_name: pages-${{ github.run_id }}-${{ github.run_attempt }}
