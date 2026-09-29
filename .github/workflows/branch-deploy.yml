@@ -5,14 +5,8 @@ on:
   issue_comment:
     types: [ created ]
 
-# Permissions needed for reacting and adding comments for IssueOps commands
-permissions:
-  pull-requests: write
-  deployments: write
-  contents: write
-  checks: read
-  pages: write
-  id-token: write
+permissions: {}
+cache-mode: none
 
 # set an environment variable for use in the jobs pointing to my site
 env:
@@ -30,8 +24,15 @@ jobs:
       contains(github.event.comment.body, '.help') ||
       contains(github.event.comment.body, '.wcid') ||
       contains(github.event.comment.body, '.unlock')) }}
+    permissions:
+      contents: write
+      deployments: write
+      pull-requests: write
+      checks: read
+      actions: read
     runs-on: ubuntu-latest
     outputs: # set outputs for use in downstream jobs
+      context: ${{ steps.branch-deploy.outputs.context }}
       continue: ${{ steps.branch-deploy.outputs.continue }}
       noop: ${{ steps.branch-deploy.outputs.noop }}
       deployment_id: ${{ steps.branch-deploy.outputs.deployment_id }}
@@ -55,160 +56,135 @@ jobs:
           skip_completing: "true" # we will complete the deployment manually in the 'result' job
           admins: "GrantBirki"
 
-  # build the github-pages site
+  # Candidate scripts, dependencies, configuration, and imports run only here.
   build:
     needs: trigger
-    if: ${{ needs.trigger.outputs.continue == 'true' }} # only run if the trigger job set continue to true
+    if: ${{ needs.trigger.outputs.continue == 'true' && fromJSON(needs.trigger.outputs.context).run_attempt == github.run_attempt }}
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
-        with:
-          mode: audit
-          allowlist: |
-            hostname registry.npmjs.org tcp 443
 
-      # checkout the project's repository based on the sha provided by the branch-deploy step
+      - name: validate selected revision
+        env:
+          SELECTED_SHA: ${{ needs.trigger.outputs.sha }}
+        run: '[[ "$SELECTED_SHA" =~ ^[0-9a-f]{40}$ ]]'
+
       - name: checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v6
         with:
           ref: ${{ needs.trigger.outputs.sha }}
+          fetch-depth: 1
+          persist-credentials: false
 
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
+      - name: verify selected checkout
+        env:
+          SELECTED_SHA: ${{ needs.trigger.outputs.sha }}
+        run: 'test "$(git rev-parse HEAD)" = "$SELECTED_SHA"'
+
+      - name: setup node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
         with:
           node-version-file: .node-version
-          cache: 'npm'
-    
+          package-manager-cache: false
+
       - name: bootstrap
         run: script/bootstrap
-
-      # configure the GitHub Pages action
-      - name: setup pages
-        id: pages
-        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # pin@v6.0.0
 
       - name: build
         run: script/build
         env:
-          VITE_SITE_URL: ${{ env.web_url }}
+          VITE_SITE_URL: https://stickers.birki.io
 
-      # this step is custom to my site and adds a 'commit' version to the site
-      - name: write build version
-        run: echo ${GITHUB_SHA} > ./dist/version.txt
+      - name: archive site
+        run: tar --format=posix -cf "$RUNNER_TEMP/site.tar" -C dist .
 
-      # upload the built site as an artifact for the deploy step
-      - name: upload artifact
-        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # pin@v5.0.0
+      - name: upload build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # pin@v4.6.2
         with:
-          path: ./dist
+          name: site-${{ github.run_attempt }}-${{ needs.trigger.outputs.sha }}
+          path: ${{ runner.temp }}/site.tar
+          if-no-files-found: error
+          retention-days: 1
 
-  # deploy to GitHub Pages
-  deploy:
-    needs: [ trigger, build ]
-    if: ${{ needs.trigger.outputs.continue == 'true' }} # only run if the trigger job set continue to true
+  # A fresh runner treats the candidate archive strictly as static files.
+  prepare:
+    needs: [trigger, build]
+    if: ${{ needs.trigger.outputs.continue == 'true' && fromJSON(needs.trigger.outputs.context).run_attempt == github.run_attempt }}
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
     steps:
       - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
 
-      # deploy the site to GitHub Pages
+      - name: checkout trusted packaging
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pin@v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: .github/scripts
+
+      - name: verify trusted checkout
+        env:
+          TRUSTED_SHA: ${{ github.sha }}
+        run: |
+          [[ "$TRUSTED_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$TRUSTED_SHA"
+
+      - name: download build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # pin@v4.3.0
+        with:
+          name: site-${{ github.run_attempt }}-${{ needs.trigger.outputs.sha }}
+          path: ${{ runner.temp }}/site-input
+
+      - name: prepare static files
+        env:
+          SELECTED_SHA: ${{ needs.trigger.outputs.sha }}
+          TRUSTED_SHA: ${{ github.sha }}
+        run: python3 .github/scripts/prepare-pages.py "$RUNNER_TEMP/site-input/site.tar" "$RUNNER_TEMP/site-output" "$SELECTED_SHA" "$TRUSTED_SHA"
+
+      - name: upload pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # pin@v5.0.0
+        with:
+          name: pages-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/site-output
+
+  deploy:
+    needs: [trigger, build, prepare]
+    if: ${{ needs.trigger.outputs.continue == 'true' && fromJSON(needs.trigger.outputs.context).run_attempt == github.run_attempt && needs.trigger.outputs.noop != 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+
       - name: deploy
         id: deployment
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # pin@v5.0.0
+        with:
+          artifact_name: pages-${{ github.run_id }}-${{ github.run_attempt }}
 
-  # update the deployment result - manually complete the deployment that was created by the branch-deploy action
   result:
-    needs: [ trigger, build, deploy ]
-    runs-on: ubuntu-latest
-    # run even on failures but only if the trigger job set continue to true
+    needs: [trigger, build, prepare, deploy]
     if: ${{ always() && needs.trigger.outputs.continue == 'true' }}
-
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      deployments: write
+      pull-requests: write
     steps:
       - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
 
-      # if a previous step failed, set a variable to use as the deployment status
-      - name: set deployment status
-        id: deploy-status
-        if: ${{ needs.trigger.result == 'failure' || needs.build.result == 'failure' ||
-          needs.deploy.result == 'failure' }}
-        run: |
-          echo "DEPLOY_STATUS=failure" >> $GITHUB_OUTPUT
-
-      # use the GitHub CLI to update the deployment status that was initiated by the branch-deploy action
-      - name: create a deployment status
-        env:
-          GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-          DEPLOY_STATUS: ${{ steps.deploy-status.outputs.DEPLOY_STATUS }}
-        run: |
-          if [ -z "${DEPLOY_STATUS}" ]; then
-            DEPLOY_STATUS="success"
-          fi
-
-          gh api \
-            --method POST \
-            repos/{owner}/{repo}/deployments/${{ needs.trigger.outputs.deployment_id }}/statuses \
-            -f environment='${{ needs.trigger.outputs.environment }}' \
-            -f state=${DEPLOY_STATUS}
-        
-      # use the GitHub CLI to remove the non-sticky lock that was created by the branch-deploy action
-      - name: remove a non-sticky lock
-        env:
-          GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api \
-            --method DELETE \
-            repos/{owner}/{repo}/git/refs/heads/${{ needs.trigger.outputs.environment }}-branch-deploy-lock
-
-      # remove the default 'eyes' reaction from the comment that triggered the deployment
-      # this reaction is added by the branch-deploy action by default
-      - name: remove eyes reaction
-        if: ${{ needs.trigger.outputs.initial_reaction_id != '' }}
-        env:
-          GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api \
-            --method DELETE \
-            repos/{owner}/{repo}/issues/comments/${{ needs.trigger.outputs.comment_id }}/reactions/${{ needs.trigger.outputs.initial_reaction_id }}
-
-      # if the deployment was successful, add a 'rocket' reaction to the comment that triggered the deployment
-      - name: rocket reaction
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'failure' }}
-        uses: GrantBirki/comment@937820f3623fd0e300294bcc64ac7577fc0ad4cc # pin@v3.0.3
+      - name: complete deployment
+        uses: grantbirki/branch-deploy@a7a7ea40a15a79a036322c2924ab74f5eded702c # pin@v12.1.0
         with:
-          comment-id: ${{ needs.trigger.outputs.comment_id }}
-          reactions: rocket
-
-      # if the deployment failed, add a '-1' (thumbs down) reaction to the comment that triggered the deployment
-      - name: failure reaction
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'failure' }}
-        uses: GrantBirki/comment@937820f3623fd0e300294bcc64ac7577fc0ad4cc # pin@v3.0.3
-        with:
-          comment-id: ${{ needs.trigger.outputs.comment_id }}
-          reactions: "-1"
-
-      # if the deployment was successful, add a 'success' comment
-      - name: success comment
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS != 'failure' }}
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # pin@v5.0.0
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            ### Deployment Results ✅
-
-            **${{ needs.trigger.outputs.actor_handle }}** successfully deployed branch `${{ needs.trigger.outputs.ref }}` to **${{ needs.trigger.outputs.environment }}**
-
-            > [View Live Deployment](${{ env.web_url }}) :link:
-
-      # if the deployment was not successful, add a 'failure' comment
-      - name: failure comment
-        if: ${{ steps.deploy-status.outputs.DEPLOY_STATUS == 'failure' }}
-        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # pin@v5.0.0
-        with:
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            ### Deployment Results ❌
-
-            **${{ needs.trigger.outputs.actor_handle }}** had a failure when deploying `${{ needs.trigger.outputs.ref }}` to **${{ needs.trigger.outputs.environment }}**
+          result_mode: true
+          context: ${{ needs.trigger.outputs.context }}
+          job_results: ${{ needs.trigger.outputs.noop == 'true' && format('["{0}","{1}","{2}"]', needs.trigger.result, needs.build.result, needs.prepare.result) || toJSON(needs.*.result) }}
+          result_url: ${{ env.web_url }}
