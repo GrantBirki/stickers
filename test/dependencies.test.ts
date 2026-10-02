@@ -30,9 +30,10 @@ const approvedDevDependencies = {
 const approvedOverrides = {
   "@emnapi/core": "1.11.0",
   "@emnapi/runtime": "1.11.0",
+  devalue: "5.9.3",
   nanoid: "3.3.18",
   postcss: "8.5.23",
-  undici: "7.29.0",
+  undici: "7.29.1",
 };
 
 const readJson = <T>(path: string): T => JSON.parse(readFileSync(path, "utf8")) as T;
