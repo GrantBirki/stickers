@@ -10,6 +10,8 @@ on:
 permissions:
   contents: read
 
+cache-mode: none
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,8 +30,8 @@ jobs:
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
         with:
+          package-manager-cache: false
           node-version-file: .node-version
-          cache: 'npm'
 
       - name: bootstrap
         run: script/bootstrap
