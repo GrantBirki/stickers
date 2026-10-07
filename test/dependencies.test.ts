@@ -19,12 +19,12 @@ type PackageLock = {
 };
 
 const approvedDevDependencies = {
-  "@sveltejs/vite-plugin-svelte": "7.2.0",
+  "@sveltejs/vite-plugin-svelte": "7.3.0",
   jsdom: "29.1.1",
-  svelte: "5.56.6",
-  "svelte-check": "4.7.3",
+  svelte: "5.56.9",
+  "svelte-check": "4.7.6",
   typescript: "6.0.3",
-  vite: "8.1.5",
+  vite: "8.2.1",
 };
 
 const approvedOverrides = {
@@ -33,6 +33,7 @@ const approvedOverrides = {
   devalue: "5.9.3",
   nanoid: "3.3.18",
   postcss: "8.5.23",
+  "source-map-js": "1.2.2",
   undici: "7.29.1",
 };
 
@@ -60,4 +61,15 @@ test("the npm dependency boundary stays exact-pinned and bounded", () => {
 
   const resolvedPackageCount = Object.keys(packageLock.packages).filter(Boolean).length;
   assert.ok(resolvedPackageCount <= 115, `resolved dependency graph grew to ${resolvedPackageCount} packages`);
+});
+
+// Both PostCSS and css-tree must resolve the patched source-map implementation.
+test("all source-map-js lockfile entries use the patched release", () => {
+  const packageLock = readJson<PackageLock>("package-lock.json");
+  const sourceMaps = Object.entries(packageLock.packages).filter(([path]) => path.endsWith("/source-map-js"));
+
+  assert.ok(sourceMaps.length > 0, "source-map-js must be present in the build dependency graph");
+  for (const [path, entry] of sourceMaps) {
+    assert.equal(entry.version, approvedOverrides["source-map-js"], `${path} must resolve the patched version`);
+  }
 });
