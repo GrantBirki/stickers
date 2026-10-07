@@ -10,12 +10,14 @@ on:
 permissions:
   contents: read
 
+cache-mode: none
+
 jobs:
   lint:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
         with:
           allowlist: |
             hostname registry.npmjs.org tcp 443
@@ -25,8 +27,8 @@ jobs:
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # pin@v7.0.0
         with:
+          package-manager-cache: false
           node-version-file: .node-version
-          cache: 'npm'
 
       - name: bootstrap
         run: script/bootstrap
