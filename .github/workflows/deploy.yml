@@ -34,7 +34,7 @@ jobs:
       continue: ${{ steps.deployment-check.outputs.continue }}
 
     steps:
-      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
 
       # https://github.com/github/branch-deploy/blob/d3c24bd92505e623615b75ffdfac5ed5259adbdb/docs/merge-commit-strategy.md
       - name: deployment check
@@ -52,7 +52,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
         with:
           mode: audit
           allowlist: |
@@ -93,7 +93,7 @@ jobs:
         run: tar --format=posix -cf "$RUNNER_TEMP/site.tar" -C dist .
 
       - name: upload build
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # pin@v4.6.2
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # pin@v7.0.1
         with:
           name: site-${{ github.run_attempt }}-${{ needs.deployment-check.outputs.sha }}
           path: ${{ runner.temp }}/site.tar
@@ -108,7 +108,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
         with:
           allow_github_artifacts: true
 
@@ -128,7 +128,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$TRUSTED_SHA"
 
       - name: download build
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # pin@v4.3.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # pin@v8.0.1
         with:
           name: site-${{ github.run_attempt }}-${{ needs.deployment-check.outputs.sha }}
           path: ${{ runner.temp }}/site-input
@@ -156,7 +156,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: openai/fence@c22db5d5c19f83d1d7b40e9def37a7a6099bbca2 # pin@v0.8.10
+      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
 
       - name: deploy
         id: deployment
