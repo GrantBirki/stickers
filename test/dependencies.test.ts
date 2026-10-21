@@ -24,7 +24,7 @@ const approvedDevDependencies = {
   svelte: "5.56.9",
   "svelte-check": "4.7.6",
   typescript: "6.0.3",
-  vite: "8.2.1",
+  vite: "8.2.4",
 };
 
 const approvedOverrides = {
