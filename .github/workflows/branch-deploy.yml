@@ -45,7 +45,7 @@ jobs:
       actor_handle: ${{ steps.branch-deploy.outputs.actor_handle }}
 
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - uses: openai/fence@63c516e78543f3d8d6088ebad6475a39920863bd # pin@v0.10.2
 
       # execute the branch-deploy action
       - uses: grantbirki/branch-deploy@a7a7ea40a15a79a036322c2924ab74f5eded702c # pin@v12.1.0
@@ -65,7 +65,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - uses: openai/fence@63c516e78543f3d8d6088ebad6475a39920863bd # pin@v0.10.2
         with:
           mode: audit
           allowlist: |
@@ -121,7 +121,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - uses: openai/fence@63c516e78543f3d8d6088ebad6475a39920863bd # pin@v0.10.2
         with:
           allow_github_artifacts: true
 
@@ -169,11 +169,11 @@ jobs:
       name: github-pages
       deployment: false
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - uses: openai/fence@63c516e78543f3d8d6088ebad6475a39920863bd # pin@v0.10.2
 
       - name: deploy
         id: deployment
-        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # pin@v5.0.0
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # pin@v5.0.1
         with:
           artifact_name: pages-${{ github.run_id }}-${{ github.run_attempt }}
 
@@ -186,7 +186,7 @@ jobs:
       deployments: write
       pull-requests: write
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - uses: openai/fence@63c516e78543f3d8d6088ebad6475a39920863bd # pin@v0.10.2
 
       - name: complete deployment
         uses: grantbirki/branch-deploy@a7a7ea40a15a79a036322c2924ab74f5eded702c # pin@v12.1.0
