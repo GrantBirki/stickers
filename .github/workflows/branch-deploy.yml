@@ -45,10 +45,12 @@ jobs:
       actor_handle: ${{ steps.branch-deploy.outputs.actor_handle }}
 
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - name: fence
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux' && runner.arch == 'X64'
+        uses: openai/fence@9d10445098284f8e8bbf67495fc8c2eaa34c28c5 # pin@v0.12.7
 
       # execute the branch-deploy action
-      - uses: grantbirki/branch-deploy@a7a7ea40a15a79a036322c2924ab74f5eded702c # pin@v12.1.0
+      - uses: grantbirki/branch-deploy@7173dcbb72a30da0148076fade87260ddd1b5e28 # pin@v12.4.2
         id: branch-deploy
         with:
           trigger: ".deploy"
@@ -65,7 +67,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - name: fence
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux' && runner.arch == 'X64'
+        uses: openai/fence@9d10445098284f8e8bbf67495fc8c2eaa34c28c5 # pin@v0.12.7
         with:
           mode: audit
           allowlist: |
@@ -121,7 +125,9 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - name: fence
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux' && runner.arch == 'X64'
+        uses: openai/fence@9d10445098284f8e8bbf67495fc8c2eaa34c28c5 # pin@v0.12.7
         with:
           allow_github_artifacts: true
 
@@ -169,7 +175,9 @@ jobs:
       name: github-pages
       deployment: false
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - name: fence
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux' && runner.arch == 'X64'
+        uses: openai/fence@9d10445098284f8e8bbf67495fc8c2eaa34c28c5 # pin@v0.12.7
 
       - name: deploy
         id: deployment
@@ -186,10 +194,12 @@ jobs:
       deployments: write
       pull-requests: write
     steps:
-      - uses: openai/fence@530cce8d45da60a7c353da45511639ad5e154e9a # pin@v0.10.1
+      - name: fence
+        if: runner.environment == 'github-hosted' && runner.os == 'Linux' && runner.arch == 'X64'
+        uses: openai/fence@9d10445098284f8e8bbf67495fc8c2eaa34c28c5 # pin@v0.12.7
 
       - name: complete deployment
-        uses: grantbirki/branch-deploy@a7a7ea40a15a79a036322c2924ab74f5eded702c # pin@v12.1.0
+        uses: grantbirki/branch-deploy@7173dcbb72a30da0148076fade87260ddd1b5e28 # pin@v12.4.2
         with:
           result_mode: true
           context: ${{ needs.trigger.outputs.context }}
